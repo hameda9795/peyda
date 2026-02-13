@@ -1,0 +1,203 @@
+city_municipality	neighborhood_district
+Amsterdam	Centrum
+Amsterdam	Jordaan
+Amsterdam	De Pijp
+Amsterdam	Oud-West
+Amsterdam	Oud-Zuid
+Amsterdam	Oost
+Amsterdam	West
+Amsterdam	Noord
+Amsterdam	Zuidoost
+Amsterdam	Nieuw-West
+Amsterdam	IJburg/Zeeburgereiland
+Rotterdam	Centrum
+Rotterdam	Delfshaven
+Rotterdam	Kralingen-Crooswijk
+Rotterdam	Feijenoord
+Rotterdam	Charlois
+Rotterdam	Noord
+Rotterdam	Hillegersberg-Schiebroek
+Rotterdam	Prins Alexander
+Rotterdam	Hoek van Holland
+Den Haag	Centrum
+Den Haag	Scheveningen
+Den Haag	Segbroek
+Den Haag	Haagse Hout
+Den Haag	Laak
+Den Haag	Escamp
+Den Haag	Loosduinen
+Den Haag	Leidschenveen-Ypenburg
+Utrecht	Binnenstad
+Utrecht	Oost
+Utrecht	West
+Utrecht	Zuid
+Utrecht	Noordoost
+Utrecht	Leidsche Rijn
+Utrecht	Overvecht
+Utrecht	Vleuten-De Meern
+Eindhoven	Centrum
+Eindhoven	Stratum
+Eindhoven	Strijp
+Eindhoven	Tongelre
+Eindhoven	Woensel-Noord
+Eindhoven	Woensel-Zuid
+Eindhoven	Gestel
+Eindhoven	Meerhoven
+Groningen	Binnenstad
+Groningen	Oosterpoort
+Groningen	Helpman
+Groningen	Selwerd
+Groningen	Paddepoel
+Groningen	Reitdiep
+Groningen	Beijum
+Groningen	Vinkhuizen
+Tilburg	Centrum
+Tilburg	Oud-Noord
+Tilburg	Oud-Zuid
+Tilburg	Tilburg-West
+Tilburg	Tilburg-Noord
+Tilburg	Reeshof
+Tilburg	Groenewoud
+Tilburg	Korvel
+Almere	Almere Stad
+Almere	Almere Buiten
+Almere	Almere Haven
+Almere	Almere Poort
+Almere	Almere Hout
+Almere	Almere Pampus
+Breda	Centrum
+Breda	Belcrum
+Breda	Ginneken
+Breda	Princenhage
+Breda	Haagse Beemden
+Breda	Boeimeer
+Breda	IJpelaar
+Breda	Tuinzigt
+Nijmegen	Centrum
+Nijmegen	Nijmegen-Oost
+Nijmegen	Nijmegen-West
+Nijmegen	Lent
+Nijmegen	Dukenburg
+Nijmegen	Lindenholt
+Nijmegen	Hatert
+Nijmegen	Brakkenstein
+Enschede	Centrum
+Enschede	Roombeek
+Enschede	Glanerbrug
+Enschede	Twekkelerveld
+Enschede	Stadsveld
+Enschede	Wesselerbrink
+Enschede	Boekelo
+Enschede	Helmerhoek
+Haarlem	Centrum
+Haarlem	Haarlem-Noord
+Haarlem	Haarlem-Oost
+Haarlem	Schalkwijk
+Haarlem	Houtvaartkwartier
+Haarlem	Kleverpark
+Haarlem	Vogelenwijk
+Haarlem	Boerhaavewijk
+Arnhem	Centrum
+Arnhem	Klarendal
+Arnhem	Presikhaaf
+Arnhem	Schaarsbergen
+Arnhem	Schuytgraaf
+Arnhem	Arnhem-Zuid
+Arnhem	Elden
+Arnhem	Malburgen
+Amersfoort	Centrum
+Amersfoort	Vathorst
+Amersfoort	Schothorst
+Amersfoort	Zielhorst
+Amersfoort	Kattenbroek
+Amersfoort	Liendert
+Amersfoort	Randenbroek
+Amersfoort	Nieuwland
+Apeldoorn	Centrum
+Apeldoorn	De Maten
+Apeldoorn	Apeldoorn-Zuid
+Apeldoorn	Apeldoorn-Noord
+Apeldoorn	Osseveld-Woudhuis
+Apeldoorn	Ugchelen
+Apeldoorn	De Parken
+Apeldoorn	Orden
+Maastricht	Centrum
+Maastricht	Wyck
+Maastricht	Céramiqu
+Maastricht	Sint Pieter
+Maastricht	Heer
+Maastricht	Belfort
+Maastricht	Wittevrouwenveld
+Maastricht	Nazareth
+Leiden	Binnenstad
+Leiden	Stevenshof
+Leiden	Merenwijk
+Leiden	Leiden-Noord
+Leiden	Leiden-Zuidwest
+Leiden	Boerhaavedistrict
+Leiden	Roodenburgerdistrict
+Leiden	Stationsdistrict
+Dordrecht	Centrum
+Dordrecht	Stadspolders
+Dordrecht	Dubbeldam
+Dordrecht	Crabbehof
+Dordrecht	Wielwijk
+Dordrecht	Sterrenburg
+Dordrecht	De Staart
+Dordrecht	Reeland
+s-Hertogenbosch	Binnenstad
+s-Hertogenbosch	Maaspoort
+s-Hertogenbosch	Empel
+s-Hertogenbosch	De Groote Wielen
+s-Hertogenbosch	Paleiskwartier
+s-Hertogenbosch	Rosmalen
+s-Hertogenbosch	Engelen
+s-Hertogenbosch	Vinkel
+Zwolle	Binnenstad
+Zwolle	Assendorp
+Zwolle	Stadshagen
+Zwolle	Holtenbroek
+Zwolle	Zwolle-Zuid
+Zwolle	Aa-landen
+Zwolle	Dieze
+Zwolle	Berkum
+Leeuwarden	Binnenstad
+Leeuwarden	Huizum
+Leeuwarden	Camminghaburen
+Leeuwarden	Bilgaard
+Leeuwarden	Aldlâ
+Leeuwarden	Vrijheidswijk
+Leeuwarden	Westeinde
+Leeuwarden	Westeind
+Delft	Binnenstad
+Delft	Voorhof
+Delft	Tanthof
+Delft	Hof van Delft
+Delft	Wippolder
+Delft	Buitenhof
+Delft	Rijswijkse Hout
+Delft	Schieoevers
+Haarlemmermeer	Hoofddorp
+Haarlemmermeer	Nieuw-Vennep
+Haarlemmermeer	Badhoevedorp
+Haarlemmermeer	Hoofddorp Floriande
+Haarlemmermeer	Zwanenburg
+Haarlemmermeer	Halfweg
+Haarlemmermeer	Abbenes
+Haarlemmermeer	Lisserbroek
+Amstelveen	Stadshart
+Amstelveen	Randwijck
+Amstelveen	Keizer Karelpark
+Amstelveen	Elsrijk
+Amstelveen	Westwijk
+Amstelveen	Bovenkerk
+Amstelveen	Kostverloren
+Amstelveen	Bankras
+Zaanstad	Zaandam
+Zaanstad	Zaandijk
+Zaanstad	Koog aan de Zaan
+Zaanstad	Wormerveer
+Zaanstad	Krommenie
+Zaanstad	Assendelft
+Zaanstad	Westzaan
+Zaanstad	Oostzaan (grenzend)

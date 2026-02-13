@@ -1,0 +1,307 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Category {
+  id             String        @id @default(cuid())
+  name           String
+  slug           String        @unique
+  description    String?
+  icon           String?       // Lucide icon name or image URL
+  image          String?       // Cover image URL
+  seoTitle       String?
+  seoDescription String?
+
+  // AI Generated Content for SEO
+  contentIntro        String?    @db.Text
+  contentHistory      String?    @db.Text
+  contentTypes        String?    @db.Text
+  contentTips         String?    @db.Text
+  contentLocal        String?    @db.Text
+  contentFull         String?    @db.Text // Full rendered HTML content
+
+  // AI Generated FAQs
+  faqs                Json?      // Array of {question, answer}
+
+  // Keywords
+  keywords            String[]
+
+  // Status
+  contentGeneratedAt  DateTime?
+  contentStatus       String?    @default("pending") // pending, generating, completed, failed
+
+  subcategories       SubCategory[]
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id             String     @id @default(cuid())
+  name           String
+  slug           String     @unique
+  description    String?
+  image          String?
+  seoTitle       String?
+  seoDescription String?
+
+  // AI Generated Content for SEO
+  contentIntro   String?    @db.Text
+  contentFull    String?    @db.Text // Full rendered HTML content
+  keywords       String[]
+
+  // Status
+  contentGeneratedAt  DateTime?
+  contentStatus       String?    @default("pending")
+
+  categoryId     String
+  category       Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  businesses     Business[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([categoryId])
+  @@map("subcategories")
+}
+
+model Business {
+  id            String      @id @default(cuid())
+  name          String
+  slug          String      @unique
+  description   String?     @db.Text
+  shortDescription String?
+  longDescription  String?  @db.Text
+
+  // Address
+  street        String?
+  postalCode    String?
+  city          String      @default("Utrecht")
+  province      String?     // Province name (e.g., "Utrecht", "Noord-Holland")
+  provinceSlug  String?     // Province slug for URL (e.g., "utrecht", "noord-holland")
+  neighborhood  String?
+
+  // Contact
+  phone         String?
+  email         String?
+  website       String?
+  instagram     String?
+  facebook      String?
+  linkedin      String?
+
+  // Media
+  logo          String?
+  coverImage    String?
+  gallery       Json?      // Array of {url, altText, caption}
+  videoUrl      String?
+
+  // Business Info
+  kvkNumber     String?
+  foundedYear   Int?
+  serviceArea   String?
+  bookingUrl    String?
+  ctaType       String?     @default("call") // call, booking, quote
+
+  // Arrays stored as JSON
+  services      Json?       // Array of {name, description, price}
+  amenities     String[]
+  paymentMethods String[]
+  languages     String[]
+  openingHours  Json?       // Array of {day, open, close, closed}
+  certifications String[]
+  highlights    String[]
+  tags          String[]
+
+  // AI Generated Content
+  faq           Json?       // Array of {question, answer}
+
+  // SEO (AI Generated)
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String[]
+  seoLocalText     String?
+
+  // Stats & Status
+  rating        Float       @default(0)
+  reviewCount   Int         @default(0)
+  isVerified    Boolean     @default(false)
+  isActive      Boolean     @default(true)
+  status        String      @default("pending") // pending, approved, rejected
+
+  subCategoryId String
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  reviews       Review[]
+  analytics     BusinessAnalytics?
+  interactions  BusinessInteraction[]
+  owner         BusinessOwner?
+
+  @@index([subCategoryId])
+  @@index([status])
+  @@index([provinceSlug])
+  @@index([city])
+  @@map("businesses")
+}
+
+model Review {
+  id            String    @id @default(cuid())
+  author        String
+  email         String
+  rating        Int
+  content       String    @db.Text
+  ownerResponse String?   @db.Text
+  isPublished   Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  businessId    String
+  business      Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@map("reviews")
+}
+
+model City {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  slug          String         @unique
+  province      String?
+  image         String?
+
+  // AI Generated Content for SEO
+  contentIntro     String?    @db.Text
+  contentHistory   String?    @db.Text
+  contentEconomy   String?    @db.Text
+  contentLandmarks String?    @db.Text
+  contentLocalTips String?    @db.Text
+  contentFull      String?    @db.Text
+
+  // AI Generated FAQs
+  faqs             Json?
+
+  // Keywords
+  keywords         String[]
+
+  // Status
+  contentGeneratedAt  DateTime?
+  contentStatus       String?    @default("pending")
+
+  neighborhoods Neighborhood[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([slug])
+  @@map("cities")
+}
+
+model Neighborhood {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String
+  cityId    String
+  city      City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cityId, slug])
+  @@index([cityId])
+  @@map("neighborhoods")
+}
+
+// For storing business submissions before AI processing
+model BusinessSubmission {
+  id            String      @id @default(cuid())
+
+  // Raw form data (stored as JSON)
+  formData      Json
+
+  // Processing status
+  status        String      @default("pending") // pending, processing, completed, failed
+
+  // AI Generated content (stored after processing)
+  generatedContent Json?
+
+  // Reference to created business (if approved)
+  businessId    String?
+
+  // Contact for follow-up
+  email         String
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("business_submissions")
+}
+
+// Business Owner Authentication
+model BusinessOwner {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?  // Optional - can use email-only auth
+  name         String?
+
+  businessId   String   @unique
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Simple session management
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("business_owners")
+}
+
+// Analytics aggregated by month
+model BusinessAnalytics {
+  id                 String   @id @default(cuid())
+  businessId         String   @unique
+  business           Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Monthly stats
+  month              DateTime // First day of the month
+
+  profileViews       Int      @default(0)
+  phoneClicks        Int      @default(0)
+  websiteClicks      Int      @default(0)
+  directionsClicks   Int      @default(0)
+  emailClicks        Int      @default(0)
+  bookingClicks      Int      @default(0)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([businessId, month])
+  @@index([businessId])
+  @@index([month])
+  @@map("business_analytics")
+}
+
+// Individual interactions for detailed tracking
+model BusinessInteraction {
+  id           String   @id @default(cuid())
+  businessId   String
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  type         String   // "view", "phone_click", "website_click", "directions_click", "email_click", "booking_click"
+
+  // Optional metadata
+  userAgent    String?
+  ipAddress    String?
+  referrer     String?
+
+  createdAt    DateTime @default(now())
+
+  @@index([businessId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("business_interactions")
+}

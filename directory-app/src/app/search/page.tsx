@@ -1,0 +1,153 @@
+import { BusinessGrid } from "@/components/BusinessGrid";
+import { Metadata } from "next";
+import { Search as SearchIcon } from "lucide-react";
+import Link from "next/link";
+import { db } from "@/lib/db";
+
+export const metadata: Metadata = {
+    title: "Zoeken | Utrecht Business Directory",
+    description: "Zoekresultaten voor lokale bedrijven in Utrecht.",
+};
+
+type Props = {
+    searchParams: { q?: string };
+}
+
+export default async function SearchPage({ searchParams }: Props) {
+    const { q } = searchParams;
+    const query = q?.toLowerCase() || "";
+
+    // Search businesses in database
+    const rawResults = query
+        ? await db.business.findMany({
+            where: {
+                OR: [
+                    { name: { contains: query, mode: 'insensitive' } },
+                    { shortDescription: { contains: query, mode: 'insensitive' } },
+                    { longDescription: { contains: query, mode: 'insensitive' } }
+                ]
+            },
+            include: {
+                subCategory: {
+                    include: {
+                        category: true
+                    }
+                }
+            },
+            take: 50
+        })
+        : [];
+
+    // Map to Business type format
+    const results = rawResults.map(b => ({
+        id: b.id,
+        name: b.name,
+        slug: b.slug,
+        category: b.subCategory.category.name,
+        subcategories: [b.subCategory.name],
+        tags: b.tags,
+        shortDescription: b.shortDescription || '',
+        longDescription: b.longDescription || '',
+        highlights: (b.highlights as string[]) || [],
+        services: (b.services as { name: string; description?: string; price?: string }[]) || [],
+        products: [],
+        images: {
+            logo: b.logo || '/placeholder.jpg',
+            cover: b.coverImage || '/placeholder.jpg',
+            gallery: (b.gallery as string[]) || []
+        },
+        videoUrl: b.videoUrl || undefined,
+        address: {
+            street: b.street || '',
+            city: b.city,
+            postalCode: b.postalCode || '',
+            neighborhood: b.neighborhood || '',
+            coordinates: { lat: 0, lng: 0 }
+        },
+        contact: {
+            phone: b.phone || '',
+            email: b.email || '',
+            website: b.website || '',
+            socials: {
+                instagram: b.instagram || undefined,
+                facebook: b.facebook || undefined,
+                linkedin: b.linkedin || undefined
+            }
+        },
+        openingHours: (b.openingHours as any[]) || [],
+        paymentMethods: (b.paymentMethods as string[]) || [],
+        languages: (b.languages as string[]) || [],
+        amenities: (b.amenities as string[]) || [],
+        serviceArea: b.serviceArea || '',
+        bookingUrl: b.bookingUrl || undefined,
+        cta: {
+            text: 'Bekijk',
+            link: `/utrecht/bedrijf/${b.slug}`,
+            type: 'call' as const
+        },
+        reviews: {
+            average: b.rating,
+            count: b.reviewCount,
+            items: []
+        },
+        faq: (b.faq as { question: string; answer: string }[]) || [],
+        certifications: (b.certifications as string[]) || [],
+        kvk: b.kvkNumber || undefined,
+        foundedYear: b.foundedYear || undefined,
+        details: {
+            policies: '',
+            lastUpdate: b.updatedAt.toISOString(),
+            status: 'published' as const
+        },
+        seo: {
+            title: b.seoTitle || b.name,
+            metaDescription: b.seoDescription || b.shortDescription || '',
+            h1: b.name,
+            keywords: (b.seoKeywords as string[]) || [],
+            canonicalUrl: '',
+            localSeoText: b.seoLocalText || ''
+        }
+    }));
+
+    return (
+        <div className="min-h-screen bg-zinc-50 py-12">
+            <div className="container mx-auto px-4">
+                <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-8 mb-8 text-center">
+                    <h1 className="text-2xl font-bold text-zinc-900 mb-2">
+                        {query ? `Zoekresultaten voor "${q}"` : "Zoeken"}
+                    </h1>
+                    <p className="text-zinc-500">
+                        {query
+                            ? `${results.length} resultaten gevonden`
+                            : "Voer een zoekterm in om bedrijven te vinden."}
+                    </p>
+                </div>
+
+                {results.length > 0 ? (
+                    <BusinessGrid
+                        businesses={results}
+                        title={`Bedrijven matching "${q}"`}
+                    />
+                ) : (
+                    query && (
+                        <div className="text-center py-20 bg-white rounded-xl border border-zinc-200 border-dashed">
+                            <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-400">
+                                <SearchIcon className="h-8 w-8" />
+                            </div>
+                            <h2 className="text-xl font-semibold text-zinc-900 mb-2">Geen resultaten gevonden</h2>
+                            <p className="text-zinc-500 mb-8 max-w-md mx-auto">
+                                We konden geen bedrijven vinden die matchen met "{q}". Probeer een andere zoekterm of blader door de categorieën.
+                            </p>
+                            <Link
+                                href="/categorieen"
+                                className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                            >
+                                Bekijk alle categorieën
+                            </Link>
+                        </div>
+                    )
+                )}
+            </div>
+        </div>
+    );
+}
