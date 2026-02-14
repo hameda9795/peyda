@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { StepProps } from '@/lib/types/business-form';
 import { useEffect, useState } from 'react';
+import { NETHERLANDS_PROVINCES } from '@/lib/netherlands-data';
 
 type CityOption = {
     id: string;
@@ -28,15 +29,23 @@ type NeighborhoodOption = {
 };
 
 export function StepAddress({ formData, updateFormData }: StepProps) {
+    const [provinceOpen, setProvinceOpen] = useState(false);
     const [cityOpen, setCityOpen] = useState(false);
     const [neighborhoodOpen, setNeighborhoodOpen] = useState(false);
+    const [provinceQuery, setProvinceQuery] = useState('');
     const [cityQuery, setCityQuery] = useState('');
     const [neighborhoodQuery, setNeighborhoodQuery] = useState('');
+    const [provinceOptions] = useState(NETHERLANDS_PROVINCES);
     const [cityOptions, setCityOptions] = useState<CityOption[]>([]);
     const [neighborhoodOptions, setNeighborhoodOptions] = useState<NeighborhoodOption[]>([]);
     const [cityLoading, setCityLoading] = useState(false);
     const [neighborhoodLoading, setNeighborhoodLoading] = useState(false);
     const [selectedCitySlug, setSelectedCitySlug] = useState<string | null>(null);
+
+    // Filter provinces based on search
+    const filteredProvinces = provinceQuery
+        ? provinceOptions.filter(p => p.name.toLowerCase().includes(provinceQuery.toLowerCase()))
+        : provinceOptions;
 
     useEffect(() => {
         if (!formData.city) return;
@@ -169,6 +178,66 @@ export function StepAddress({ formData, updateFormData }: StepProps) {
                             maxLength={7}
                             className="premium-input w-full px-4 uppercase"
                         />
+                    </div>
+
+                    {/* Province */}
+                    <div className="space-y-2">
+                        <label className="premium-label">
+                            Provincie <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setProvinceOpen(!provinceOpen)}
+                                className={`w-full h-12 px-4 rounded-xl border bg-white text-left flex items-center justify-between focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all ${provinceOpen ? 'border-indigo-500 ring-4 ring-indigo-500/10' : 'border-slate-200 hover:border-slate-300'
+                                    }`}
+                            >
+                                <span className={`font-medium ${formData.province ? 'text-slate-900' : 'text-slate-400'}`}>
+                                    {formData.province || 'Selecteer uw provincie'}
+                                </span>
+                                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${provinceOpen ? 'rotate-180 text-indigo-500' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                                {provinceOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl shadow-slate-200/50 overflow-hidden max-h-72 overflow-y-auto"
+                                    >
+                                        <div className="p-2 space-y-2">
+                                            <input
+                                                type="text"
+                                                value={provinceQuery}
+                                                onChange={(e) => setProvinceQuery(e.target.value)}
+                                                placeholder="Zoek provincie..."
+                                                className="premium-input w-full px-4 h-10"
+                                            />
+                                            {filteredProvinces.map((province) => (
+                                                <button
+                                                    key={province.slug}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        updateFormData({ province: province.name, city: '', neighborhood: '' });
+                                                        setSelectedCitySlug(null);
+                                                        setProvinceQuery('');
+                                                        setProvinceOpen(false);
+                                                    }}
+                                                    className={`w-full px-4 py-2.5 text-left rounded-lg transition-all text-sm font-medium ${formData.province === province.name
+                                                        ? 'bg-indigo-50 text-indigo-700'
+                                                        : 'text-slate-600 hover:bg-slate-50'
+                                                        }`}
+                                                >
+                                                    <span className="ml-2">{province.icon}</span> {province.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
 
                     {/* City */}
@@ -428,12 +497,13 @@ export function StepAddress({ formData, updateFormData }: StepProps) {
             </div>
 
             {/* Click outside handler */}
-            {(neighborhoodOpen || cityOpen) && (
+            {(neighborhoodOpen || cityOpen || provinceOpen) && (
                 <div
                     className="fixed inset-0 z-40 bg-transparent"
                     onClick={() => {
                         setNeighborhoodOpen(false);
                         setCityOpen(false);
+                        setProvinceOpen(false);
                     }}
                 />
             )}

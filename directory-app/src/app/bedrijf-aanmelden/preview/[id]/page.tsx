@@ -299,14 +299,18 @@ export default function PreviewPage() {
                             >
                                 <h2 className="text-xl font-bold text-slate-800 mb-4">Foto's</h2>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {images.gallery.map((img: string, i: number) => (
-                                        <img
-                                            key={i}
-                                            src={img}
-                                            alt={`Gallery ${i + 1}`}
-                                            className="w-full h-48 object-cover rounded-xl"
-                                        />
-                                    ))}
+                                    {images.gallery.map((img: any, i: number) => {
+                                        const imageUrl = typeof img === 'string' ? img : img?.url;
+                                        if (!imageUrl) return null;
+                                        return (
+                                            <img
+                                                key={i}
+                                                src={imageUrl}
+                                                alt={img?.altText || `Gallery ${i + 1}`}
+                                                className="w-full h-48 object-cover rounded-xl"
+                                            />
+                                        );
+                                    })}
                                 </div>
                             </motion.div>
                         )}

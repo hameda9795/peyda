@@ -24,6 +24,7 @@ export type BusinessFormData = {
     street: string;
     postalCode: string;
     city: string;
+    province: string;
     neighborhood: string;
 
     // Contact

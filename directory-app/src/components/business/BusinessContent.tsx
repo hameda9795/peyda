@@ -174,19 +174,24 @@ export function BusinessContent({ business }: BusinessContentProps) {
             <section>
                 <h2 className="text-3xl font-bold text-slate-900 mb-8">Galerij</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {business.images.gallery.map((img, idx) => (
-                        <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300">
-                            <Image
-                                src={img}
-                                alt={`${business.name} ${business.address.city} ${business.address.neighborhood} foto ${idx + 1} - ${business.category}`}
-                                fill
-                                sizes="(max-width: 768px) 50vw, 25vw"
-                                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                loading="lazy"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                    ))}
+                    {business.images.gallery.map((img: any, idx: number) => {
+                        // Handle both string URLs and objects with url property
+                        const imageUrl = typeof img === 'string' ? img : img?.url;
+                        if (!imageUrl) return null;
+                        return (
+                            <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300">
+                                <Image
+                                    src={imageUrl}
+                                    alt={img?.altText || `${business.name} ${business.address.city} ${business.address.neighborhood} foto ${idx + 1} - ${business.category}`}
+                                    fill
+                                    sizes="(max-width: 768px) 50vw, 25vw"
+                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </div>
+                        );
+                    })}
                 </div>
             </section>
 
