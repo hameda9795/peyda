@@ -55,7 +55,8 @@ export function BusinessPreview({ formData, aiData, onBack, onConfirm, isSubmitt
                 city: formData.city,
                 postalCode: formData.postalCode,
                 neighborhood: formData.neighborhood,
-                coordinates: { lat: 52.0907, lng: 5.1214 } // Mock coordinates for Utrecht
+                province: formData.province,
+                coordinates: { lat: 52.0907, lng: 5.1214 } // Mock coordinates - could be enhanced with geocoding
             },
 
             contact: {

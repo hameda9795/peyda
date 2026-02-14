@@ -22,13 +22,17 @@ async function getBusiness(businessId?: string) {
     }
     return await prisma.business.findFirst({
         where: { status: 'published' },
-        include: {
+        select: {
+            id: true,
+            slug: true,
+            city: true,
+            provinceSlug: true,
             subCategory: {
                 include: { category: true }
             },
             analytics: true
         }
-    })
+    }) as any
 }
 
 export async function getBusinessData(businessId?: string) {
@@ -81,10 +85,10 @@ export async function getBusinessData(businessId?: string) {
                 keywords: business.seoKeywords || []
             },
             stats: {
-                profileViews: business.analytics?.[0]?.profileViews || 0,
-                phoneClicks: business.analytics?.[0]?.phoneClicks || 0,
-                websiteClicks: business.analytics?.[0]?.websiteClicks || 0,
-                directionsClicks: business.analytics?.[0]?.directionsClicks || 0
+                profileViews: business.analytics?.profileViews || 0,
+                phoneClicks: business.analytics?.phoneClicks || 0,
+                websiteClicks: business.analytics?.websiteClicks || 0,
+                directionsClicks: business.analytics?.directionsClicks || 0
             }
         }
     } catch (error) {
@@ -188,8 +192,57 @@ export async function getAnalyticsData(businessId?: string) {
     }
 }
 
+import { supabase } from '@/lib/supabase';
+
+async function saveBusinessFile(file: File | null, folder: string): Promise<{ url: string | null; error: string | null }> {
+    if (!file) return { url: null, error: null };
+
+    try {
+        console.log('saveBusinessFile called with:', file.name, file.type, file.size);
+
+        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const path = `${folder}/${fileName}`;
+
+        console.log('Uploading to Supabase:', path);
+
+        const { data, error } = await supabase.storage
+            .from('uploads')
+            .upload(path, file);
+
+        if (error) {
+            console.error('Supabase upload error:', error);
+            return { url: null, error: error.message };
+        }
+
+        console.log('Upload successful:', data);
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('uploads')
+            .getPublicUrl(path);
+
+        console.log('Public URL:', publicUrl);
+        return { url: publicUrl, error: null };
+    } catch (error: any) {
+        console.error('Error saving file:', error);
+        return { url: null, error: error?.message || 'Unknown error' };
+    }
+}
+
 export async function updateProfile(formData: FormData, businessId?: string) {
     try {
+        console.log('=== updateProfile called ===');
+
+        // Log all form data keys
+        console.log('FormData keys:', Array.from(formData.keys()));
+
+        // Log logo file
+        const logoFile = formData.get('logo');
+        console.log('Logo file in formData:', logoFile ? `File: ${(logoFile as File).name}, size: ${(logoFile as File).size}` : 'null');
+
+        // Log cover file
+        const coverFile = formData.get('coverImage');
+        console.log('Cover file in formData:', coverFile ? `File: ${(coverFile as File).name}, size: ${(coverFile as File).size}` : 'null');
+
         const business = await getBusiness(businessId)
 
         if (!business) {
@@ -204,7 +257,63 @@ export async function updateProfile(formData: FormData, businessId?: string) {
         const postalCode = formData.get('postalCode') as string
         const city = formData.get('city') as string
         const neighborhood = formData.get('neighborhood') as string
+        const province = formData.get('province') as string
         const shortDescription = formData.get('shortDescription') as string
+        const instagram = formData.get('instagram') as string
+        const facebook = formData.get('facebook') as string
+        const linkedin = formData.get('linkedin') as string
+        const kvkNumber = formData.get('kvkNumber') as string
+        const foundedYear = formData.get('foundedYear') as string
+        const serviceArea = formData.get('serviceArea') as string
+        const bookingUrl = formData.get('bookingUrl') as string
+        const logoAltText = formData.get('logoAltText') as string
+        const coverAltText = formData.get('coverAltText') as string
+
+        // Parse JSON fields
+        const services = formData.get('services') ? JSON.parse(formData.get('services') as string) : []
+        const amenities = formData.get('amenities') ? JSON.parse(formData.get('amenities') as string) : []
+        const paymentMethods = formData.get('paymentMethods') ? JSON.parse(formData.get('paymentMethods') as string) : []
+        const languages = formData.get('languages') ? JSON.parse(formData.get('languages') as string) : []
+        const certifications = formData.get('certifications') ? JSON.parse(formData.get('certifications') as string) : []
+        const faq = formData.get('faq') ? JSON.parse(formData.get('faq') as string) : []
+        const openingHours = formData.get('openingHours') ? JSON.parse(formData.get('openingHours') as string) : []
+
+        // Handle file uploads
+        const uploadedLogoFile = formData.get('logo') as File | null
+        const uploadedCoverFile = formData.get('coverImage') as File | null
+
+        let logoUrl = business.logo
+        let coverImageUrl = business.coverImage
+        let uploadErrors: string[] = []
+
+        if (uploadedLogoFile && uploadedLogoFile.size > 0) {
+            console.log('Uploading logo...');
+            const logoResult = await saveBusinessFile(uploadedLogoFile, 'logos')
+            console.log('Logo upload result:', logoResult);
+            if (logoResult.url) {
+                logoUrl = logoResult.url
+            } else if (logoResult.error) {
+                uploadErrors.push(`Logo upload failed: ${logoResult.error}`)
+            }
+        }
+
+        if (uploadedCoverFile && uploadedCoverFile.size > 0) {
+            console.log('Uploading cover...');
+            const coverResult = await saveBusinessFile(uploadedCoverFile, 'covers')
+            console.log('Cover upload result:', coverResult);
+            if (coverResult.url) {
+                coverImageUrl = coverResult.url
+            } else if (coverResult.error) {
+                uploadErrors.push(`Cover upload failed: ${coverResult.error}`)
+            }
+        }
+
+        if (uploadErrors.length > 0) {
+            console.error('Upload errors:', uploadErrors)
+            return { success: false, error: uploadErrors.join('; ') }
+        }
+
+        console.log('Saving to database - logo:', logoUrl, 'cover:', coverImageUrl);
 
         await prisma.business.update({
             where: { id: business.id },
@@ -217,18 +326,45 @@ export async function updateProfile(formData: FormData, businessId?: string) {
                 postalCode,
                 city,
                 neighborhood,
+                province,
                 shortDescription,
+                instagram,
+                facebook,
+                linkedin,
+                kvkNumber,
+                foundedYear: foundedYear ? parseInt(foundedYear) : null,
+                serviceArea,
+                bookingUrl,
+                services,
+                amenities,
+                paymentMethods,
+                languages,
+                openingHours,
+                certifications,
+                faq,
+                logo: logoUrl,
+                logoAltText: logoAltText || null,
+                coverImage: coverImageUrl,
+                coverAltText: coverAltText || null,
                 updatedAt: new Date()
             }
         })
 
+        console.log('Database updated successfully - logo:', logoUrl, 'cover:', coverImageUrl)
+
         revalidatePath('/dashboard/profile')
         revalidatePath('/dashboard')
+        revalidatePath(`/bedrijf/${business.slug}`)
+        revalidatePath(`/business/${business.slug}`)
+        revalidatePath(`/bedrijven/${business.slug}`)
+        revalidatePath(`/nederland`)
+        revalidatePath(`/${business.provinceSlug}`)
+        revalidatePath(`/${business.provinceSlug}/${business.city}`)
 
         return { success: true }
     } catch (error) {
         console.error('Error updating profile:', error)
-        return { success: false, error: 'Failed to update profile' }
+        return { success: false, error: `Failed to update profile: ${error}` }
     }
 }
 
@@ -326,22 +462,22 @@ export async function getSEOScore(businessId?: string) {
                 name: 'Basis Informatie',
                 score: Math.min(score, 20) / 20 * 100,
                 items: [
-                    { label: 'Bedrijfsnaam ingevuld', status: business.name ? 'complete' : 'incomplete', points: 5 },
-                    { label: 'Telefoonnummer toegevoegd', status: business.phone ? 'complete' : 'incomplete', points: 5 },
-                    { label: 'Adres compleet', status: (business.street && business.city) ? 'complete' : 'incomplete', points: 5 },
-                    { label: 'Openingstijden ingesteld', status: business.openingHours ? 'complete' : 'incomplete', points: 5 }
+                    { label: 'Bedrijfsnaam ingevuld', status: (business.name ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
+                    { label: 'Telefoonnummer toegevoegd', status: (business.phone ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
+                    { label: 'Adres compleet', status: ((business.street && business.city) ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
+                    { label: 'Openingstijden ingesteld', status: (business.openingHours ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 }
                 ]
             },
             {
                 name: 'Content Kwaliteit',
                 score: business.shortDescription && business.longDescription ? 100 : business.shortDescription || business.longDescription ? 50 : 0,
                 items: [
-                    { label: 'Korte beschrijving (160 tekens)', status: business.shortDescription ? 'complete' : 'incomplete', points: 10 },
-                    { label: 'Uitgebreide beschrijving', status: business.longDescription ? 'complete' : 'incomplete', points: 10 },
+                    { label: 'Korte beschrijving (160 tekens)', status: (business.shortDescription ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
+                    { label: 'Uitgebreide beschrijving', status: (business.longDescription ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
                     {
                         label: 'Diensten toegevoegd',
-                        status: (business.services && Array.isArray(business.services) && business.services.length >= 3) ? 'complete' :
-                                (business.services && Array.isArray(business.services) && business.services.length > 0) ? 'warning' : 'incomplete',
+                        status: ((business.services && Array.isArray(business.services) && business.services.length >= 3) ? 'complete' :
+                                (business.services && Array.isArray(business.services) && business.services.length > 0) ? 'warning' : 'incomplete') as "complete" | "warning" | "incomplete",
                         points: 5,
                         message: business.services && Array.isArray(business.services) && business.services.length > 0
                             ? `${business.services.length}/3 diensten toegevoegd`
@@ -349,8 +485,8 @@ export async function getSEOScore(businessId?: string) {
                     },
                     {
                         label: 'FAQ sectie',
-                        status: (business.faq && Array.isArray(business.faq) && business.faq.length >= 5) ? 'complete' :
-                                (business.faq && Array.isArray(business.faq) && business.faq.length > 0) ? 'warning' : 'incomplete',
+                        status: ((business.faq && Array.isArray(business.faq) && business.faq.length >= 5) ? 'complete' :
+                                (business.faq && Array.isArray(business.faq) && business.faq.length > 0) ? 'warning' : 'incomplete') as "complete" | "warning" | "incomplete",
                         points: 5,
                         message: business.faq && Array.isArray(business.faq) && business.faq.length > 0
                             ? `${business.faq.length}/5 vragen beantwoord`
@@ -362,23 +498,23 @@ export async function getSEOScore(businessId?: string) {
                 name: 'Visueel Content',
                 score: business.coverImage && business.logo ? 100 : business.coverImage || business.logo ? 50 : 0,
                 items: [
-                    { label: 'Logo geüpload', status: business.logo ? 'complete' : 'incomplete', points: 10 },
-                    { label: 'Cover foto toegevoegd', status: business.coverImage ? 'complete' : 'incomplete', points: 10 },
+                    { label: 'Logo geüpload', status: (business.logo ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
+                    { label: 'Cover foto toegevoegd', status: (business.coverImage ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
                     {
                         label: 'Galerij foto\'s (5+ aanbevolen)',
-                        status: (business.gallery && Array.isArray(business.gallery) && business.gallery.length >= 5) ? 'complete' : 'warning',
+                        status: ((business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).length >= 5) ? 'complete' : 'warning') as "complete" | "warning" | "incomplete",
                         points: 5,
-                        message: `${(business.gallery?.length || 0)} van 5 foto's`,
+                        message: `${((business.gallery as any[])?.length || 0)} van 5 foto's`,
                         actionUrl: '/dashboard/profile',
                         actionLabel: 'Voeg foto\'s toe'
                     },
                     {
                         label: 'Foto alt-teksten',
-                        status: (business.gallery && Array.isArray(business.gallery) && business.gallery.length > 0 && business.gallery.every((g: any) => g.altText)) ? 'complete' :
-                                (business.gallery && Array.isArray(business.gallery) && business.gallery.some((g: any) => g.altText)) ? 'warning' : 'incomplete',
+                        status: ((business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).length > 0 && (business.gallery as any[]).every((g: any) => g.altText)) ? 'complete' :
+                                (business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).some((g: any) => g.altText)) ? 'warning' : 'incomplete') as "complete" | "warning" | "incomplete",
                         points: 5,
-                        message: business.gallery && Array.isArray(business.gallery) && business.gallery.length > 0
-                            ? `${business.gallery.filter((g: any) => g.altText).length}/${business.gallery.length} foto\'s hebben alt-tekst`
+                        message: business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).length > 0
+                            ? `${(business.gallery as any[]).filter((g: any) => g.altText).length}/${(business.gallery as any[]).length} foto\'s hebben alt-tekst`
                             : 'Voeg alt-teksten toe aan foto\'s',
                         actionUrl: '/dashboard/profile',
                         actionLabel: 'Voeg alt-teksten toe'
@@ -389,19 +525,19 @@ export async function getSEOScore(businessId?: string) {
                 name: 'Social Proof',
                 score: business.reviewCount >= 5 ? 100 : business.reviewCount > 0 ? 50 : 0,
                 items: [
-                    { label: 'Minimaal 5 reviews', status: (business.reviewCount && business.reviewCount >= 5) ? 'complete' : 'warning', points: 5, message: `${business.reviewCount} van 5 reviews` },
-                    { label: 'Gemiddelde rating 4+', status: (business.rating && business.rating >= 4) ? 'complete' : 'warning', points: 5, message: `Huidige: ${business.rating}` },
-                    { label: 'Eigenaar reageert op reviews', status: 'warning', points: 5, message: 'Controleer onbeantwoorde reviews' }
+                    { label: 'Minimaal 5 reviews', status: ((business.reviewCount && business.reviewCount >= 5) ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: `${business.reviewCount} van 5 reviews` },
+                    { label: 'Gemiddelde rating 4+', status: ((business.rating && business.rating >= 4) ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: `Huidige: ${business.rating}` },
+                    { label: 'Eigenaar reageert op reviews', status: 'warning' as "complete" | "warning" | "incomplete", points: 5, message: 'Controleer onbeantwoorde reviews' }
                 ]
             },
             {
                 name: 'Lokale SEO',
                 score: (business.city ? 25 : 0) + (business.neighborhood ? 25 : 0) + (business.serviceArea ? 25 : 0) + ((business.street && business.postalCode && business.city) ? 25 : 0),
                 items: [
-                    { label: 'Stad en wijk ingevuld', status: (business.city && business.neighborhood) ? 'complete' : 'incomplete', points: 5 },
-                    { label: 'Werkgebied gespecificeerd', status: business.serviceArea ? 'complete' : 'warning', points: 5, message: 'Voeg servicegebied toe' },
-                    { label: 'Lokale keywords in beschrijving', status: business.seoLocalText ? 'complete' : 'warning', points: 5, message: 'AI heeft lokale tekst gegenereerd' },
-                    { label: 'Google Maps integratie', status: (business.street && business.postalCode && business.city) ? 'complete' : 'incomplete', points: 5 }
+                    { label: 'Stad en wijk ingevuld', status: ((business.city && business.neighborhood) ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
+                    { label: 'Werkgebied gespecificeerd', status: (business.serviceArea ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: 'Voeg servicegebied toe' },
+                    { label: 'Lokale keywords in beschrijving', status: (business.seoLocalText ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: 'AI heeft lokale tekst gegenereerd' },
+                    { label: 'Google Maps integratie', status: ((business.street && business.postalCode && business.city) ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 }
                 ]
             }
         ]

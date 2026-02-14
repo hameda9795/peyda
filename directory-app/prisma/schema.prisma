@@ -82,7 +82,7 @@ model Business {
   // Address
   street        String?
   postalCode    String?
-  city          String      @default("Utrecht")
+  city          String
   province      String?     // Province name (e.g., "Utrecht", "Noord-Holland")
   provinceSlug  String?     // Province slug for URL (e.g., "utrecht", "noord-holland")
   neighborhood  String?
@@ -97,7 +97,9 @@ model Business {
 
   // Media
   logo          String?
+  logoAltText   String?
   coverImage    String?
+  coverAltText  String?
   gallery       Json?      // Array of {url, altText, caption}
   videoUrl      String?
 

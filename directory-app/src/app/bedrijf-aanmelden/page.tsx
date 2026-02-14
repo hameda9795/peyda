@@ -45,7 +45,8 @@ const initialFormData: BusinessFormData = {
     shortDescription: '',
     street: '',
     postalCode: '',
-    city: 'Utrecht',
+    city: '',
+    province: '',
     neighborhood: '',
     phone: '',
     email: '',
@@ -134,6 +135,9 @@ export default function BusinessRegistrationPage() {
                 } else if (!formData.city) {
                     isValid = false;
                     errorMessage = "Stad is verplicht.";
+                } else if (!formData.province) {
+                    isValid = false;
+                    errorMessage = "Provincie is verplicht.";
                 } else if (!formData.phone) {
                     isValid = false;
                     errorMessage = "Telefoonnummer is verplicht.";

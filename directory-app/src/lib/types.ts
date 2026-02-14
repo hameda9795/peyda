@@ -61,7 +61,8 @@ export type Business = {
         street: string;
         city: string;
         postalCode: string;
-        neighborhood: string; // Utrecht wijk
+        neighborhood: string;
+        province?: string;
         coordinates: { lat: number; lng: number };
     };
 

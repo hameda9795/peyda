@@ -56,18 +56,24 @@ export async function GET(request: NextRequest) {
                 street: business.street,
                 postalCode: business.postalCode,
                 city: business.city,
-                neighborhood: business.neighborhood
+                neighborhood: business.neighborhood,
+                province: business.province
             },
             contact: {
                 phone: business.phone,
                 email: business.email,
                 website: business.website,
                 instagram: business.instagram,
-                facebook: business.facebook
+                facebook: business.facebook,
+                linkedin: business.linkedin
             },
-            logo: business.logo,
-            coverImage: business.coverImage,
-            gallery: business.gallery,
+            images: {
+                logo: business.logo,
+                logoAltText: business.logoAltText,
+                cover: business.coverImage,
+                coverAltText: business.coverAltText,
+                gallery: business.gallery
+            },
             shortDescription: business.shortDescription,
             longDescription: business.longDescription,
             openingHours: business.openingHours,
@@ -78,16 +84,21 @@ export async function GET(request: NextRequest) {
             highlights: business.highlights,
             tags: business.tags,
             faq: business.faq,
+            kvk: business.kvkNumber,
+            foundedYear: business.foundedYear,
+            serviceArea: business.serviceArea,
+            bookingUrl: business.bookingUrl,
+            certifications: business.certifications,
             seo: {
                 title: business.seoTitle,
                 description: business.seoDescription,
                 keywords: business.seoKeywords
             },
             stats: {
-                profileViews: business.analytics?.[0]?.profileViews || 0,
-                phoneClicks: business.analytics?.[0]?.phoneClicks || 0,
-                websiteClicks: business.analytics?.[0]?.websiteClicks || 0,
-                directionsClicks: business.analytics?.[0]?.directionsClicks || 0
+                profileViews: business.analytics?.profileViews || 0,
+                phoneClicks: business.analytics?.phoneClicks || 0,
+                websiteClicks: business.analytics?.websiteClicks || 0,
+                directionsClicks: business.analytics?.directionsClicks || 0
             }
         })
     } catch (error) {

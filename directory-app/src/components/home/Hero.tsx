@@ -43,7 +43,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
-                    className="text-5xl md:text-7xl font-bold tracking-tight text-zinc-900 mb-6 leading-tight"
+                    className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-zinc-900 mb-4 md:mb-6 leading-tight"
                 >
                     Vind lokale experts <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">voor elke klus</span>
@@ -53,7 +53,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="text-zinc-500 text-lg md:text-xl mb-12 max-w-2xl leading-relaxed"
+                    className="text-zinc-500 text-base md:text-lg lg:text-xl mb-8 md:mb-12 max-w-2xl leading-relaxed px-4 sm:px-0"
                 >
                     Van de beste restaurants tot betrouwbare loodgieters. <br className="hidden md:block" /> Alles wat je nodig hebt in Utrecht, verzameld op één premium platform.
                 </motion.p>
@@ -66,20 +66,22 @@ export function Hero() {
                 >
                     <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative flex items-center bg-white border border-zinc-200 rounded-2xl p-2 shadow-xl shadow-indigo-100/50">
-                        <Search className="ml-4 h-5 w-5 text-zinc-400" />
+                        <Search className="ml-3 md:ml-4 h-4 w-4 md:h-5 md:w-5 text-zinc-400 shrink-0" />
                         <input
                             type="text"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                            placeholder="Wat zoek je vandaag? (bijv. kapper, loodgieter)"
-                            className="flex-1 bg-transparent border-none outline-none px-4 text-zinc-900 placeholder:text-zinc-400 h-10 ring-0 focus:ring-0"
+                            placeholder="Wat zoek je? (bijv. kapper)"
+                            className="flex-1 bg-transparent border-none outline-none px-2 md:px-4 text-sm md:text-base text-zinc-900 placeholder:text-zinc-400 h-10 ring-0 focus:ring-0 min-w-0"
                         />
                         <button
                             onClick={handleSearch}
-                            className="bg-zinc-900 text-white font-medium text-sm px-6 py-3 rounded-xl hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 flex items-center gap-2"
+                            className="bg-zinc-900 text-white font-medium text-xs md:text-sm px-3 md:px-6 py-2.5 md:py-3 rounded-xl hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 flex items-center gap-1.5 md:gap-2 whitespace-nowrap"
                         >
-                            Zoeken <ArrowRight className="h-4 w-4" />
+                            <span className="hidden sm:inline">Zoeken</span>
+                            <span className="sm:hidden">Zoek</span>
+                            <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
                         </button>
                     </div>
                 </motion.div>
@@ -88,7 +90,7 @@ export function Hero() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8 }}
-                    className="mt-12 flex items-center gap-8 text-sm text-zinc-400"
+                    className="mt-10 md:mt-12 flex items-center gap-6 md:gap-8 text-xs md:text-sm text-zinc-400"
                 >
                     <div className="flex -space-x-2">
                         {[1, 2, 3, 4].map(i => (
@@ -97,7 +99,8 @@ export function Hero() {
                             </div>
                         ))}
                     </div>
-                    <p>Vertrouwd door <strong>15.000+</strong> Utrechters</p>
+                    <p className="hidden sm:block">Vertrouwd door <strong>15.000+</strong> Utrechters</p>
+                    <p className="sm:hidden">Vertrouwd door <strong>15.000+</strong></p>
                 </motion.div>
             </div>
         </section>
