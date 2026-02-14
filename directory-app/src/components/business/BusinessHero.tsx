@@ -1,7 +1,10 @@
+"use client";
+
 import { Business } from "@/lib/types";
 import { Star, MapPin, CheckCircle, Share2, Heart, Phone, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { trackWhatsAppClick } from "@/lib/tracking";
 
 interface BusinessHeroProps {
     business: Business;
@@ -10,6 +13,12 @@ interface BusinessHeroProps {
 export function BusinessHero({ business }: BusinessHeroProps) {
     const phoneDigits = business.contact.phone?.replace(/\D/g, "");
     const whatsappLink = phoneDigits ? `https://wa.me/${phoneDigits}?text=${encodeURIComponent(`Hoi ${business.name}, ik heb interesse.`)}` : null;
+
+    const handleWhatsAppClick = () => {
+        if (business.id) {
+            trackWhatsAppClick(business.id);
+        }
+    };
 
     return (
         <div className="relative w-full h-[60vh] min-h-[500px] lg:h-[70vh] bg-slate-900 overflow-hidden">
@@ -125,6 +134,9 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                             {whatsappLink && (
                                 <a
                                     href={whatsappLink}
+                                    onClick={handleWhatsAppClick}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-white backdrop-blur-sm transition-all"
                                 >
                                     <MessageCircle className="w-5 h-5" />

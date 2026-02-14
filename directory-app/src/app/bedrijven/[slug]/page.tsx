@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { getBusinessBySlug, getRelatedBusinessesBySlug } from "@/lib/actions/business";
 import { getCategories } from "@/lib/actions/categories";
 import { NETHERLANDS_PROVINCES } from "@/lib/netherlands-data";
+import { TrackedLink } from "@/components/TrackedLinks";
 import {
   generateWebPageSchema,
   generateBreadcrumbSchema,
@@ -202,14 +203,14 @@ export default async function BusinessPage({ params }: Props) {
                 </div>
                 <div className="seo-hero-actions">
                   {business.contact.phone && (
-                    <a href={`tel:${business.contact.phone}`} className="seo-cta">
+                    <TrackedLink businessId={business.id} type="phone" href={`tel:${business.contact.phone}`} className="seo-cta">
                       Bel nu
-                    </a>
+                    </TrackedLink>
                   )}
                   {business.bookingUrl && (
-                    <a href={business.bookingUrl} className="seo-chip">
+                    <TrackedLink businessId={business.id} type="booking" href={business.bookingUrl} className="seo-chip">
                       Reserveren
-                    </a>
+                    </TrackedLink>
                   )}
                   <Link href={`/categorieen/${business.subcategories?.[0]?.toLowerCase() || ''}`} className="seo-chip">
                     Bekijk meer {business.category.toLowerCase()}
@@ -245,9 +246,9 @@ export default async function BusinessPage({ params }: Props) {
                   <div className="seo-stat">
                     <span>Website</span>
                     {business.contact.website ? (
-                      <a href={business.contact.website} target="_blank" rel="noopener noreferrer">
+                      <TrackedLink businessId={business.id} type="website" href={business.contact.website} className="">
                         Bekijk
-                      </a>
+                      </TrackedLink>
                     ) : '-'}
                   </div>
                 </div>
@@ -294,13 +295,13 @@ export default async function BusinessPage({ params }: Props) {
                 <div className="seo-card-title">📞 Contact</div>
                 <div className="seo-card-meta">
                   {business.contact.phone && (
-                    <p><a href={`tel:${business.contact.phone}`}>{business.contact.phone}</a></p>
+                    <p><TrackedLink businessId={business.id} type="phone" href={`tel:${business.contact.phone}`}>{business.contact.phone}</TrackedLink></p>
                   )}
                   {business.contact.email && (
-                    <p><a href={`mailto:${business.contact.email}`}>{business.contact.email}</a></p>
+                    <p><TrackedLink businessId={business.id} type="email" href={`mailto:${business.contact.email}`}>{business.contact.email}</TrackedLink></p>
                   )}
                   {business.contact.website && (
-                    <p><a href={business.contact.website} target="_blank" rel="noopener noreferrer">Bezoek website</a></p>
+                    <p><TrackedLink businessId={business.id} type="website" href={business.contact.website}>Bezoek website</TrackedLink></p>
                   )}
                 </div>
               </div>
@@ -366,19 +367,19 @@ export default async function BusinessPage({ params }: Props) {
               <h2 className="seo-section-title">Volg ons</h2>
               <div className="seo-chip-row">
                 {business.contact.socials?.instagram && (
-                  <a href={business.contact.socials.instagram} target="_blank" rel="noopener noreferrer" className="seo-chip">
+                  <TrackedLink businessId={business.id} type="website" href={business.contact.socials.instagram} className="seo-chip">
                     Instagram
-                  </a>
+                  </TrackedLink>
                 )}
                 {business.contact.socials?.facebook && (
-                  <a href={business.contact.socials.facebook} target="_blank" rel="noopener noreferrer" className="seo-chip">
+                  <TrackedLink businessId={business.id} type="website" href={business.contact.socials.facebook} className="seo-chip">
                     Facebook
-                  </a>
+                  </TrackedLink>
                 )}
                 {business.contact.socials?.linkedin && (
-                  <a href={business.contact.socials.linkedin} target="_blank" rel="noopener noreferrer" className="seo-chip">
+                  <TrackedLink businessId={business.id} type="website" href={business.contact.socials.linkedin} className="seo-chip">
                     LinkedIn
-                  </a>
+                  </TrackedLink>
                 )}
               </div>
             </section>

@@ -181,6 +181,9 @@ export default function BusinessRegistrationPage() {
                 } else if (!formData.kvkNumber) {
                     isValid = false;
                     errorMessage = "KVK-nummer is verplicht.";
+                } else if (formData.ctaType === 'booking' && !formData.bookingUrl) {
+                    isValid = false;
+                    errorMessage = "Vul een reserveringslink in wanneer u 'Reserveren' als actieknop kiest.";
                 }
                 break;
             default:
@@ -220,6 +223,21 @@ export default function BusinessRegistrationPage() {
     };
 
     const handleGeneratePage = async () => {
+        // Validation before generating
+        const answeredFaqs = (formData.faq || []).filter(
+            item => item.question?.trim() && item.answer?.trim()
+        );
+
+        if (answeredFaqs.length < 5) {
+            setError("Beantwoord minimaal 5 SEO-vragen voordat u de pagina genereert.");
+            return;
+        }
+
+        if (formData.ctaType === 'booking' && !formData.bookingUrl) {
+            setError("Vul een reserveringslink in wanneer u 'Reserveren' als actieknop kiest.");
+            return;
+        }
+
         setIsGenerating(true);
         setError(null);
 

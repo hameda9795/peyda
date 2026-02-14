@@ -143,7 +143,7 @@ model Business {
   updatedAt     DateTime    @updatedAt
 
   reviews       Review[]
-  analytics     BusinessAnalytics?
+  analytics     BusinessAnalytics[]
   interactions  BusinessInteraction[]
   owner         BusinessOwner?
 
@@ -265,7 +265,7 @@ model BusinessOwner {
 // Analytics aggregated by month
 model BusinessAnalytics {
   id                 String   @id @default(cuid())
-  businessId         String   @unique
+  businessId         String
   business           Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   // Monthly stats
@@ -273,6 +273,7 @@ model BusinessAnalytics {
 
   profileViews       Int      @default(0)
   phoneClicks        Int      @default(0)
+  whatsappClicks     Int      @default(0)
   websiteClicks      Int      @default(0)
   directionsClicks   Int      @default(0)
   emailClicks        Int      @default(0)
@@ -284,6 +285,7 @@ model BusinessAnalytics {
   @@unique([businessId, month])
   @@index([businessId])
   @@index([month])
+  @@index([businessId, month])
   @@map("business_analytics")
 }
 

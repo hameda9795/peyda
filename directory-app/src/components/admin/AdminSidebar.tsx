@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Layers } from "lucide-react";
+import { LayoutDashboard, Layers, Building2, BarChart3, Users, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarItem {
@@ -13,7 +13,11 @@ interface SidebarItem {
 
 const sidebarItems: SidebarItem[] = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Businesses", href: "/admin/businesses", icon: Building2 },
     { name: "Categories", href: "/admin/categories", icon: Layers },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Locations", href: "/admin/locations", icon: MapPin },
 ];
 
 export function AdminSidebar() {

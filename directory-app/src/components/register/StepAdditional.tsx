@@ -220,6 +220,11 @@ export function StepAdditional({ formData, updateFormData }: StepProps) {
                         <ExternalLink className="w-5 h-5" />
                     </span>
                     Externe Link
+                    {formData.ctaType === 'booking' && (
+                        <span className="text-xs font-normal text-rose-600 bg-rose-50 px-2 py-0.5 rounded">
+                            Verplicht bij "Reserveren"
+                        </span>
+                    )}
                 </h3>
 
                 <div className="relative">
@@ -228,12 +233,15 @@ export function StepAdditional({ formData, updateFormData }: StepProps) {
                         value={formData.bookingUrl}
                         onChange={(e) => updateFormData({ bookingUrl: e.target.value })}
                         placeholder="https://www.uwbedrijf.nl/afspraak-maken"
-                        className="premium-input w-full px-4 pl-10"
+                        className={`premium-input w-full px-4 pl-10 ${formData.ctaType === 'booking' && !formData.bookingUrl ? 'border-rose-400 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10' : ''}`}
                     />
                     <ExternalLink className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 </div>
                 <p className="text-xs text-slate-500 pl-1">
                     Directe link naar uw contactformulier of reserveringssysteem.
+                    {formData.ctaType === 'booking' && (
+                        <span className="text-rose-600 font-medium"> Vereist omdat u "Reserveren" als actieknop heeft gekozen.</span>
+                    )}
                 </p>
             </div>
 
