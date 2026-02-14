@@ -7,6 +7,7 @@ import { getBusinessBySlug, getRelatedBusinessesBySlug } from "@/lib/actions/bus
 import { getCategories } from "@/lib/actions/categories";
 import { NETHERLANDS_PROVINCES } from "@/lib/netherlands-data";
 import { TrackedLink } from "@/components/TrackedLinks";
+import { TrackPageView } from "@/components/business/TrackPageView";
 import {
   generateWebPageSchema,
   generateBreadcrumbSchema,
@@ -158,6 +159,9 @@ export default async function BusinessPage({ params }: Props) {
 
   return (
     <>
+      {/* Track page view */}
+      <TrackPageView business={business} />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaScripts }}

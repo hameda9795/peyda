@@ -309,3 +309,16 @@ model BusinessInteraction {
   @@index([createdAt])
   @@map("business_interactions")
 }
+
+// SEO Audit History
+model SeoAuditLog {
+  id          String   @id @default(cuid())
+  businessId  String
+  score       Int
+  breakdown   Json     // Detailed breakdown of each category
+  createdAt   DateTime @default(now())
+
+  @@index([businessId])
+  @@index([createdAt])
+  @@map("seo_audit_logs")
+}

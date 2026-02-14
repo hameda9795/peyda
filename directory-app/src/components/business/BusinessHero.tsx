@@ -4,7 +4,7 @@ import { Business } from "@/lib/types";
 import { Star, MapPin, CheckCircle, Share2, Heart, Phone, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { trackWhatsAppClick } from "@/lib/tracking";
+import { trackWhatsAppClick, trackPhoneClick, trackBookingClick } from "@/lib/tracking";
 
 interface BusinessHeroProps {
     business: Business;
@@ -17,6 +17,18 @@ export function BusinessHero({ business }: BusinessHeroProps) {
     const handleWhatsAppClick = () => {
         if (business.id) {
             trackWhatsAppClick(business.id);
+        }
+    };
+
+    const handlePhoneClick = () => {
+        if (business.id) {
+            trackPhoneClick(business.id);
+        }
+    };
+
+    const handleCtaClick = () => {
+        if (business.id) {
+            trackBookingClick(business.id);
         }
     };
 
@@ -117,6 +129,7 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                     <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
                         <Link
                             href={business.cta.link}
+                            onClick={handleCtaClick}
                             className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3 rounded-lg font-semibold transition-all shadow-lg shadow-white/10"
                         >
                             {business.cta.text}
@@ -125,6 +138,7 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                             {business.contact.phone && (
                                 <a
                                     href={`tel:${business.contact.phone}`}
+                                    onClick={handlePhoneClick}
                                     className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-white backdrop-blur-sm transition-all"
                                 >
                                     <Phone className="w-5 h-5" />

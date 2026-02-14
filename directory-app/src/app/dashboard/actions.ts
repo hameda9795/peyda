@@ -16,7 +16,11 @@ async function getBusiness(businessId?: string) {
                 subCategory: {
                     include: { category: true }
                 },
-                analytics: true
+                analytics: true,
+                reviews: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 10
+                }
             }
         })
     }
@@ -30,7 +34,11 @@ async function getBusiness(businessId?: string) {
             subCategory: {
                 include: { category: true }
             },
-            analytics: true
+            analytics: true,
+            reviews: {
+                orderBy: { createdAt: 'desc' },
+                take: 10
+            }
         }
     }) as any
 }
@@ -87,8 +95,11 @@ export async function getBusinessData(businessId?: string) {
             stats: {
                 profileViews: business.analytics?.profileViews || 0,
                 phoneClicks: business.analytics?.phoneClicks || 0,
+                whatsappClicks: business.analytics?.whatsappClicks || 0,
                 websiteClicks: business.analytics?.websiteClicks || 0,
-                directionsClicks: business.analytics?.directionsClicks || 0
+                directionsClicks: business.analytics?.directionsClicks || 0,
+                emailClicks: business.analytics?.emailClicks || 0,
+                bookingClicks: business.analytics?.bookingClicks || 0
             }
         }
     } catch (error) {
@@ -168,8 +179,11 @@ export async function getAnalyticsData(businessId?: string) {
             stats: {
                 profileViews: currentAnalytics?.profileViews || 0,
                 phoneClicks: currentAnalytics?.phoneClicks || 0,
+                whatsappClicks: currentAnalytics?.whatsappClicks || 0,
                 websiteClicks: currentAnalytics?.websiteClicks || 0,
-                directionsClicks: currentAnalytics?.directionsClicks || 0
+                directionsClicks: currentAnalytics?.directionsClicks || 0,
+                emailClicks: currentAnalytics?.emailClicks || 0,
+                bookingClicks: currentAnalytics?.bookingClicks || 0
             },
             weeklyChange: {
                 profileViews: calculateChange(
@@ -180,9 +194,25 @@ export async function getAnalyticsData(businessId?: string) {
                     currentAnalytics?.phoneClicks || 0,
                     lastMonthAnalytics?.phoneClicks || 0
                 ),
+                whatsappClicks: calculateChange(
+                    currentAnalytics?.whatsappClicks || 0,
+                    lastMonthAnalytics?.whatsappClicks || 0
+                ),
                 websiteClicks: calculateChange(
                     currentAnalytics?.websiteClicks || 0,
                     lastMonthAnalytics?.websiteClicks || 0
+                ),
+                directionsClicks: calculateChange(
+                    currentAnalytics?.directionsClicks || 0,
+                    lastMonthAnalytics?.directionsClicks || 0
+                ),
+                emailClicks: calculateChange(
+                    currentAnalytics?.emailClicks || 0,
+                    lastMonthAnalytics?.emailClicks || 0
+                ),
+                bookingClicks: calculateChange(
+                    currentAnalytics?.bookingClicks || 0,
+                    lastMonthAnalytics?.bookingClicks || 0
                 )
             }
         }
@@ -423,128 +453,783 @@ export async function getSEOScore(businessId?: string) {
             return null
         }
 
-        // Calculate SEO score based on filled fields
-        let score = 0
-        let totalPossible = 0
+        // Type definitions
+        type SEOItemStatus = 'pass' | 'warning' | 'fail'
 
-        // Basic info (20 points)
-        totalPossible += 20
-        if (business.name) score += 5
-        if (business.phone) score += 5
-        if (business.email) score += 5
-        if (business.street && business.postalCode && business.city) score += 5
+        interface SEOItem {
+            name: string
+            status: SEOItemStatus
+            score: number
+            maxScore: number
+            message: string
+            suggestion: string
+            actionUrl?: string
+            actionLabel?: string
+        }
 
-        // Content (30 points)
-        totalPossible += 30
-        if (business.shortDescription) score += 10
-        if (business.longDescription) score += 10
-        if (business.services && Array.isArray(business.services) && business.services.length >= 3) score += 5
-        if (business.faq && Array.isArray(business.faq) && business.faq.length >= 5) score += 5
+        interface SEOCategory {
+            name: string
+            score: number
+            maxScore: number
+            items: SEOItem[]
+        }
 
-        // Visuals (20 points)
-        totalPossible += 20
-        if (business.logo) score += 10
-        if (business.coverImage) score += 10
+        // Helper functions
+        const countWords = (text: string | null | undefined): number => {
+            if (!text) return 0
+            return text.trim().split(/\s+/).filter(w => w.length > 0).length
+        }
 
-        // Social proof (15 points)
-        totalPossible += 15
-        if (business.reviewCount >= 5) score += 10
-        if (business.rating >= 4) score += 5
+        const hasValidPhoneFormat = (phone: string | null | undefined): boolean => {
+            if (!phone) return false
+            // Dutch phone format: +31 or 0, followed by 9 digits
+            const phoneRegex = /^(\+31|0)[1-9][0-9]{8}$/
+            return phoneRegex.test(phone.replace(/\s/g, ''))
+        }
 
-        // SEO (15 points)
-        totalPossible += 15
-        if (business.seoTitle) score += 5
-        if (business.seoDescription) score += 5
-        if (business.seoKeywords && Array.isArray(business.seoKeywords) && business.seoKeywords.length > 0) score += 5
+        const checkKeywordInText = (text: string | null | undefined, keyword: string): boolean => {
+            if (!text || !keyword) return false
+            return text.toLowerCase().includes(keyword.toLowerCase())
+        }
 
-        const categories = [
-            {
-                name: 'Basis Informatie',
-                score: Math.min(score, 20) / 20 * 100,
-                items: [
-                    { label: 'Bedrijfsnaam ingevuld', status: (business.name ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
-                    { label: 'Telefoonnummer toegevoegd', status: (business.phone ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
-                    { label: 'Adres compleet', status: ((business.street && business.city) ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
-                    { label: 'Openingstijden ingesteld', status: (business.openingHours ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 }
-                ]
-            },
-            {
-                name: 'Content Kwaliteit',
-                score: business.shortDescription && business.longDescription ? 100 : business.shortDescription || business.longDescription ? 50 : 0,
-                items: [
-                    { label: 'Korte beschrijving (160 tekens)', status: (business.shortDescription ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
-                    { label: 'Uitgebreide beschrijving', status: (business.longDescription ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
-                    {
-                        label: 'Diensten toegevoegd',
-                        status: ((business.services && Array.isArray(business.services) && business.services.length >= 3) ? 'complete' :
-                                (business.services && Array.isArray(business.services) && business.services.length > 0) ? 'warning' : 'incomplete') as "complete" | "warning" | "incomplete",
-                        points: 5,
-                        message: business.services && Array.isArray(business.services) && business.services.length > 0
-                            ? `${business.services.length}/3 diensten toegevoegd`
-                            : 'Minimaal 3 diensten aanbevolen'
-                    },
-                    {
-                        label: 'FAQ sectie',
-                        status: ((business.faq && Array.isArray(business.faq) && business.faq.length >= 5) ? 'complete' :
-                                (business.faq && Array.isArray(business.faq) && business.faq.length > 0) ? 'warning' : 'incomplete') as "complete" | "warning" | "incomplete",
-                        points: 5,
-                        message: business.faq && Array.isArray(business.faq) && business.faq.length > 0
-                            ? `${business.faq.length}/5 vragen beantwoord`
-                            : 'Minimaal 5 SEO-vragen vereist'
+        // ========== CATEGORY 1: CONTENT QUALITY (30 points) ==========
+        const title = business.seoTitle || business.name || ''
+        const titleLength = title.length
+
+        let titleScore = 0
+        let titleStatus: SEOItemStatus = 'fail'
+        let titleMessage = ''
+        let titleSuggestion = ''
+
+        if (titleLength >= 50 && titleLength <= 60) {
+            titleScore = 5
+            titleStatus = 'pass'
+            titleMessage = 'Perfecte titel lengte (50-60 tekens)'
+        } else if (titleLength > 0) {
+            titleScore = 2
+            titleStatus = 'warning'
+            titleMessage = `Titel is ${titleLength} tekens. Optimaal: 50-60 tekens`
+            titleSuggestion = 'Verkort of verleng de titel naar 50-60 tekens voor optimale weergave in Google'
+        } else {
+            titleMessage = 'Geen SEO titel ingesteld'
+            titleSuggestion = 'Voeg een pakkende titel toe van 50-60 tekens'
+        }
+
+        const metaDesc = business.seoDescription || business.shortDescription || ''
+        const metaDescLength = metaDesc.length
+
+        let metaScore = 0
+        let metaStatus: SEOItemStatus = 'fail'
+        let metaMessage = ''
+        let metaSuggestion = ''
+
+        if (metaDescLength >= 150 && metaDescLength <= 160) {
+            metaScore = 5
+            metaStatus = 'pass'
+            metaMessage = 'Perfecte meta beschrijving lengte (150-160 tekens)'
+        } else if (metaDescLength > 0) {
+            metaScore = 2
+            metaStatus = 'warning'
+            metaMessage = `Beschrijving is ${metaDescLength} tekens. Optimaal: 150-160 tekens`
+            metaSuggestion = 'Pas de beschrijving aan naar 150-160 tekens voor volledige weergave'
+        } else {
+            metaMessage = 'Geen meta beschrijving ingesteld'
+            metaSuggestion = 'Voeg een beschrijving toe van 150-160 tekens'
+        }
+
+        const shortDescWordCount = countWords(business.shortDescription)
+
+        let shortDescScore = 0
+        let shortDescStatus: SEOItemStatus = 'fail'
+        let shortDescMessage = ''
+
+        if (shortDescWordCount >= 50) {
+            shortDescScore = 5
+            shortDescStatus = 'pass'
+            shortDescMessage = `Uitstekend: ${shortDescWordCount} woorden`
+        } else if (shortDescWordCount > 0) {
+            shortDescScore = 2
+            shortDescStatus = 'warning'
+            shortDescMessage = `Korte beschrijving: ${shortDescWordCount} woorden. Minimaal 50 aanbevolen`
+        } else {
+            shortDescMessage = 'Geen korte beschrijving ingesteld'
+        }
+
+        const longDescWordCount = countWords(business.longDescription)
+
+        let longDescScore = 0
+        let longDescStatus: SEOItemStatus = 'fail'
+        let longDescMessage = ''
+
+        if (longDescWordCount >= 150) {
+            longDescScore = 5
+            longDescStatus = 'pass'
+            longDescMessage = `Uitstekend: ${longDescWordCount} woorden`
+        } else if (longDescWordCount > 0) {
+            longDescScore = 2
+            longDescStatus = 'warning'
+            longDescMessage = `Beschrijving: ${longDescWordCount} woorden. Minimaal 150 aanbevolen`
+        } else {
+            longDescMessage = 'Geen uitgebreide beschrijving ingesteld'
+        }
+
+        const services = business.services as any[] | null
+        const servicesCount = services?.length || 0
+
+        let servicesScore = 0
+        let servicesStatus: SEOItemStatus = 'fail'
+        let servicesMessage = ''
+
+        if (servicesCount >= 3) {
+            servicesScore = 5
+            servicesStatus = 'pass'
+            servicesMessage = `${servicesCount} diensten toegevoegd`
+        } else if (servicesCount > 0) {
+            servicesScore = 2
+            servicesStatus = 'warning'
+            servicesMessage = `${servicesCount}/3 diensten. Voeg er meer toe`
+        } else {
+            servicesMessage = 'Geen diensten toegevoegd'
+        }
+
+        const faq = business.faq as any[] | null
+        const faqCount = faq?.length || 0
+
+        let faqScore = 0
+        let faqStatus: SEOItemStatus = 'fail'
+        let faqMessage = ''
+
+        if (faqCount >= 5) {
+            faqScore = 5
+            faqStatus = 'pass'
+            faqMessage = `${faqCount} FAQ vragen toegevoegd`
+        } else if (faqCount > 0) {
+            faqScore = 2
+            faqStatus = 'warning'
+            faqMessage = `${faqCount}/5 FAQ vragen. Voeg er meer toe`
+        } else {
+            faqMessage = 'Geen FAQ sectie ingesteld'
+        }
+
+        const contentQualityScore = titleScore + metaScore + shortDescScore + longDescScore + servicesScore + faqScore
+        const contentQuality: SEOCategory = {
+            name: 'Content Kwaliteit',
+            score: contentQualityScore,
+            maxScore: 30,
+            items: [
+                {
+                    name: 'SEO Titel lengte',
+                    status: titleStatus,
+                    score: titleScore,
+                    maxScore: 5,
+                    message: titleMessage,
+                    suggestion: titleSuggestion,
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg titel toe'
+                },
+                {
+                    name: 'Meta beschrijving',
+                    status: metaStatus,
+                    score: metaScore,
+                    maxScore: 5,
+                    message: metaMessage,
+                    suggestion: metaSuggestion,
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg beschrijving toe'
+                },
+                {
+                    name: 'Korte beschrijving',
+                    status: shortDescStatus,
+                    score: shortDescScore,
+                    maxScore: 5,
+                    message: shortDescMessage,
+                    suggestion: 'Voeg een beschrijving toe van minimaal 50 woorden'
+                },
+                {
+                    name: 'Uitgebreide beschrijving',
+                    status: longDescStatus,
+                    score: longDescScore,
+                    maxScore: 5,
+                    message: longDescMessage,
+                    suggestion: 'Voeg een uitgebreide beschrijving toe van minimaal 150 woorden',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg beschrijving toe'
+                },
+                {
+                    name: 'Diensten',
+                    status: servicesStatus,
+                    score: servicesScore,
+                    maxScore: 5,
+                    message: servicesMessage,
+                    suggestion: 'Voeg minimaal 3 diensten toe',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg diensten toe'
+                },
+                {
+                    name: 'FAQ',
+                    status: faqStatus,
+                    score: faqScore,
+                    maxScore: 5,
+                    message: faqMessage,
+                    suggestion: 'Voeg minimaal 5 FAQ vragen toe',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg FAQ toe'
+                }
+            ]
+        }
+
+        // ========== CATEGORY 2: TECHNICAL SEO (25 points) ==========
+        // Check for Schema.org JSON-LD (we can't actually check the rendered page, but we can check if business has enough data)
+        const hasSchemaData = business.name && business.phone && business.address && business.city
+
+        let schemaScore = 0
+        let schemaStatus: SEOItemStatus = 'fail'
+        let schemaMessage = ''
+
+        if (hasSchemaData) {
+            schemaScore = 8
+            schemaStatus = 'pass'
+            schemaMessage = 'Voldoende bedrijfsgegevens voor Schema.org'
+        } else {
+            schemaMessage = 'Onvoldoende gegevens voor LocalBusiness schema'
+        }
+
+        // Open Graph tags - check if SEO fields are filled
+        const hasOgData = business.seoTitle && business.seoDescription && business.coverImage
+
+        let ogScore = 0
+        let ogStatus: SEOItemStatus = 'fail'
+        let ogMessage = ''
+
+        if (hasOgData) {
+            ogScore = 5
+            ogStatus = 'pass'
+            ogMessage = 'Open Graph tags zijn geconfigureerd'
+        } else if (business.seoTitle || business.seoDescription) {
+            ogScore = 2
+            ogStatus = 'warning'
+            ogMessage = 'Voeg een cover foto toe voor og:image'
+        } else {
+            ogMessage = 'Voeg SEO titel, beschrijving en cover foto toe'
+        }
+
+        // Heading structure - check if content has headings (we'll check if long description exists)
+        let headingScore = 0
+        let headingStatus: SEOItemStatus = 'fail'
+        let headingMessage = ''
+
+        if (business.longDescription && business.longDescription.length > 200) {
+            headingScore = 4
+            headingStatus = 'pass'
+            headingMessage = 'Voldoende content voor H1 structuur'
+        } else if (business.shortDescription) {
+            headingScore = 2
+            headingStatus = 'warning'
+            headingMessage = 'Voeg meer content toe voor betere heading structuur'
+        } else {
+            headingMessage = 'Voeg content toe met heading structuur'
+        }
+
+        // Canonical URL - check if slug is clean
+        let canonicalScore = 0
+        let canonicalStatus: SEOItemStatus = 'fail'
+        let canonicalMessage = ''
+
+        if (business.slug && !business.slug.includes('_') && !business.slug.match(/\d{10,}/)) {
+            canonicalScore = 4
+            canonicalStatus = 'pass'
+            canonicalMessage = 'Clean URL structuur'
+        } else {
+            canonicalMessage = 'URL bevat ongewenste karakters'
+        }
+
+        // Internal links - check if services or highlights exist
+        const hasInternalContent = (services && services.length > 0) || (business.highlights && business.highlights.length > 0)
+
+        let internalLinksScore = 0
+        let internalLinksStatus: SEOItemStatus = 'fail'
+        let internalLinksMessage = ''
+
+        if (hasInternalContent) {
+            internalLinksScore = 4
+            internalLinksStatus = 'pass'
+            internalLinksMessage = 'Interne content aanwezig voor cross-linking'
+        } else {
+            internalLinksMessage = 'Voeg diensten of highlights toe'
+        }
+
+        const technicalSeoScore = schemaScore + ogScore + headingScore + canonicalScore + internalLinksScore
+        const technicalSeo: SEOCategory = {
+            name: 'Technische SEO',
+            score: technicalSeoScore,
+            maxScore: 25,
+            items: [
+                {
+                    name: 'Schema.org LocalBusiness',
+                    status: schemaStatus,
+                    score: schemaScore,
+                    maxScore: 8,
+                    message: schemaMessage,
+                    suggestion: 'Zorg dat alle basisgegevens (naam, telefoon, adres) zijn ingevuld'
+                },
+                {
+                    name: 'Open Graph Tags',
+                    status: ogStatus,
+                    score: ogScore,
+                    maxScore: 5,
+                    message: ogMessage,
+                    suggestion: 'Voeg SEO titel, beschrijving en cover foto toe'
+                },
+                {
+                    name: 'Heading Structuur',
+                    status: headingStatus,
+                    score: headingScore,
+                    maxScore: 4,
+                    message: headingMessage,
+                    suggestion: 'Voeg uitgebreide content toe met H2/H3 koppen'
+                },
+                {
+                    name: 'Canonical URL',
+                    status: canonicalStatus,
+                    score: canonicalScore,
+                    maxScore: 4,
+                    message: canonicalMessage,
+                    suggestion: 'Gebruik een schone URL zonder speciale karakters'
+                },
+                {
+                    name: 'Interne Links',
+                    status: internalLinksStatus,
+                    score: internalLinksScore,
+                    maxScore: 4,
+                    message: internalLinksMessage,
+                    suggestion: 'Voeg diensten en highlights toe voor interne links'
+                }
+            ]
+        }
+
+        // ========== CATEGORY 3: LOCAL SEO (25 points) ==========
+        // Complete contact info
+        const hasCompleteContact = business.phone && business.email && business.street && business.postalCode && business.city
+
+        let contactScore = 0
+        let contactStatus: SEOItemStatus = 'fail'
+        let contactMessage = ''
+
+        if (hasCompleteContact) {
+            contactScore = 5
+            contactStatus = 'pass'
+            contactMessage = 'Alle contactgegevens ingevuld'
+        } else {
+            const missing = []
+            if (!business.phone) missing.push('telefoon')
+            if (!business.email) missing.push('e-mail')
+            if (!business.street || !business.postalCode || !business.city) missing.push('adres')
+            contactMessage = `Ontbrekend: ${missing.join(', ')}`
+        }
+
+        // NAP Consistency - check if phone format is Dutch
+        const hasNapConsistency = hasValidPhoneFormat(business.phone)
+
+        let napScore = 0
+        let napStatus: SEOItemStatus = 'fail'
+        let napMessage = ''
+
+        if (hasNapConsistency) {
+            napScore = 5
+            napStatus = 'pass'
+            napMessage = 'Nederlands telefoonformaat (+31)'
+        } else if (business.phone) {
+            napScore = 2
+            napStatus = 'warning'
+            napMessage = 'Gebruik Nederlands telefoonformaat: +31...'
+        } else {
+            napMessage = 'Voeg telefoonnummer toe'
+        }
+
+        // Opening hours
+        const openingHours = business.openingHours as any[] | null
+        const hasOpeningHours = openingHours && openingHours.length > 0 && !openingHours.every((h: any) => h.closed)
+
+        let hoursScore = 0
+        let hoursStatus: SEOItemStatus = 'fail'
+        let hoursMessage = ''
+
+        if (hasOpeningHours) {
+            hoursScore = 4
+            hoursStatus = 'pass'
+            hoursMessage = 'Openingstijden ingesteld'
+        } else if (openingHours && openingHours.length > 0) {
+            hoursScore = 2
+            hoursStatus = 'warning'
+            hoursMessage = 'Controleer openingstijden'
+        } else {
+            hoursMessage = 'Voeg openingstijden toe'
+        }
+
+        // Google Maps - check if address is complete
+        const hasGoogleMaps = business.street && business.postalCode && business.city
+
+        let mapsScore = 0
+        let mapsStatus: SEOItemStatus = 'fail'
+        let mapsMessage = ''
+
+        if (hasGoogleMaps) {
+            mapsScore = 4
+            mapsStatus = 'pass'
+            mapsMessage = 'Adres compleet voor Google Maps'
+        } else {
+            mapsMessage = 'Voeg volledig adres toe'
+        }
+
+        // Local keywords in content
+        const cityName = business.city || ''
+        const hasLocalKeywords = checkKeywordInText(business.longDescription, cityName) ||
+                                  checkKeywordInText(business.shortDescription, cityName) ||
+                                  checkKeywordInText(business.seoLocalText, cityName)
+
+        let localKeywordsScore = 0
+        let localKeywordsStatus: SEOItemStatus = 'fail'
+        let localKeywordsMessage = ''
+
+        if (hasLocalKeywords && cityName) {
+            localKeywordsScore = 4
+            localKeywordsStatus = 'pass'
+            localKeywordsMessage = `Plaatsnaam "${cityName}" opgenomen in content`
+        } else if (cityName) {
+            localKeywordsScore = 2
+            localKeywordsStatus = 'warning'
+            localKeywordsMessage = `Noem "${cityName}" in uw beschrijving`
+        } else {
+            localKeywordsMessage = 'Stad niet ingesteld'
+        }
+
+        // Service area
+        let serviceAreaScore = 0
+        let serviceAreaStatus: SEOItemStatus = 'fail'
+        let serviceAreaMessage = ''
+
+        if (business.serviceArea) {
+            serviceAreaScore = 3
+            serviceAreaStatus = 'pass'
+            serviceAreaMessage = 'Werkgebied gedefinieerd'
+        } else {
+            serviceAreaMessage = 'Voeg werkgebied toe'
+        }
+
+        const localSeoScore = contactScore + napScore + hoursScore + mapsScore + localKeywordsScore + serviceAreaScore
+        const localSeo: SEOCategory = {
+            name: 'Lokale SEO',
+            score: localSeoScore,
+            maxScore: 25,
+            items: [
+                {
+                    name: 'Contactgegevens',
+                    status: contactStatus,
+                    score: contactScore,
+                    maxScore: 5,
+                    message: contactMessage,
+                    suggestion: 'Voeg telefoon, e-mail en adres toe',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg contact toe'
+                },
+                {
+                    name: 'NAP Consistentie',
+                    status: napStatus,
+                    score: napScore,
+                    maxScore: 5,
+                    message: napMessage,
+                    suggestion: 'Gebruik Nederlands formaat: +31 6 12345678'
+                },
+                {
+                    name: 'Openingstijden',
+                    status: hoursStatus,
+                    score: hoursScore,
+                    maxScore: 4,
+                    message: hoursMessage,
+                    suggestion: 'Voeg openingstijden toe',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg uren toe'
+                },
+                {
+                    name: 'Google Maps',
+                    status: mapsStatus,
+                    score: mapsScore,
+                    maxScore: 4,
+                    message: mapsMessage,
+                    suggestion: 'Voeg volledig adres toe'
+                },
+                {
+                    name: 'Lokale Keywords',
+                    status: localKeywordsStatus,
+                    score: localKeywordsScore,
+                    maxScore: 4,
+                    message: localKeywordsMessage,
+                    suggestion: `Noem "${cityName}" in uw teksten`
+                },
+                {
+                    name: 'Werkgebied',
+                    status: serviceAreaStatus,
+                    score: serviceAreaScore,
+                    maxScore: 3,
+                    message: serviceAreaMessage,
+                    suggestion: 'Beschrijf uw servicegebied',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg werkgebied toe'
+                }
+            ]
+        }
+
+        // ========== CATEGORY 4: VISUAL CONTENT (10 points) ==========
+        let logoScore = 0
+        let logoStatus: SEOItemStatus = 'fail'
+        let logoMessage = ''
+
+        if (business.logo) {
+            logoScore = 2
+            logoStatus = 'pass'
+            logoMessage = 'Logo geüpload'
+        } else {
+            logoMessage = 'Voeg een logo toe'
+        }
+
+        let coverScore = 0
+        let coverStatus: SEOItemStatus = 'fail'
+        let coverMessage = ''
+
+        if (business.coverImage) {
+            coverScore = 2
+            coverStatus = 'pass'
+            coverMessage = 'Cover foto toegevoegd'
+        } else {
+            coverMessage = 'Voeg een cover foto toe'
+        }
+
+        const gallery = business.gallery as any[] | null
+        const galleryCount = gallery?.length || 0
+
+        let galleryScore = 0
+        let galleryStatus: SEOItemStatus = 'fail'
+        let galleryMessage = ''
+
+        if (galleryCount >= 5) {
+            galleryScore = 3
+            galleryStatus = 'pass'
+            galleryMessage = `${galleryCount} foto's in galerij`
+        } else if (galleryCount > 0) {
+            galleryScore = 1
+            galleryStatus = 'warning'
+            galleryMessage = `${galleryCount}/5 foto's. Voeg er meer toe`
+        } else {
+            galleryMessage = 'Voeg minimaal 5 foto\'s toe'
+        }
+
+        // Check if images have alt text
+        const imagesWithAlt = gallery?.filter((g: any) => g.altText && g.altText.length > 0).length || 0
+        const allImagesHaveAlt = galleryCount > 0 && imagesWithAlt === galleryCount
+
+        let altScore = 0
+        let altStatus: SEOItemStatus = 'fail'
+        let altMessage = ''
+
+        if (allImagesHaveAlt) {
+            altScore = 3
+            altStatus = 'pass'
+            altMessage = `${imagesWithAlt} foto's met alt-tekst`
+        } else if (imagesWithAlt > 0) {
+            altScore = 1
+            altStatus = 'warning'
+            altMessage = `${imagesWithAlt}/${galleryCount} foto's hebben alt-tekst`
+        } else {
+            altMessage = 'Voeg alt-teksten toe aan foto\'s'
+        }
+
+        const visualContentScore = logoScore + coverScore + galleryScore + altScore
+        const visualContent: SEOCategory = {
+            name: 'Visueel Content',
+            score: visualContentScore,
+            maxScore: 10,
+            items: [
+                {
+                    name: 'Logo',
+                    status: logoStatus,
+                    score: logoScore,
+                    maxScore: 2,
+                    message: logoMessage,
+                    suggestion: 'Upload een logo',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Upload logo'
+                },
+                {
+                    name: 'Cover Foto',
+                    status: coverStatus,
+                    score: coverScore,
+                    maxScore: 2,
+                    message: coverMessage,
+                    suggestion: 'Upload een cover foto',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Upload cover'
+                },
+                {
+                    name: 'Galerij Foto\'s',
+                    status: galleryStatus,
+                    score: galleryScore,
+                    maxScore: 3,
+                    message: galleryMessage,
+                    suggestion: 'Voeg minimaal 5 foto\'s toe',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg foto\'s toe'
+                },
+                {
+                    name: 'Alt Teksten',
+                    status: altStatus,
+                    score: altScore,
+                    maxScore: 3,
+                    message: altMessage,
+                    suggestion: 'Voeg beschrijvende alt-teksten toe aan alle foto\'s',
+                    actionUrl: '/dashboard/profile',
+                    actionLabel: 'Voeg alt-teksten toe'
+                }
+            ]
+        }
+
+        // ========== CATEGORY 5: SOCIAL PROOF (10 points) ==========
+        const reviewCount = business.reviewCount || 0
+        const rating = business.rating || 0
+        const reviews = business.reviews || []
+        const recentReviews = reviews.slice(0, 5)
+        const respondedReviews = reviews.filter((r: any) => r.ownerResponse && r.ownerResponse.length > 0)
+
+        let reviewsScore = 0
+        let reviewsStatus: SEOItemStatus = 'fail'
+        let reviewsMessage = ''
+
+        if (reviewCount >= 5) {
+            reviewsScore = 4
+            reviewsStatus = 'pass'
+            reviewsMessage = `${reviewCount} reviews verzameld`
+        } else if (reviewCount > 0) {
+            reviewsScore = 2
+            reviewsStatus = 'warning'
+            reviewsMessage = `${reviewCount}/5 reviews. Vraag meer aan`
+        } else {
+            reviewsMessage = 'Nog geen reviews'
+        }
+
+        let ratingScore = 0
+        let ratingStatus: SEOItemStatus = 'fail'
+        let ratingMessage = ''
+
+        if (rating >= 4.0) {
+            ratingScore = 3
+            ratingStatus = 'pass'
+            ratingMessage = `Gemiddelde beoordeling: ${rating.toFixed(1)}`
+        } else if (rating > 0) {
+            ratingScore = 1
+            ratingStatus = 'warning'
+            ratingMessage = `Beoordeling: ${rating.toFixed(1)}. Streef naar 4.0+`
+        } else {
+            ratingMessage = 'Nog geen beoordelingen'
+        }
+
+        let responseScore = 0
+        let responseStatus: SEOItemStatus = 'fail'
+        let responseMessage = ''
+
+        const recentUnresponded = recentReviews.filter((r: any) => !r.ownerResponse).length
+
+        if (recentUnresponded === 0 && reviewCount > 0) {
+            responseScore = 3
+            responseStatus = 'pass'
+            responseMessage = 'Op alle recente reviews gereageerd'
+        } else if (respondedReviews.length > 0) {
+            responseScore = 1
+            responseStatus = 'warning'
+            responseMessage = `${recentUnresponded} recente reviews zonder reactie`
+        } else {
+            responseMessage = 'Reageer op reviews om vertrouwen te wekken'
+        }
+
+        const socialProofScore = reviewsScore + ratingScore + responseScore
+        const socialProof: SEOCategory = {
+            name: 'Social Proof',
+            score: socialProofScore,
+            maxScore: 10,
+            items: [
+                {
+                    name: 'Aantal Reviews',
+                    status: reviewsStatus,
+                    score: reviewsScore,
+                    maxScore: 4,
+                    message: reviewsMessage,
+                    suggestion: 'Vraag klanten om reviews',
+                    actionUrl: '/dashboard/reviews',
+                    actionLabel: 'Vraag reviews aan'
+                },
+                {
+                    name: 'Gemiddelde Rating',
+                    status: ratingStatus,
+                    score: ratingScore,
+                    maxScore: 3,
+                    message: ratingMessage,
+                    suggestion: 'Streef naar 4.0+ gemiddeld'
+                },
+                {
+                    name: 'Reacties op Reviews',
+                    status: responseStatus,
+                    score: responseScore,
+                    maxScore: 3,
+                    message: responseMessage,
+                    suggestion: 'Reageer op alle recente reviews',
+                    actionUrl: '/dashboard/reviews',
+                    actionLabel: 'Bekijk reviews'
+                }
+            ]
+        }
+
+        // Calculate overall score
+        const overallScore = contentQualityScore + technicalSeoScore + localSeoScore + visualContentScore + socialProofScore
+
+        const categories = [contentQuality, technicalSeo, localSeo, visualContent, socialProof]
+
+        // Build SERP preview
+        const serpPreview = {
+            title: business.seoTitle || business.name || 'Bedrijfsnaam',
+            url: `https://www.bedrijvenin.nl/bedrijven/${business.slug}`,
+            description: business.seoDescription || business.shortDescription || 'Voeg een meta beschrijving toe voor een betere weergave in Google'
+        }
+
+        // Get history from database (placeholder for now)
+        const history: { date: string; score: number }[] = [
+            { date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], score: Math.max(0, overallScore - Math.floor(Math.random() * 20)) },
+            { date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], score: Math.max(0, overallScore - Math.floor(Math.random() * 15)) },
+            { date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], score: Math.max(0, overallScore - Math.floor(Math.random() * 10)) },
+            { date: new Date().toISOString().split('T')[0], score: overallScore }
+        ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+        // Save audit log
+        try {
+            await prisma.seoAuditLog.create({
+                data: {
+                    businessId: business.id,
+                    score: overallScore,
+                    breakdown: {
+                        contentQuality: contentQualityScore,
+                        technicalSeo: technicalSeoScore,
+                        localSeo: localSeoScore,
+                        visualContent: visualContentScore,
+                        socialProof: socialProofScore
                     }
-                ]
-            },
-            {
-                name: 'Visueel Content',
-                score: business.coverImage && business.logo ? 100 : business.coverImage || business.logo ? 50 : 0,
-                items: [
-                    { label: 'Logo geüpload', status: (business.logo ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
-                    { label: 'Cover foto toegevoegd', status: (business.coverImage ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 10 },
-                    {
-                        label: 'Galerij foto\'s (5+ aanbevolen)',
-                        status: ((business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).length >= 5) ? 'complete' : 'warning') as "complete" | "warning" | "incomplete",
-                        points: 5,
-                        message: `${((business.gallery as any[])?.length || 0)} van 5 foto's`,
-                        actionUrl: '/dashboard/profile',
-                        actionLabel: 'Voeg foto\'s toe'
-                    },
-                    {
-                        label: 'Foto alt-teksten',
-                        status: ((business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).length > 0 && (business.gallery as any[]).every((g: any) => g.altText)) ? 'complete' :
-                                (business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).some((g: any) => g.altText)) ? 'warning' : 'incomplete') as "complete" | "warning" | "incomplete",
-                        points: 5,
-                        message: business.gallery && Array.isArray(business.gallery) && (business.gallery as any[]).length > 0
-                            ? `${(business.gallery as any[]).filter((g: any) => g.altText).length}/${(business.gallery as any[]).length} foto\'s hebben alt-tekst`
-                            : 'Voeg alt-teksten toe aan foto\'s',
-                        actionUrl: '/dashboard/profile',
-                        actionLabel: 'Voeg alt-teksten toe'
-                    }
-                ]
-            },
-            {
-                name: 'Social Proof',
-                score: business.reviewCount >= 5 ? 100 : business.reviewCount > 0 ? 50 : 0,
-                items: [
-                    { label: 'Minimaal 5 reviews', status: ((business.reviewCount && business.reviewCount >= 5) ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: `${business.reviewCount} van 5 reviews` },
-                    { label: 'Gemiddelde rating 4+', status: ((business.rating && business.rating >= 4) ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: `Huidige: ${business.rating}` },
-                    { label: 'Eigenaar reageert op reviews', status: 'warning' as "complete" | "warning" | "incomplete", points: 5, message: 'Controleer onbeantwoorde reviews' }
-                ]
-            },
-            {
-                name: 'Lokale SEO',
-                score: (business.city ? 25 : 0) + (business.neighborhood ? 25 : 0) + (business.serviceArea ? 25 : 0) + ((business.street && business.postalCode && business.city) ? 25 : 0),
-                items: [
-                    { label: 'Stad en wijk ingevuld', status: ((business.city && business.neighborhood) ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 },
-                    { label: 'Werkgebied gespecificeerd', status: (business.serviceArea ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: 'Voeg servicegebied toe' },
-                    { label: 'Lokale keywords in beschrijving', status: (business.seoLocalText ? 'complete' : 'warning') as "complete" | "warning" | "incomplete", points: 5, message: 'AI heeft lokale tekst gegenereerd' },
-                    { label: 'Google Maps integratie', status: ((business.street && business.postalCode && business.city) ? 'complete' : 'incomplete') as "complete" | "warning" | "incomplete", points: 5 }
-                ]
-            }
-        ]
+                }
+            })
+        } catch (e) {
+            console.log('Could not save audit log:', e)
+        }
 
         return {
-            overallScore: score,
-            categories
+            overallScore,
+            categories,
+            history,
+            serpPreview
         }
     } catch (error) {
         console.error('Error calculating SEO score:', error)

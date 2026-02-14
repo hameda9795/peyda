@@ -2,6 +2,7 @@ import { getBusinessBySlug } from "@/lib/actions/business";
 import { BusinessHero } from "@/components/business/BusinessHero";
 import { BusinessInfoSidebar } from "@/components/business/BusinessInfoSidebar";
 import { BusinessContent } from "@/components/business/BusinessContent";
+import { TrackPageView } from "@/components/business/TrackPageView";
 import { Metadata } from "next";
 import Script from "next/script";
 import { notFound } from "next/navigation";
@@ -172,6 +173,9 @@ export default async function BusinessPage({ params }: Props) {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
+            {/* Track page view */}
+            <TrackPageView business={business} />
+
             {/* LocalBusiness Schema */}
             <Script
                 id="business-jsonld"

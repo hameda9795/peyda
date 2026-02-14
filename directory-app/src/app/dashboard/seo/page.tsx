@@ -1,15 +1,22 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { CheckCircle, XCircle, AlertCircle, TrendingUp, Search, Image, Star, FileText, ArrowRight, Upload, MessageSquare, FileQuestion } from "lucide-react";
-import Link from "next/link";
+import { Search, Image, Star, FileQuestion, TrendingUp, AlertCircle } from "lucide-react";
 import { getSEOScore } from "../actions";
+import { ScoreGauge } from "./components/ScoreGauge";
+import { SERPPreview } from "./components/SERPPreview";
+import { ScoreHistory } from "./components/ScoreHistory";
+import { PriorityActions } from "./components/PriorityActions";
+import { AuditList } from "./components/AuditList";
+import { InfoIcon } from "./components/SEOTooltip";
 
 interface SEOItem {
-    label: string;
-    status: "complete" | "warning" | "incomplete";
-    points: number;
-    message?: string;
+    name: string;
+    status: 'pass' | 'warning' | 'fail';
+    score: number;
+    maxScore: number;
+    message: string;
+    suggestion: string;
     actionUrl?: string;
     actionLabel?: string;
 }
@@ -17,84 +24,26 @@ interface SEOItem {
 interface SEOCategory {
     name: string;
     score: number;
+    maxScore: number;
     items: SEOItem[];
 }
 
 interface SEOScoreData {
     overallScore: number;
     categories: SEOCategory[];
+    history: { date: string; score: number }[];
+    serpPreview: {
+        title: string;
+        url: string;
+        description: string;
+    };
 }
-
-const defaultSEOChecks: SEOCategory[] = [
-    {
-        name: "Basis Informatie",
-        score: 100,
-        items: [
-            { label: "Bedrijfsnaam ingevuld", status: "complete", points: 10 },
-            { label: "Telefoonnummer toegevoegd", status: "complete", points: 10 },
-            { label: "Adres compleet", status: "complete", points: 10 },
-            { label: "Openingstijden ingesteld", status: "complete", points: 10 },
-        ]
-    },
-    {
-        name: "Content Kwaliteit",
-        score: 60,
-        items: [
-            { label: "Korte beschrijving (160 tekens)", status: "complete", points: 15 },
-            { label: "Uitgebreide beschrijving", status: "warning", points: 10, message: "Slechts 50 woorden, minimaal 150 aanbevolen" },
-            { label: "Diensten toegevoegd", status: "incomplete", points: 0, message: "Voeg minimaal 3 diensten toe", actionUrl: "/dashboard/profile", actionLabel: "Voeg diensten toe" },
-            { label: "FAQ sectie", status: "incomplete", points: 0, message: "Voeg minimaal 5 veelgestelde vragen toe", actionUrl: "/dashboard/profile", actionLabel: "Voeg FAQ toe" },
-        ]
-    },
-    {
-        name: "Visueel Content",
-        score: 30,
-        items: [
-            { label: "Logo geüpload", status: "complete", points: 10 },
-            { label: "Cover foto toegevoegd", status: "complete", points: 10 },
-            { label: "Galerij foto's (5+ aanbevolen)", status: "warning", points: 5, message: "3 van 5 foto's", actionUrl: "/dashboard/profile", actionLabel: "Voeg foto's toe" },
-            { label: "Foto alt-teksten", status: "incomplete", points: 0, message: "Voeg beschrijvingen toe aan foto's", actionUrl: "/dashboard/profile", actionLabel: "Voeg alt-teksten toe" },
-        ]
-    },
-    {
-        name: "Social Proof",
-        score: 50,
-        items: [
-            { label: "Minimaal 5 reviews", status: "warning", points: 10, message: "3 van 5 reviews", actionUrl: "/dashboard/reviews", actionLabel: "Vraag reviews aan" },
-            { label: "Gemiddelde rating 4+", status: "complete", points: 15 },
-            { label: "Eigenaar reageert op reviews", status: "warning", points: 5, message: "Controleer onbeantwoorde reviews", actionUrl: "/dashboard/reviews", actionLabel: "Bekijk reviews" },
-        ]
-    },
-    {
-        name: "Lokale SEO",
-        score: 70,
-        items: [
-            { label: "Stad en wijk ingevuld", status: "complete", points: 10 },
-            { label: "Werkgebied gespecificeerd", status: "complete", points: 10 },
-            { label: "Lokale keywords in beschrijving", status: "warning", points: 5, message: "Noem specifieke straten/wijken" },
-            { label: "Google Maps integratie", status: "complete", points: 10 },
-        ]
-    }
-];
-
-const defaultOverallScore = Math.round(
-    defaultSEOChecks.reduce((acc, cat) => acc + cat.score, 0) / defaultSEOChecks.length
-);
 
 export default function SEOPage({ searchParams }: { searchParams: Promise<{ businessId?: string }> }) {
     const params = use(searchParams);
     const [loading, setLoading] = useState(true);
     const [seoScore, setSeoScore] = useState<SEOScoreData | null>(null);
-    const [categories, setCategories] = useState<SEOCategory[]>(defaultSEOChecks);
-    const [overallScore, setOverallScore] = useState(defaultOverallScore);
     const businessId = params.businessId;
-
-    const getLink = (path: string) => {
-        if (businessId) {
-            return `${path}?businessId=${businessId}`;
-        }
-        return path;
-    };
 
     // Fetch real SEO score
     useEffect(() => {
@@ -103,11 +52,9 @@ export default function SEOPage({ searchParams }: { searchParams: Promise<{ busi
                 const data = await getSEOScore(businessId);
                 if (data) {
                     setSeoScore(data);
-                    setCategories(data.categories);
-                    setOverallScore(data.overallScore);
                 }
             } catch (error) {
-                console.log('Using default SEO data');
+                console.error('Error fetching SEO score:', error);
             } finally {
                 setLoading(false);
             }
@@ -115,37 +62,48 @@ export default function SEOPage({ searchParams }: { searchParams: Promise<{ busi
         fetchData();
     }, [businessId]);
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case "complete":
-                return <CheckCircle className="w-5 h-5 text-green-600" />;
-            case "warning":
-                return <AlertCircle className="w-5 h-5 text-orange-500" />;
-            case "incomplete":
-                return <XCircle className="w-5 h-5 text-red-500" />;
-            default:
-                return null;
+    const getScoreMessage = (score: number) => {
+        if (score >= 80) {
+            return {
+                text: 'Uitstekend! Uw bedrijf is goed geoptimaliseerd',
+                subtext: 'Blijf zo doorgaan en monitor regelmatig uw score'
+            };
         }
+        if (score >= 50) {
+            return {
+                text: 'Goed op weg, nog verbeteringen mogelijk',
+                subtext: 'Focus op de rode en gele items hieronder'
+            };
+        }
+        return {
+            text: 'Aandacht nodig - immediate actie vereist',
+            subtext: 'Begin met de belangrijkste verbeteringen'
+        };
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 80) return "text-green-600";
-        if (score >= 50) return "text-orange-500";
-        return "text-red-500";
+        if (score >= 80) return {
+            gradient: 'from-green-500 to-emerald-600',
+            text: 'text-green-600',
+            bg: 'bg-green-50',
+            border: 'border-green-200'
+        };
+        if (score >= 50) return {
+            gradient: 'from-yellow-500 to-orange-500',
+            text: 'text-yellow-600',
+            bg: 'bg-yellow-50',
+            border: 'border-yellow-200'
+        };
+        return {
+            gradient: 'from-red-500 to-rose-600',
+            text: 'text-red-600',
+            bg: 'bg-red-50',
+            border: 'border-red-200'
+        };
     };
 
-    const getScoreBgColor = (score: number) => {
-        if (score >= 80) return "bg-green-600";
-        if (score >= 50) return "bg-orange-500";
-        return "bg-red-500";
-    };
-
-    const getActionIcon = (category: string) => {
-        if (category.includes("Visueel")) return <Image className="w-4 h-4" />;
-        if (category.includes("Social")) return <MessageSquare className="w-4 h-4" />;
-        if (category.includes("Content")) return <FileText className="w-4 h-4" />;
-        return <ArrowRight className="w-4 h-4" />;
-    };
+    // Collect all items for priority actions
+    const allItems = seoScore?.categories.flatMap(cat => cat.items) || [];
 
     if (loading) {
         return (
@@ -158,6 +116,9 @@ export default function SEOPage({ searchParams }: { searchParams: Promise<{ busi
         );
     }
 
+    const scoreData = getScoreColor(seoScore?.overallScore || 0);
+    const messageData = getScoreMessage(seoScore?.overallScore || 0);
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -168,81 +129,90 @@ export default function SEOPage({ searchParams }: { searchParams: Promise<{ busi
                 </p>
             </div>
 
-            {/* Overall Score */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-xl p-8">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-blue-100 mb-2">Uw totale SEO Score</p>
-                        <div className="flex items-baseline gap-4">
-                            <span className="text-6xl font-bold">{overallScore}</span>
-                            <span className="text-2xl text-blue-100">/100</span>
+            {/* Main Score Display */}
+            <div className={`bg-gradient-to-br ${scoreData.gradient} text-white rounded-xl p-8`}>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="text-center md:text-left">
+                        <p className="text-white/80 mb-2">Uw totale SEO Score</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-7xl font-bold">{seoScore?.overallScore || 0}</span>
+                            <span className="text-2xl text-white/70">/100</span>
                         </div>
                         <div className="mt-4 flex items-center gap-2">
-                            {overallScore >= 80 ? (
+                            {seoScore?.overallScore && seoScore.overallScore >= 80 ? (
                                 <>
-                                    <CheckCircle className="w-5 h-5 text-green-300" />
-                                    <span className="text-sm text-blue-100">Uitstekend! Blijf zo doorgaan</span>
+                                    <svg className="w-5 h-5 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="text-sm text-white/80">{messageData.text}</span>
                                 </>
-                            ) : overallScore >= 50 ? (
+                            ) : seoScore?.overallScore && seoScore.overallScore >= 50 ? (
                                 <>
                                     <AlertCircle className="w-5 h-5 text-yellow-300" />
-                                    <span className="text-sm text-blue-100">Goed op weg, nog wat verbeteringen mogelijk</span>
+                                    <span className="text-sm text-white/80">{messageData.text}</span>
                                 </>
                             ) : (
                                 <>
-                                    <XCircle className="w-5 h-5 text-red-300" />
-                                    <span className="text-sm text-blue-100">Er is nog veel te verbeteren</span>
+                                    <AlertCircle className="w-5 h-5 text-red-300" />
+                                    <span className="text-sm text-white/80">{messageData.text}</span>
                                 </>
                             )}
                         </div>
+                        <p className="text-sm text-white/60 mt-1">{messageData.subtext}</p>
                     </div>
-                    <div className="hidden md:flex items-center justify-center">
-                        <div className="relative w-40 h-40">
-                            <svg className="w-40 h-40 transform -rotate-90">
-                                <circle
-                                    cx="80"
-                                    cy="80"
-                                    r="70"
-                                    stroke="currentColor"
-                                    strokeWidth="12"
-                                    fill="none"
-                                    className="text-blue-400 opacity-30"
-                                />
-                                <circle
-                                    cx="80"
-                                    cy="80"
-                                    r="70"
-                                    stroke="currentColor"
-                                    strokeWidth="12"
-                                    fill="none"
-                                    strokeDasharray={`${2 * Math.PI * 70}`}
-                                    strokeDashoffset={`${2 * Math.PI * 70 * (1 - overallScore / 100)}`}
-                                    className="text-white"
-                                    strokeLinecap="round"
-                                />
-                            </svg>
+                    <div className="hidden md:block">
+                        <div className="relative">
+                            <ScoreGauge score={seoScore?.overallScore || 0} size="lg" showLabel={false} />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-center">
+                                    <span className="text-4xl font-bold text-white">
+                                        {seoScore?.overallScore || 0}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-xl p-4 border border-slate-200">
                     <div className="flex items-center gap-3">
                         <Search className="w-8 h-8 text-blue-600" />
                         <div>
-                            <p className="text-2xl font-bold text-slate-800">12</p>
-                            <p className="text-xs text-slate-500">Keywords ranking</p>
+                            <p className="text-2xl font-bold text-slate-800">
+                                {seoScore?.categories.find(c => c.name === 'Content Kwaliteit')?.score || 0}
+                            </p>
+                            <p className="text-xs text-slate-500">Content</p>
                         </div>
                     </div>
                 </div>
                 <div className="bg-white rounded-xl p-4 border border-slate-200">
                     <div className="flex items-center gap-3">
-                        <Image className="w-8 h-8 text-green-600" />
+                        <svg className="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                         <div>
-                            <p className="text-2xl font-bold text-slate-800">3/10</p>
-                            <p className="text-xs text-slate-500">Foto&apos;s toegevoegd</p>
+                            <p className="text-2xl font-bold text-slate-800">
+                                {seoScore?.categories.find(c => c.name === 'Technische SEO')?.score || 0}
+                            </p>
+                            <p className="text-xs text-slate-500">Technisch</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-slate-200">
+                    <div className="flex items-center gap-3">
+                        <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <div>
+                            <p className="text-2xl font-bold text-slate-800">
+                                {seoScore?.categories.find(c => c.name === 'Lokale SEO')?.score || 0}
+                            </p>
+                            <p className="text-xs text-slate-500">Lokaal</p>
                         </div>
                     </div>
                 </div>
@@ -250,124 +220,52 @@ export default function SEOPage({ searchParams }: { searchParams: Promise<{ busi
                     <div className="flex items-center gap-3">
                         <Star className="w-8 h-8 text-yellow-600" />
                         <div>
-                            <p className="text-2xl font-bold text-slate-800">3/5</p>
-                            <p className="text-xs text-slate-500">Reviews verzameld</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white rounded-xl p-4 border border-slate-200">
-                    <div className="flex items-center gap-3">
-                        <FileQuestion className="w-8 h-8 text-purple-600" />
-                        <div>
-                            <p className="text-2xl font-bold text-slate-800">0/5</p>
-                            <p className="text-xs text-slate-500">FAQ vragen</p>
+                            <p className="text-2xl font-bold text-slate-800">
+                                {seoScore?.categories.find(c => c.name === 'Social Proof')?.score || 0}
+                            </p>
+                            <p className="text-xs text-slate-500">Reviews</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* SEO Categories with Actions */}
-            <div className="space-y-4">
-                {categories.map((category, idx) => (
-                    <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                        <div className="bg-slate-50 p-4 flex items-center justify-between">
-                            <h3 className="font-bold text-slate-800">{category.name}</h3>
-                            <div className="flex items-center gap-3">
-                                <span className={`text-2xl font-bold ${getScoreColor(category.score)}`}>
-                                    {category.score}%
-                                </span>
-                                <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full ${getScoreBgColor(category.score)} transition-all`}
-                                        style={{ width: `${category.score}%` }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-4 space-y-3">
-                            {category.items.map((item, itemIdx) => (
-                                <div
-                                    key={itemIdx}
-                                    className={`flex items-start justify-between py-3 border-b border-slate-100 last:border-0 ${item.status !== 'complete' ? 'bg-orange-50/50 rounded-lg px-3' : ''}`}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        {getStatusIcon(item.status)}
-                                        <div>
-                                            <p className="text-sm font-medium text-slate-800">
-                                                {item.label}
-                                            </p>
-                                            {item.message && (
-                                                <p className="text-xs text-slate-500 mt-1">{item.message}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-sm text-slate-500">+{item.points} punten</span>
-                                        {item.status !== 'complete' && item.actionUrl && (
-                                            <Link
-                                                href={getLink(item.actionUrl)}
-                                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                                            >
-                                                {getActionIcon(category.name)}
-                                                <span>{item.actionLabel || "Verbeter"}</span>
-                                                <ArrowRight className="w-3 h-3" />
-                                            </Link>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ))}
+            {/* Two Column Layout */}
+            <div className="grid lg:grid-cols-2 gap-6">
+                {/* SERP Preview */}
+                <div>
+                    {seoScore?.serpPreview && (
+                        <SERPPreview
+                            title={seoScore.serpPreview.title}
+                            url={seoScore.serpPreview.url}
+                            description={seoScore.serpPreview.description}
+                        />
+                    )}
+                </div>
+
+                {/* Score History */}
+                <div>
+                    {seoScore?.history && (
+                        <ScoreHistory history={seoScore.history} />
+                    )}
+                </div>
             </div>
 
-            {/* Action Items */}
-            <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+            {/* Priority Actions */}
+            <div className={`${scoreData.bg} rounded-xl p-6 border ${scoreData.border}`}>
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
+                    <TrendingUp className="w-5 h-5" />
                     Snelle Wins - Verbeter uw score vandaag nog
+                    <InfoIcon content="Dit zijn de belangrijkste verbeterpunten gesorteerd op potentiële impact" />
                 </h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                    <Link
-                        href={getLink("/dashboard/profile")}
-                        className="flex items-center gap-4 p-4 bg-white rounded-lg border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all group"
-                    >
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                            <Upload className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-medium text-slate-800">Upload meer foto&apos;s</p>
-                            <p className="text-sm text-slate-600 mt-1">+15 punten</p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                    <Link
-                        href={getLink("/dashboard/reviews")}
-                        className="flex items-center gap-4 p-4 bg-white rounded-lg border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all group"
-                    >
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                            <MessageSquare className="w-6 h-6 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-medium text-slate-800">Vraag 2 nieuwe reviews aan</p>
-                            <p className="text-sm text-slate-600 mt-1">+10 punten</p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-green-600 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                    <Link
-                        href={getLink("/dashboard/profile")}
-                        className="flex items-center gap-4 p-4 bg-white rounded-lg border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all group"
-                    >
-                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                            <FileQuestion className="w-6 h-6 text-purple-600" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-medium text-slate-800">Voeg FAQ vragen toe</p>
-                            <p className="text-sm text-slate-600 mt-1">+10 punten</p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-purple-600 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                </div>
+                <PriorityActions items={allItems} businessId={businessId} />
+            </div>
+
+            {/* Detailed Audit List */}
+            <div>
+                <h2 className="text-xl font-bold text-slate-800 mb-4">Detailed SEO Audit</h2>
+                {seoScore?.categories && (
+                    <AuditList categories={seoScore.categories} businessId={businessId} />
+                )}
             </div>
         </div>
     );

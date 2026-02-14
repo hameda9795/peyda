@@ -1,3 +1,5 @@
+"use client";
+
 import { Business } from "@/lib/types";
 import {
     Building2,
@@ -15,6 +17,7 @@ import {
     Languages
 } from "lucide-react";
 import Link from "next/link";
+import { trackPhoneClick, trackEmailClick, trackWebsiteClick, trackDirectionsClick } from "@/lib/tracking";
 
 interface BusinessInfoSidebarProps {
     business: Business;
@@ -44,6 +47,7 @@ export function BusinessInfoSidebar({ business }: BusinessInfoSidebarProps) {
                             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.address.street}, ${business.address.postalCode} ${business.address.city}`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => business.id && trackDirectionsClick(business.id)}
                             className="block rounded-xl overflow-hidden border border-slate-200 hover:border-blue-400 transition-colors cursor-pointer group"
                         >
                             <div className="relative">
@@ -70,7 +74,11 @@ export function BusinessInfoSidebar({ business }: BusinessInfoSidebarProps) {
                         <Phone className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium text-slate-900">Telefoon</p>
-                            <a href={`tel:${business.contact.phone}`} className="hover:text-blue-600 transition-colors">
+                            <a
+                                href={`tel:${business.contact.phone}`}
+                                onClick={() => business.id && trackPhoneClick(business.id)}
+                                className="hover:text-blue-600 transition-colors"
+                            >
                                 {business.contact.phone}
                             </a>
                         </div>
@@ -80,7 +88,11 @@ export function BusinessInfoSidebar({ business }: BusinessInfoSidebarProps) {
                         <Mail className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium text-slate-900">Email</p>
-                            <a href={`mailto:${business.contact.email}`} className="hover:text-blue-600 transition-colors break-all">
+                            <a
+                                href={`mailto:${business.contact.email}`}
+                                onClick={() => business.id && trackEmailClick(business.id)}
+                                className="hover:text-blue-600 transition-colors break-all"
+                            >
                                 {business.contact.email}
                             </a>
                         </div>
@@ -90,7 +102,13 @@ export function BusinessInfoSidebar({ business }: BusinessInfoSidebarProps) {
                         <Globe className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium text-slate-900">Website</p>
-                            <a href={business.contact.website} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors break-all">
+                            <a
+                                href={business.contact.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => business.id && trackWebsiteClick(business.id)}
+                                className="hover:text-blue-600 transition-colors break-all"
+                            >
                                 {business.contact.website.replace(/^https?:\/\//, '')}
                             </a>
                         </div>
