@@ -90,11 +90,6 @@ export async function GET(request: NextRequest) {
 
         // Get top businesses by views (from current analytics)
         const topBusinesses = await db.business.findMany({
-            where: {
-                analytics: {
-                    isNot: null,
-                },
-            },
             include: {
                 analytics: true,
             },
@@ -107,7 +102,7 @@ export async function GET(request: NextRequest) {
                 name: b.name,
                 slug: b.slug,
                 city: b.city,
-                totalViews: b.analytics?.profileViews || 0,
+                totalViews: b.analytics?.reduce((sum, a) => sum + (a.profileViews || 0), 0) || 0,
             }))
             .sort((a, b) => b.totalViews - a.totalViews)
             .slice(0, 10);

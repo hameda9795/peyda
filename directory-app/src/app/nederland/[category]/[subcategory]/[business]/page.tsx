@@ -74,8 +74,8 @@ export default async function BusinessPage({ params }: Props) {
 
     const currentUrl = `${BASE_URL}/nederland/${category}/${subcategory}/${slug}`;
 
-    // JSON-LD Schema - LocalBusiness
-    const localBusinessSchema = {
+    // Use AI-generated structured data if available, otherwise generate from business data
+    const localBusinessSchema = business.seo.structuredData || {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
         "name": business.name,

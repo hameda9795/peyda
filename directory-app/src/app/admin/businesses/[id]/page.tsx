@@ -29,5 +29,5 @@ export default async function BusinessDetailPage({ params }: Props) {
         notFound();
     }
 
-    return <BusinessDetails business={business} />;
+    return <BusinessDetails business={business as any} />;
 }

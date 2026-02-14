@@ -92,13 +92,16 @@ export async function GET(request: NextRequest) {
             seo: {
                 title: business.seoTitle,
                 description: business.seoDescription,
-                keywords: business.seoKeywords
+                keywords: business.seoKeywords,
+                status: business.seoStatus,
+                lastUpdate: business.lastSeoUpdate,
+                hasStructuredData: !!business.structuredData
             },
             stats: {
-                profileViews: business.analytics?.profileViews || 0,
-                phoneClicks: business.analytics?.phoneClicks || 0,
-                websiteClicks: business.analytics?.websiteClicks || 0,
-                directionsClicks: business.analytics?.directionsClicks || 0
+                profileViews: business.analytics?.[0]?.profileViews || 0,
+                phoneClicks: business.analytics?.[0]?.phoneClicks || 0,
+                websiteClicks: business.analytics?.[0]?.websiteClicks || 0,
+                directionsClicks: business.analytics?.[0]?.directionsClicks || 0
             }
         })
     } catch (error) {

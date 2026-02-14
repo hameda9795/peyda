@@ -1236,3 +1236,213 @@ export async function getSEOScore(businessId?: string) {
         return null
     }
 }
+
+// ========== AUTO-SEO GENERATION FUNCTIONS ==========
+
+// Type for AI-generated SEO data
+interface SeoDataResult {
+    title: string;
+    description: string;
+    keywords: string[];
+    structuredData: Record<string, any>;
+}
+
+// Helper function to generate SEO data using AI
+async function generateSeoWithAI(business: any): Promise<SeoDataResult> {
+    const { OpenAI } = await import('openai');
+
+    const client = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    // Prepare business data for the prompt
+    const services = business.services as any[] | null;
+    const servicesList = services?.map((s: any) => s.name).join(', ') || 'Geen diensten opgegeven';
+
+    const prompt = `
+Je bent een SEO-expert gespecialiseerd in lokale bedrijven in Nederland. Genereer SEO-content voor het volgende bedrijf:
+
+Naam: ${business.name}
+Categorie: ${business.subCategory?.name || 'Niet gespecificeerd'}
+Hoofdcategorie: ${business.subCategory?.category?.name || 'Niet gespecificeerd'}
+Stad: ${business.city}
+Provincie: ${business.province || 'Niet gespecificeerd'}
+Wijk: ${business.neighborhood || 'Niet gespecificeerd'}
+Korte beschrijving: ${business.shortDescription || 'Geen beschrijving'}
+Diensten: ${servicesList}
+Aantal reviews: ${business.reviewCount || 0}
+Gemiddelde rating: ${business.rating || 0}
+Telefoon: ${business.phone || 'Niet beschikbaar'}
+Website: ${business.website || 'Niet beschikbaar'}
+
+Genereer een JSON-object met de volgende structuur:
+{
+  "title": "SEO titel (maximaal 60 tekens, inclusief bedrijfsnaam, hoofddienst en stad)",
+  "description": "Meta beschrijving (maximaal 160 tekens, inclusief CTA)",
+  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
+  "structuredData": {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "bedrijfsnaam",
+    "image": "URL naar logo of cover afbeelding",
+    "telephone": "telefoonnummer",
+    "email": "e-mailadres",
+    "url": "website URL",
+    "priceRange": "€€ of €€€",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "straat + huisnummer",
+      "addressLocality": "stad",
+      "postalCode": "postcode",
+      "addressCountry": "NL"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "52.0", // approximate
+      "longitude": "5.0"  // approximate
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "${business.rating || 0}",
+      "reviewCount": "${business.reviewCount || 0}"
+    },
+    "areaServed": {
+      "@type": "City",
+      "name": "${business.city}"
+    }
+  }
+}
+
+Belangrijke richtlijnen:
+- Titel moet de bedrijfsnaam, hoofddienst en stad bevatten
+- Beschrijving moet een call-to-action bevatten (bijv. "Bel nu", "Plan een afspraak", "Contacteer ons")
+- Gebruik lokale keywords (stad, wijk, provincie)
+- Schema.org moet volledig en valide zijn
+- Alle JSON moet correct geformatteerd zijn
+- Antwoord ALLEEN met JSON, geen andere tekst
+`;
+
+    const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+    });
+
+    const content = response.choices[0]?.message?.content || '{}';
+    const parsed = JSON.parse(content);
+
+    // Validate and sanitize the response
+    return {
+        title: (parsed.title || '').slice(0, 60),
+        description: (parsed.description || '').slice(0, 160),
+        keywords: Array.isArray(parsed.keywords) ? parsed.keywords.slice(0, 10) : [],
+        structuredData: parsed.structuredData || null,
+    };
+}
+
+// Main function to generate SEO data for a business
+export async function generateSeoData(businessId?: string) {
+    try {
+        console.log('=== generateSeoData called ===');
+
+        const business = await getBusiness(businessId);
+
+        if (!business) {
+            return { success: false, error: 'Business not found' };
+        }
+
+        // Update status to GENERATING
+        await prisma.business.update({
+            where: { id: business.id },
+            data: { seoStatus: 'GENERATING' }
+        });
+
+        console.log('Generating SEO for business:', business.name);
+
+        // Generate SEO data with AI
+        const seoData = await generateSeoWithAI(business);
+
+        console.log('Generated SEO data:', {
+            titleLength: seoData.title.length,
+            descriptionLength: seoData.description.length,
+            keywordsCount: seoData.keywords.length,
+            hasStructuredData: !!seoData.structuredData
+        });
+
+        // Save to database
+        await prisma.business.update({
+            where: { id: business.id },
+            data: {
+                seoTitle: seoData.title,
+                seoDescription: seoData.description,
+                seoKeywords: seoData.keywords,
+                structuredData: seoData.structuredData,
+                seoStatus: 'COMPLETED',
+                lastSeoUpdate: new Date()
+            }
+        });
+
+        console.log('SEO data saved successfully');
+
+        // Revalidate relevant paths
+        revalidatePath('/dashboard/profile');
+        revalidatePath('/dashboard/seo');
+        revalidatePath(`/nederland`);
+        revalidatePath(`/bedrijf/${business.slug}`);
+        revalidatePath(`/bedrijven/${business.slug}`);
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error generating SEO data:', error);
+
+        // Update status to FAILED
+        try {
+            const business = await getBusiness(businessId);
+            if (business) {
+                await prisma.business.update({
+                    where: { id: business.id },
+                    data: { seoStatus: 'FAILED' }
+                });
+            }
+        } catch (e) {
+            console.error('Error updating status to FAILED:', e);
+        }
+
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to generate SEO data'
+        };
+    }
+}
+
+// Function to get SEO status for a business
+export async function getSeoStatus(businessId?: string) {
+    try {
+        const business = await getBusiness(businessId);
+
+        if (!business) {
+            return null;
+        }
+
+        return {
+            status: business.seoStatus,
+            lastUpdate: business.lastSeoUpdate,
+            seoTitle: business.seoTitle,
+            seoDescription: business.seoDescription,
+            seoKeywords: business.seoKeywords,
+            hasStructuredData: !!business.structuredData
+        };
+    } catch (error) {
+        console.error('Error getting SEO status:', error);
+        return null;
+    }
+}

@@ -111,6 +111,9 @@ export type Business = {
         status: 'published' | 'draft';
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    analytics?: any[];
+
     seo: {
         title: string;
         metaDescription: string;
@@ -118,5 +121,6 @@ export type Business = {
         keywords: string[];
         canonicalUrl: string;
         localSeoText: string; // "Top rated [category] in [neighborhood]"
+        structuredData?: Record<string, any>;
     };
 };

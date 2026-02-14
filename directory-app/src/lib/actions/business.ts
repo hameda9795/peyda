@@ -392,7 +392,8 @@ export async function getBusinessBySlug(slug: string): Promise<Business | null> 
             h1: business.name,
             keywords: business.seoKeywords,
             canonicalUrl: `https://utrecht-directory.nl/utrecht/bedrijf/${business.slug}`,
-            localSeoText: business.seoLocalText || ''
+            localSeoText: business.seoLocalText || '',
+            structuredData: business.structuredData
         }
     };
 }

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, use } from "react";
 import { Save, Upload, X, Instagram, Facebook, Linkedin, Globe, Plus, Trash2 } from "lucide-react";
-import { updateProfile as updateProfileAction, updateOpeningHours } from "../actions";
+import { updateProfile as updateProfileAction, updateOpeningHours, generateSeoData } from "../actions";
+import { SeoStatusWidget } from "@/components/dashboard/SeoStatusWidget";
 
 const defaultOpeningHours = [
     { day: "Maandag", open: "08:00", close: "18:00", closed: false },
@@ -88,6 +89,33 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
     const [coverAltText, setCoverAltText] = useState<string>("");
     const [faqList, setFaqList] = useState<FAQ[]>([]);
 
+    // SEO State
+    const [seoStatus, setSeoStatus] = useState<'PENDING' | 'GENERATING' | 'COMPLETED' | 'FAILED' | null>(null);
+    const [seoLastUpdate, setSeoLastUpdate] = useState<Date | null>(null);
+    const [isGeneratingSeo, setIsGeneratingSeo] = useState(false);
+
+    // Function to handle SEO generation
+    const handleGenerateSeo = async () => {
+        setIsGeneratingSeo(true);
+        setSeoStatus('GENERATING');
+
+        try {
+            const result = await generateSeoData(businessId);
+            if (result.success) {
+                setSeoStatus('COMPLETED');
+                setSeoLastUpdate(new Date());
+            } else {
+                setSeoStatus('FAILED');
+                console.error('SEO generation failed:', result.error);
+            }
+        } catch (error) {
+            console.error('Error generating SEO:', error);
+            setSeoStatus('FAILED');
+        } finally {
+            setIsGeneratingSeo(false);
+        }
+    };
+
     // Fetch real data from API
     useEffect(() => {
         async function fetchData() {
@@ -152,6 +180,14 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                     // Load FAQ
                     if (data.faq && Array.isArray(data.faq)) {
                         setFaqList(data.faq);
+                    }
+
+                    // Load SEO status
+                    if (data.seo?.status) {
+                        setSeoStatus(data.seo.status);
+                        if (data.seo.lastUpdate) {
+                            setSeoLastUpdate(new Date(data.seo.lastUpdate));
+                        }
                     }
                 }
             } catch (error) {
@@ -402,6 +438,15 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                     </div>
                 )}
             </div>
+
+            {/* SEO Status Widget */}
+            <SeoStatusWidget
+                status={seoStatus}
+                lastUpdate={seoLastUpdate}
+                onGenerate={handleGenerateSeo}
+                onRegenerate={handleGenerateSeo}
+                isGenerating={isGeneratingSeo}
+            />
 
             {/* Basic Information */}
             <div className="bg-white rounded-xl p-6 border border-slate-200">
