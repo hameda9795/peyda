@@ -93,6 +93,11 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
     const [seoStatus, setSeoStatus] = useState<'PENDING' | 'GENERATING' | 'COMPLETED' | 'FAILED' | null>(null);
     const [seoLastUpdate, setSeoLastUpdate] = useState<Date | null>(null);
     const [isGeneratingSeo, setIsGeneratingSeo] = useState(false);
+    const [seoData, setSeoData] = useState({
+        title: '',
+        description: '',
+        keywords: [] as string[]
+    });
 
     // Function to handle SEO generation
     const handleGenerateSeo = async () => {
@@ -104,13 +109,16 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             if (result.success) {
                 setSeoStatus('COMPLETED');
                 setSeoLastUpdate(new Date());
+                // Refresh the page after successful generation
+                window.location.reload();
             } else {
                 setSeoStatus('FAILED');
-                console.error('SEO generation failed:', result.error);
+                alert('SEO generatie mislukt: ' + (result.error || 'Onbekende fout'));
             }
         } catch (error) {
             console.error('Error generating SEO:', error);
             setSeoStatus('FAILED');
+            alert('Er is een fout opgetreden bij het genereren van SEO');
         } finally {
             setIsGeneratingSeo(false);
         }
@@ -188,6 +196,15 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                         if (data.seo.lastUpdate) {
                             setSeoLastUpdate(new Date(data.seo.lastUpdate));
                         }
+                    }
+
+                    // Load SEO data
+                    if (data.seo) {
+                        setSeoData({
+                            title: data.seo.title || '',
+                            description: data.seo.description || '',
+                            keywords: data.seo.keywords || []
+                        });
                     }
                 }
             } catch (error) {
@@ -381,6 +398,17 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                 form.append('coverAltText', coverAltText);
             }
 
+            // Add SEO data if available
+            if (seoData.title) {
+                form.append('seoTitle', seoData.title);
+            }
+            if (seoData.description) {
+                form.append('seoDescription', seoData.description);
+            }
+            if (seoData.keywords.length > 0) {
+                form.append('seoKeywords', JSON.stringify(seoData.keywords));
+            }
+
             const result = await updateProfileAction(form, businessId);
 
             if (result.success) {
@@ -447,6 +475,69 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                 onRegenerate={handleGenerateSeo}
                 isGenerating={isGeneratingSeo}
             />
+
+            {/* SEO Edit Section */}
+            {seoStatus === 'COMPLETED' && (
+                <div className="bg-white rounded-xl p-6 border border-slate-200">
+                    <h2 className="text-lg font-bold text-slate-800 mb-4">AI Gegenereerde SEO</h2>
+                    <p className="text-sm text-slate-600 mb-4">
+                        Dit is automatisch gegenereerd door AI. U kunt het handmatig aanpassen.
+                    </p>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                SEO Titel (max 60 tekens)
+                            </label>
+                            <input
+                                type="text"
+                                value={seoData.title}
+                                onChange={(e) => setSeoData({ ...seoData, title: e.target.value.slice(0, 60) })}
+                                maxLength={60}
+                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <div className="text-xs text-slate-500 mt-1 text-left">
+                                {seoData.title.length}/60 tekens
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                Meta Beschrijving (max 160 tekens)
+                            </label>
+                            <textarea
+                                value={seoData.description}
+                                onChange={(e) => setSeoData({ ...seoData, description: e.target.value.slice(0, 160) })}
+                                maxLength={160}
+                                rows={3}
+                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <div className="text-xs text-slate-500 mt-1 text-left">
+                                {seoData.description.length}/160 tekens
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                SEO Keywords (gescheiden door komma)
+                            </label>
+                            <input
+                                type="text"
+                                value={seoData.keywords.join(', ')}
+                                onChange={(e) => setSeoData({
+                                    ...seoData,
+                                    keywords: e.target.value.split(',').map(k => k.trim()).filter(k => k)
+                                })}
+                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="keyword1, keyword2, keyword3"
+                            />
+                            <div className="text-xs text-slate-500 mt-1 text-left">
+                                {seoData.keywords.length} keywords
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Basic Information */}
             <div className="bg-white rounded-xl p-6 border border-slate-200">

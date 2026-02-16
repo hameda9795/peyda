@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { Search, Image, Star, FileQuestion, TrendingUp, AlertCircle } from "lucide-react";
+import { Search, Image, Star, FileQuestion, TrendingUp, AlertCircle, RefreshCw } from "lucide-react";
 import { getSEOScore } from "../actions";
 import { ScoreGauge } from "./components/ScoreGauge";
 import { SERPPreview } from "./components/SERPPreview";
@@ -42,25 +42,33 @@ interface SEOScoreData {
 export default function SEOPage({ searchParams }: { searchParams: Promise<{ businessId?: string }> }) {
     const params = use(searchParams);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [seoScore, setSeoScore] = useState<SEOScoreData | null>(null);
     const businessId = params.businessId;
 
     // Fetch real SEO score
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const data = await getSEOScore(businessId);
-                if (data) {
-                    setSeoScore(data);
-                }
-            } catch (error) {
-                console.error('Error fetching SEO score:', error);
-            } finally {
-                setLoading(false);
+    const fetchSEOScore = async () => {
+        try {
+            const data = await getSEOScore(businessId);
+            if (data) {
+                setSeoScore(data);
             }
+        } catch (error) {
+            console.error('Error fetching SEO score:', error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
         }
-        fetchData();
+    };
+
+    useEffect(() => {
+        fetchSEOScore();
     }, [businessId]);
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        fetchSEOScore();
+    };
 
     const getScoreMessage = (score: number) => {
         if (score >= 80) {
@@ -123,10 +131,22 @@ export default function SEOPage({ searchParams }: { searchParams: Promise<{ busi
         <div className="space-y-6">
             {/* Header */}
             <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h1 className="text-2xl font-bold text-slate-800 mb-2">SEO Score Dashboard</h1>
-                <p className="text-slate-600">
-                    Verbeter uw zichtbaarheid in Google en bereik meer klanten
-                </p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-800 mb-2">SEO Score Dashboard</h1>
+                        <p className="text-slate-600">
+                            Verbeter uw zichtbaarheid in Google en bereik meer klanten
+                        </p>
+                    </div>
+                    <button
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                        {refreshing ? 'Vernieuwen...' : 'Vernieuwen'}
+                    </button>
+                </div>
             </div>
 
             {/* Main Score Display */}

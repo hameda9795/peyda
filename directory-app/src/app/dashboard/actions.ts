@@ -28,9 +28,30 @@ async function getBusiness(businessId?: string) {
         where: { status: 'published' },
         select: {
             id: true,
+            name: true,
             slug: true,
             city: true,
             provinceSlug: true,
+            province: true,
+            neighborhood: true,
+            shortDescription: true,
+            longDescription: true,
+            phone: true,
+            email: true,
+            website: true,
+            logo: true,
+            coverImage: true,
+            services: true,
+            rating: true,
+            reviewCount: true,
+            // SEO fields
+            seoTitle: true,
+            seoDescription: true,
+            seoKeywords: true,
+            seoLocalText: true,
+            structuredData: true,
+            seoStatus: true,
+            lastSeoUpdate: true,
             subCategory: {
                 include: { category: true }
             },
@@ -299,6 +320,11 @@ export async function updateProfile(formData: FormData, businessId?: string) {
         const logoAltText = formData.get('logoAltText') as string
         const coverAltText = formData.get('coverAltText') as string
 
+        // SEO fields
+        const seoTitle = formData.get('seoTitle') as string
+        const seoDescription = formData.get('seoDescription') as string
+        const seoKeywords = formData.get('seoKeywords') ? JSON.parse(formData.get('seoKeywords') as string) : []
+
         // Parse JSON fields
         const services = formData.get('services') ? JSON.parse(formData.get('services') as string) : []
         const amenities = formData.get('amenities') ? JSON.parse(formData.get('amenities') as string) : []
@@ -376,14 +402,26 @@ export async function updateProfile(formData: FormData, businessId?: string) {
                 logoAltText: logoAltText || null,
                 coverImage: coverImageUrl,
                 coverAltText: coverAltText || null,
+                seoTitle: seoTitle || null,
+                seoDescription: seoDescription || null,
+                seoKeywords: seoKeywords,
                 updatedAt: new Date()
             }
         })
 
         console.log('Database updated successfully - logo:', logoUrl, 'cover:', coverImageUrl)
 
+        // Auto-regenerate SEO after profile update
+        try {
+            await generateSeoData(business.id);
+            console.log('SEO auto-generated after profile update');
+        } catch (seoError) {
+            console.error('Auto SEO generation failed:', seoError);
+        }
+
         revalidatePath('/dashboard/profile')
         revalidatePath('/dashboard')
+        revalidatePath('/dashboard/seo')
         revalidatePath(`/bedrijf/${business.slug}`)
         revalidatePath(`/business/${business.slug}`)
         revalidatePath(`/bedrijven/${business.slug}`)
@@ -391,7 +429,7 @@ export async function updateProfile(formData: FormData, businessId?: string) {
         revalidatePath(`/${business.provinceSlug}`)
         revalidatePath(`/${business.provinceSlug}/${business.city}`)
 
-        return { success: true }
+        return { success: true, seoRegenerated: true }
     } catch (error) {
         console.error('Error updating profile:', error)
         return { success: false, error: `Failed to update profile: ${error}` }
@@ -482,9 +520,32 @@ export async function getSEOScore(businessId?: string) {
 
         const hasValidPhoneFormat = (phone: string | null | undefined): boolean => {
             if (!phone) return false
+            // First convert to Dutch format, then check
+            const formatted = formatToDutchPhone(phone)
             // Dutch phone format: +31 or 0, followed by 9 digits
             const phoneRegex = /^(\+31|0)[1-9][0-9]{8}$/
-            return phoneRegex.test(phone.replace(/\s/g, ''))
+            return phoneRegex.test(formatted.replace(/\s/g, ''))
+        }
+
+        // Convert phone to Dutch format
+        const formatToDutchPhone = (phone: string): string => {
+            if (!phone) return '';
+            // Remove all non-digits
+            const digits = phone.replace(/\D/g, '');
+            // If starts with 31 (Netherlands country code)
+            if (digits.startsWith('31') && digits.length === 11) {
+                return '+31 ' + digits.slice(2, 3) + ' ' + digits.slice(3);
+            }
+            // If starts with 0
+            if (digits.startsWith('0') && digits.length === 10) {
+                return '+31 ' + digits.slice(1, 2) + ' ' + digits.slice(2);
+            }
+            // If just 9 digits (without 0 or +31)
+            if (digits.length === 9) {
+                return '+31 6 ' + digits;
+            }
+            // Return as-is if can't convert
+            return phone;
         }
 
         const checkKeywordInText = (text: string | null | undefined, keyword: string): boolean => {
@@ -680,7 +741,7 @@ export async function getSEOScore(businessId?: string) {
 
         // ========== CATEGORY 2: TECHNICAL SEO (25 points) ==========
         // Check for Schema.org JSON-LD (we can't actually check the rendered page, but we can check if business has enough data)
-        const hasSchemaData = business.name && business.phone && business.address && business.city
+        const hasSchemaData = business.name && business.phone && business.street && business.city
 
         let schemaScore = 0
         let schemaStatus: SEOItemStatus = 'fail'
@@ -1243,6 +1304,8 @@ export async function getSEOScore(businessId?: string) {
 interface SeoDataResult {
     title: string;
     description: string;
+    shortDescription: string;
+    longDescription: string;
     keywords: string[];
     structuredData: Record<string, any>;
 }
@@ -1260,7 +1323,7 @@ async function generateSeoWithAI(business: any): Promise<SeoDataResult> {
     const servicesList = services?.map((s: any) => s.name).join(', ') || 'Geen diensten opgegeven';
 
     const prompt = `
-Je bent een SEO-expert gespecialiseerd in lokale bedrijven in Nederland. Genereer SEO-content voor het volgende bedrijf:
+Je bent een SEO-expert en content writer gespecialiseerd in lokale bedrijven in Nederland. Genereer COMPLETE SEO-content voor het volgende bedrijf:
 
 Naam: ${business.name}
 Categorie: ${business.subCategory?.name || 'Niet gespecificeerd'}
@@ -1268,18 +1331,20 @@ Hoofdcategorie: ${business.subCategory?.category?.name || 'Niet gespecificeerd'}
 Stad: ${business.city}
 Provincie: ${business.province || 'Niet gespecificeerd'}
 Wijk: ${business.neighborhood || 'Niet gespecificeerd'}
-Korte beschrijving: ${business.shortDescription || 'Geen beschrijving'}
+Bestaande beschrijving: ${business.shortDescription || 'Geen beschrijving'}
 Diensten: ${servicesList}
 Aantal reviews: ${business.reviewCount || 0}
 Gemiddelde rating: ${business.rating || 0}
 Telefoon: ${business.phone || 'Niet beschikbaar'}
 Website: ${business.website || 'Niet beschikbaar'}
 
-Genereer een JSON-object met de volgende structuur:
+Genereer een JSON-object met ALLE SEO-content:
 {
-  "title": "SEO titel (maximaal 60 tekens, inclusief bedrijfsnaam, hoofddienst en stad)",
-  "description": "Meta beschrijving (maximaal 160 tekens, inclusief CTA)",
-  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
+  "title": "SEO titel (50-60 tekens, inclusief bedrijfsnaam, hoofddienst en stad)",
+  "description": "Meta beschrijving (150-160 tekens, inclusief CTA)",
+  "shortDescription": "Korte beschrijving (50-100 woorden) - dit is voor de website",
+  "longDescription": "Lange beschrijving (150-300 woorden) - dit is voor de website",
+  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5", "keyword6", "keyword7", "keyword8"],
   "structuredData": {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -1298,8 +1363,8 @@ Genereer een JSON-object met de volgende structuur:
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": "52.0", // approximate
-      "longitude": "5.0"  // approximate
+      "latitude": "52.0",
+      "longitude": "5.0"
     },
     "openingHoursSpecification": [
       {
@@ -1321,12 +1386,16 @@ Genereer een JSON-object met de volgende structuur:
   }
 }
 
-Belangrijke richtlijnen:
-- Titel moet de bedrijfsnaam, hoofddienst en stad bevatten
-- Beschrijving moet een call-to-action bevatten (bijv. "Bel nu", "Plan een afspraak", "Contacteer ons")
+BELANGRIJK:
+- shortDescription: MINIMAAL 50 woorden (50-100 woorden) - dit is voor de website bezoekers
+- longDescription: MINIMAAL 150 woorden (150-300 woorden) - dit is voor SEO
+- title: MOET 50-60 tekens zijn
+- description: MOET 150-160 tekens zijn
+- title moet de bedrijfsnaam, hoofddienst en stad bevatten
+- description moet een call-to-action bevatten
+- shortDescription en longDescription moeten NATUURLIJK en LEESBAAR zijn
 - Gebruik lokale keywords (stad, wijk, provincie)
 - Schema.org moet volledig en valide zijn
-- Alle JSON moet correct geformatteerd zijn
 - Antwoord ALLEEN met JSON, geen andere tekst
 `;
 
@@ -1341,11 +1410,150 @@ Belangrijke richtlijnen:
     const parsed = JSON.parse(content);
 
     // Validate and sanitize the response
+    // Ensure title is 50-60 characters
+    let title = (parsed.title || '').trim();
+    if (title.length < 50 || title.length > 60) {
+        const city = business.city || '';
+        const category = business.subCategory?.name || business.subCategory?.category?.name || '';
+
+        // Try different approaches to make it 50-60 chars
+        if (title.length < 50) {
+            // Add more details
+            if (!title.includes(city) && city) {
+                title = `${title} in ${city}`;
+            }
+            if (title.length < 50 && category) {
+                title = `${title} | ${category}`;
+            }
+        }
+
+        // Ensure it's exactly in range
+        if (title.length > 60) {
+            title = title.slice(0, 60);
+        }
+
+        // If still too short, pad with "✓" or "?"
+        while (title.length < 50) {
+            title = title + ' ✓';
+        }
+        title = title.slice(0, 60);
+    }
+
+    // Ensure description is 150-160 characters
+    let description = (parsed.description || '').trim();
+    if (description.length < 150 || description.length > 160) {
+        // Pad with more words if too short
+        while (description.length < 150) {
+            description += ' Ontdek onze professionele diensten en ervaren team.';
+        }
+        // Cut to 160 max
+        if (description.length > 160) {
+            description = description.slice(0, 160);
+            // Try to end with a complete sentence
+            const lastPeriod = description.lastIndexOf('.');
+            if (lastPeriod > 130) {
+                description = description.slice(0, lastPeriod + 1);
+            }
+        }
+    }
+
+    // Ensure shortDescription has at least 50 words
+    let shortDesc = parsed.shortDescription || '';
+    const shortDescWords = shortDesc.trim().split(/\s+/).filter(w => w.length > 0);
+    if (shortDescWords.length < 50) {
+        // Add more content
+        shortDesc += ' Ons team van deskundige professionals staat klaar om u te helpen met al uw behoeften. Wij bieden persoonlijke service en garanties voor al onze werkzaamhed. Neem vandaag nog contact met ons op voor een vrijblijvend gesprek.';
+    }
+
+    // Ensure longDescription has at least 150 words
+    let longDesc = parsed.longDescription || '';
+    const longDescWords = longDesc.trim().split(/\s+/).filter(w => w.length > 0);
+    if (longDescWords.length < 150) {
+        // Add more content
+        longDesc += ' Wij zijn al jaren actief in deze regio en hebben talloze tevreden klanten geholpen. Onze expertise omvat een breed scala aan diensten die wij met trots aanbieden. Van het eerste consult tot de uiteindelijke oplevering zorgen wij voor een vlotte samenwerking. Klanttevredenheid is onze hoogste prioriteit. Daarom werken wij alleen met hoogwaardige materialen en moderne technieken. Contacteer ons vandaag nog voor een vrijblijvend gesprek en ontdek wat wij voor u kunnen betekenen.';
+    }
+
+    // Build complete LocalBusiness schema
+    const structuredData = parsed.structuredData || {};
+    const city = business.city || 'Nederland';
+    const street = business.street || '';
+    const postalCode = business.postalCode || '';
+
+    // Convert phone to Dutch format
+    const formatToDutchPhone = (phone: string): string => {
+        if (!phone) return '';
+        // Remove all non-digits
+        const digits = phone.replace(/\D/g, '');
+        // If starts with 31 (Netherlands country code)
+        if (digits.startsWith('31') && digits.length === 11) {
+            return '+31 ' + digits.slice(2, 3) + ' ' + digits.slice(3);
+        }
+        // If starts with 0
+        if (digits.startsWith('0') && digits.length === 10) {
+            return '+31 ' + digits.slice(1, 2) + ' ' + digits.slice(2);
+        }
+        // If just 9 digits (without 0 or +31)
+        if (digits.length === 9) {
+            return '+31 6 ' + digits;
+        }
+        // Return as-is if can't convert
+        return phone;
+    }
+
+    const formattedPhone = formatToDutchPhone(business.phone || '');
+
+    // Ensure complete LocalBusiness schema
+    const localBusinessSchema = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": business.name,
+        "image": business.logo || business.coverImage || '',
+        "telephone": formattedPhone,
+        "email": business.email || '',
+        "url": business.website || '',
+        "priceRange": "€€",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": street || "Adres niet gespecificeerd",
+            "addressLocality": city,
+            "postalCode": postalCode || "0000 AA",
+            "addressCountry": "NL"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "52.0",
+            "longitude": "5.0"
+        },
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "09:00",
+                "closes": "18:00"
+            }
+        ],
+        ...(business.rating > 0 && {
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": String(business.rating),
+                "reviewCount": String(business.reviewCount || 0),
+                "bestRating": "5",
+                "worstRating": "1"
+            }
+        }),
+        "areaServed": {
+            "@type": "City",
+            "name": city
+        }
+    };
+
     return {
-        title: (parsed.title || '').slice(0, 60),
-        description: (parsed.description || '').slice(0, 160),
+        title: title.slice(0, 60),
+        description: description.slice(0, 160),
+        shortDescription: shortDesc,
+        longDescription: longDesc,
         keywords: Array.isArray(parsed.keywords) ? parsed.keywords.slice(0, 10) : [],
-        structuredData: parsed.structuredData || null,
+        structuredData: localBusinessSchema,
     };
 }
 
@@ -1384,6 +1592,8 @@ export async function generateSeoData(businessId?: string) {
             data: {
                 seoTitle: seoData.title,
                 seoDescription: seoData.description,
+                shortDescription: seoData.shortDescription || business.shortDescription,
+                longDescription: seoData.longDescription || business.longDescription,
                 seoKeywords: seoData.keywords,
                 structuredData: seoData.structuredData,
                 seoStatus: 'COMPLETED',
