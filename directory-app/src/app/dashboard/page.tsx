@@ -1,6 +1,8 @@
 import { Eye, Phone, Globe, MapPin, Star, TrendingUp, Award, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getBusinessData, getReviewsData, getAnalyticsData } from "./actions";
+import { getCurrentUser } from "@/app/actions";
 
 // Mock data for fallback
 const mockBusinessData = {
@@ -42,13 +44,21 @@ const mockBusinessData = {
 };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ businessId?: string }> }) {
-    const params = await searchParams
-    const businessId = params.businessId
+    // Get current user and their business
+    const currentUser = await getCurrentUser();
+
+    // If no user or no business, redirect to home
+    if (!currentUser || !currentUser.businessId) {
+        redirect('/');
+    }
+
+    // Always use the current user's business ID (ignore URL params for security)
+    const userBusinessId = currentUser.businessId;
 
     // Try to fetch real data
-    const businessData = await getBusinessData(businessId);
-    const analyticsData = await getAnalyticsData(businessId);
-    const reviewsData = await getReviewsData(businessId);
+    const businessData = await getBusinessData(userBusinessId);
+    const analyticsData = await getAnalyticsData(userBusinessId);
+    const reviewsData = await getReviewsData(userBusinessId);
 
     // Use real data if available, otherwise mock
     const data = businessData ? {
@@ -207,7 +217,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         </div>
 
                         <Link
-                            href={`/dashboard/seo${businessId ? `?businessId=${businessId}` : ''}`}
+                            href={`/dashboard/seo${userBusinessId ? `?businessId=${userBusinessId}` : ''}`}
                             className="block w-full text-center py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                         >
                             Verbeter SEO Score
@@ -231,7 +241,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                             </div>
                         </div>
                         <Link
-                            href={`/dashboard/reviews${businessId ? `?businessId=${businessId}` : ''}`}
+                            href={`/dashboard/reviews${userBusinessId ? `?businessId=${userBusinessId}` : ''}`}
                             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
                             Alles bekijken →
@@ -272,7 +282,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                 <p className="text-sm text-slate-600 mb-3">{review.content}</p>
                                 {!review.hasResponse && (
                                     <Link
-                                        href={`/dashboard/reviews${businessId ? `?businessId=${businessId}` : ''}`}
+                                        href={`/dashboard/reviews${userBusinessId ? `?businessId=${userBusinessId}` : ''}`}
                                         className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                                     >
                                         Reageren →
@@ -289,7 +299,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <h3 className="font-bold text-slate-800 mb-4">Snelle acties</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Link
-                        href={`/dashboard/profile${businessId ? `?businessId=${businessId}` : ''}`}
+                        href={`/dashboard/profile${userBusinessId ? `?businessId=${userBusinessId}` : ''}`}
                         className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
                     >
                         <Award className="w-8 h-8 text-blue-600" />
@@ -299,7 +309,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         </div>
                     </Link>
                     <Link
-                        href={`/dashboard/reviews${businessId ? `?businessId=${businessId}` : ''}`}
+                        href={`/dashboard/reviews${userBusinessId ? `?businessId=${userBusinessId}` : ''}`}
                         className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
                     >
                         <MessageSquare className="w-8 h-8 text-green-600" />

@@ -1459,7 +1459,7 @@ BELANGRIJK:
 
     // Ensure shortDescription has at least 50 words
     let shortDesc = parsed.shortDescription || '';
-    const shortDescWords = shortDesc.trim().split(/\s+/).filter(w => w.length > 0);
+    const shortDescWords = shortDesc.trim().split(/\s+/).filter((w: string) => w.length > 0);
     if (shortDescWords.length < 50) {
         // Add more content
         shortDesc += ' Ons team van deskundige professionals staat klaar om u te helpen met al uw behoeften. Wij bieden persoonlijke service en garanties voor al onze werkzaamhed. Neem vandaag nog contact met ons op voor een vrijblijvend gesprek.';
@@ -1467,7 +1467,7 @@ BELANGRIJK:
 
     // Ensure longDescription has at least 150 words
     let longDesc = parsed.longDescription || '';
-    const longDescWords = longDesc.trim().split(/\s+/).filter(w => w.length > 0);
+    const longDescWords = longDesc.trim().split(/\s+/).filter((w: string) => w.length > 0);
     if (longDescWords.length < 150) {
         // Add more content
         longDesc += ' Wij zijn al jaren actief in deze regio en hebben talloze tevreden klanten geholpen. Onze expertise omvat een breed scala aan diensten die wij met trots aanbieden. Van het eerste consult tot de uiteindelijke oplevering zorgen wij voor een vlotte samenwerking. Klanttevredenheid is onze hoogste prioriteit. Daarom werken wij alleen met hoogwaardige materialen en moderne technieken. Contacteer ons vandaag nog voor een vrijblijvend gesprek en ontdek wat wij voor u kunnen betekenen.';

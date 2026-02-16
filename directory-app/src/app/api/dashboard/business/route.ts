@@ -1,14 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { cookies } from 'next/headers'
 
 const prisma = new PrismaClient({
     datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL
 })
 
-// Helper to get business
-async function getBusiness(businessId?: string) {
+// Helper to get authenticated user
+async function getAuthenticatedUser() {
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('session_token')
+
+    if (!sessionToken) {
+        return null
+    }
+
+    return await prisma.businessOwner.findUnique({
+        where: { id: sessionToken.value },
+        include: { business: true }
+    })
+}
+
+// Helper to get business - only returns user's own business
+async function getUserBusiness(businessId?: string, userId?: string) {
+    // If no user, return nothing
+    if (!userId) {
+        return null
+    }
+
+    // If businessId is provided, verify it belongs to user
     if (businessId) {
-        return await prisma.business.findUnique({
+        const business = await prisma.business.findUnique({
             where: { id: businessId },
             include: {
                 subCategory: {
@@ -17,25 +39,50 @@ async function getBusiness(businessId?: string) {
                 analytics: true
             }
         })
+
+        // Verify this business belongs to the user
+        const owner = await prisma.businessOwner.findFirst({
+            where: { id: userId, businessId: businessId }
+        })
+
+        if (!owner) {
+            return null // User doesn't own this business
+        }
+
+        return business
     }
-    return await prisma.business.findFirst({
-        where: { status: 'published' },
+
+    // No businessId provided, return user's business
+    const user = await prisma.businessOwner.findUnique({
+        where: { id: userId },
         include: {
-            subCategory: {
-                include: { category: true }
-            },
-            analytics: true
+            business: {
+                include: {
+                    subCategory: {
+                        include: { category: true }
+                    },
+                    analytics: true
+                }
+            }
         }
     })
+
+    return user?.business || null
 }
 
 // GET - Fetch business data for dashboard
 export async function GET(request: NextRequest) {
     try {
+        // Check authentication
+        const currentUser = await getAuthenticatedUser()
+        if (!currentUser || !currentUser.businessId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const { searchParams } = new URL(request.url)
         const businessId = searchParams.get('businessId') || undefined
 
-        const business = await getBusiness(businessId)
+        const business = await getUserBusiness(businessId, currentUser.id)
 
         if (!business) {
             return NextResponse.json({ error: 'No business found' }, { status: 404 })
@@ -113,13 +160,19 @@ export async function GET(request: NextRequest) {
 // PUT - Update business data
 export async function PUT(request: NextRequest) {
     try {
+        // Check authentication
+        const currentUser = await getAuthenticatedUser()
+        if (!currentUser || !currentUser.businessId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const { searchParams } = new URL(request.url)
         const businessId = searchParams.get('businessId') || undefined
 
-        const business = await getBusiness(businessId)
+        const business = await getUserBusiness(businessId, currentUser.id)
 
         if (!business) {
-            return NextResponse.json({ error: 'Business not found' }, { status: 404 })
+            return NextResponse.json({ error: 'Business not found or unauthorized' }, { status: 404 })
         }
 
         const body = await request.json()

@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Search, Bell, Menu, X, ChevronDown } from "lucide-react";
+import { Search, Bell, Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
 import { MegaMenu } from "./MegaMenu";
 import { SearchBar } from "./SearchBar";
+import LoginModal from "@/components/LoginModal";
+import { getCurrentUser } from "@/app/actions";
 
 interface MobileMenuProps {
     isOpen: boolean;
     onClose: () => void;
     categories: any[];
+    onLoginClick: () => void;
+    onRegisterClick: () => void;
 }
 
-function MobileMenu({ isOpen, onClose, categories }: MobileMenuProps) {
+function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick }: MobileMenuProps) {
     const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
     useEffect(() => {
@@ -76,7 +80,19 @@ function MobileMenu({ isOpen, onClose, categories }: MobileMenuProps) {
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="p-4 overflow-y-auto h-[calc(100%-180px)]">
+                <nav className="p-4 overflow-y-auto h-[calc(100%-230px)]">
+                    {/* Login Button */}
+                    <button
+                        onClick={() => {
+                            onClose();
+                            onLoginClick();
+                        }}
+                        className="w-full mb-4 py-3.5 text-center text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 rounded-full transition-colors shadow-lg shadow-indigo-200 min-h-[48px] flex items-center justify-center gap-2"
+                    >
+                        <User className="h-5 w-5" />
+                        Inloggen
+                    </button>
+
                     <ul className="space-y-2">
                         {mainLinks.map((link) => (
                             <li key={link.href}>
@@ -114,13 +130,15 @@ function MobileMenu({ isOpen, onClose, categories }: MobileMenuProps) {
 
                     {/* CTA */}
                     <div className="mt-6 px-4">
-                        <Link 
-                            href="/bedrijf-aanmelden"
-                            onClick={onClose}
+                        <button
+                            onClick={() => {
+                                onClose();
+                                onRegisterClick();
+                            }}
                             className="block w-full py-3.5 text-center text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 rounded-full transition-colors shadow-lg shadow-emerald-200 min-h-[48px] flex items-center justify-center"
                         >
                             Bedrijf toevoegen
-                        </Link>
+                        </button>
                     </div>
                 </nav>
             </div>
@@ -131,6 +149,35 @@ function MobileMenu({ isOpen, onClose, categories }: MobileMenuProps) {
 export function Navbar({ categories = [] }: { categories?: any[] }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [redirectToRegister, setRedirectToRegister] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userBusinessId, setUserBusinessId] = useState<string | null>(null);
+
+    // Check authentication status on mount
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const user = await getCurrentUser();
+                setIsLoggedIn(!!user);
+                setUserBusinessId(user?.businessId || null);
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                setIsLoggedIn(false);
+                setUserBusinessId(null);
+            }
+        };
+        checkAuth();
+    }, []);
+
+    const handleLoginSuccess = () => {
+        if (redirectToRegister) {
+            window.location.href = '/bedrijf-aanmelden';
+        } else {
+            window.location.href = '/dashboard';
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -139,6 +186,20 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    // Close user menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('.user-menu')) {
+                setShowUserMenu(false);
+            }
+        };
+        if (showUserMenu) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [showUserMenu]);
 
     return (
         <>
@@ -205,23 +266,85 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                             <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-emerald-500 rounded-full border-2 border-white" />
                         </button>
 
+                        {/* User Button / Login */}
+                        <div className="relative user-menu">
+                            {isLoggedIn ? (
+                                <>
+                                    <button
+                                        onClick={() => setShowUserMenu(!showUserMenu)}
+                                        className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
+                                        aria-label="Menu"
+                                    >
+                                        <User className="h-5 w-5" />
+                                    </button>
+
+                                    {/* User Dropdown - Logged in */}
+                                    {showUserMenu && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-zinc-100 py-2 z-50">
+                                            <button
+                                                onClick={() => {
+                                                    setShowUserMenu(false);
+                                                    window.location.href = '/dashboard';
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 flex items-center gap-2"
+                                            >
+                                                <LayoutDashboard className="w-4 h-4" />
+                                                Dashboard
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    setShowUserMenu(false);
+                                                    await fetch('/api/auth/logout', { method: 'POST' });
+                                                    setIsLoggedIn(false);
+                                                    setUserBusinessId(null);
+                                                    window.location.href = '/';
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                Uitloggen
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => setShowLoginModal(true)}
+                                    className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors min-h-[44px] flex items-center"
+                                >
+                                    Inloggen
+                                </button>
+                            )}
+                        </div>
+
                         {/* CTA Button - Improved */}
-                        <Link
-                            href="/bedrijf-aanmelden"
+                        <button
+                            onClick={() => {
+                                setRedirectToRegister(true);
+                                setShowLoginModal(true);
+                            }}
                             className="hidden sm:flex px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 rounded-full transition-colors shadow-lg shadow-emerald-200 min-h-[44px] items-center"
                         >
                             Bedrijf toevoegen
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </header>
 
             {/* Mobile Menu */}
-            <MobileMenu 
-                isOpen={mobileMenuOpen} 
+            <MobileMenu
+                isOpen={mobileMenuOpen}
                 onClose={() => setMobileMenuOpen(false)}
                 categories={categories}
+                onLoginClick={() => setShowLoginModal(true)}
+                onRegisterClick={() => {
+                    setRedirectToRegister(true);
+                    setShowLoginModal(true);
+                }}
             />
+
+            {/* Login Modal */}
+            <LoginModal isOpen={showLoginModal} onClose={() => { setShowLoginModal(false); setRedirectToRegister(false); }} onSuccess={handleLoginSuccess} isRegistration={redirectToRegister} />
         </>
     );
 }

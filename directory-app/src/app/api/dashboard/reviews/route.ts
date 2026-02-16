@@ -1,25 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { cookies } from 'next/headers'
 
 const prisma = new PrismaClient({
     datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL
 })
 
-// Helper to get business by ID
-async function getBusiness(businessId?: string) {
-    if (businessId) {
-        return await prisma.business.findUnique({ where: { id: businessId } })
+// Helper to get authenticated user
+async function getAuthenticatedUser() {
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('session_token')
+
+    if (!sessionToken) {
+        return null
     }
-    return await prisma.business.findFirst({ where: { status: 'published' } })
+
+    return await prisma.businessOwner.findUnique({
+        where: { id: sessionToken.value }
+    })
+}
+
+// Helper to get user's business
+async function getUserBusiness(businessId?: string, userId?: string) {
+    if (!userId) return null
+
+    if (businessId) {
+        const business = await prisma.business.findUnique({ where: { id: businessId } })
+        const owner = await prisma.businessOwner.findFirst({
+            where: { id: userId, businessId: businessId }
+        })
+        if (!owner) return null
+        return business
+    }
+
+    const user = await prisma.businessOwner.findUnique({
+        where: { id: userId },
+        include: { business: true }
+    })
+    return user?.business || null
 }
 
 // GET - Fetch reviews for business
 export async function GET(request: NextRequest) {
     try {
+        // Check authentication
+        const currentUser = await getAuthenticatedUser()
+        if (!currentUser || !currentUser.businessId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const { searchParams } = new URL(request.url)
         const businessId = searchParams.get('businessId') || undefined
 
-        const business = await getBusiness(businessId)
+        const business = await getUserBusiness(businessId, currentUser.id)
 
         if (!business) {
             return NextResponse.json({ error: 'Business not found' }, { status: 404 })
@@ -54,8 +87,23 @@ export async function GET(request: NextRequest) {
 // POST - Submit owner response to a review
 export async function POST(request: NextRequest) {
     try {
+        // Check authentication
+        const currentUser = await getAuthenticatedUser()
+        if (!currentUser || !currentUser.businessId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const body = await request.json()
         const { reviewId, response } = body
+
+        // Verify the review belongs to user's business
+        const review = await prisma.review.findUnique({
+            where: { id: reviewId }
+        })
+
+        if (!review || review.businessId !== currentUser.businessId) {
+            return NextResponse.json({ error: 'Review not found or unauthorized' }, { status: 404 })
+        }
 
         const updated = await prisma.review.update({
             where: { id: reviewId },

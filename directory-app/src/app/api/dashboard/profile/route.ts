@@ -1,17 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { cookies } from 'next/headers';
+
+// Helper to get authenticated user
+async function getAuthenticatedUser() {
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('session_token')
+
+    if (!sessionToken) {
+        return null
+    }
+
+    return await db.businessOwner.findUnique({
+        where: { id: sessionToken.value }
+    })
+}
 
 export async function GET(request: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url);
-        const businessId = searchParams.get('businessId');
-
-        if (!businessId) {
-            return NextResponse.json(
-                { error: 'Missing businessId' },
-                { status: 400 }
-            );
+        // Check authentication
+        const currentUser = await getAuthenticatedUser()
+        if (!currentUser || !currentUser.businessId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        // Use user's business ID
+        const businessId = currentUser.businessId
 
         const business = await db.business.findUnique({
             where: { id: businessId }

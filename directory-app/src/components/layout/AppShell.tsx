@@ -8,10 +8,11 @@ export function AppShell({ children, categories }: { children: React.ReactNode, 
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith("/admin");
     const isRegister = pathname?.startsWith("/bedrijf-aanmelden");
+    const isDashboard = pathname?.startsWith("/dashboard");
     const isHomepage = pathname === "/";
 
     // Full-screen pages without navigation
-    if (isAdmin || isRegister) {
+    if (isAdmin || isRegister || isDashboard) {
         return <>{children}</>;
     }
 

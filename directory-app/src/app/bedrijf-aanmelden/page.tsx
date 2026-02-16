@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, use } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -84,7 +84,8 @@ const initialFormData: BusinessFormData = {
     faq: [],
 };
 
-export default function BusinessRegistrationPage() {
+export default function BusinessRegistrationPage({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
+    const params = use(searchParams);
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<BusinessFormData>(initialFormData);
@@ -100,6 +101,14 @@ export default function BusinessRegistrationPage() {
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Prefill email from query param
+    useEffect(() => {
+        if (params.email) {
+            const decodedEmail = decodeURIComponent(params.email);
+            setFormData(prev => ({ ...prev, email: decodedEmail }));
+        }
+    }, [params.email]);
 
     const updateFormData = (data: Partial<BusinessFormData>) => {
         setFormData(prev => ({ ...prev, ...data }));

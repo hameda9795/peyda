@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, Store, MessageSquare, TrendingUp, Settings, LogOut, Menu, X, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Store, MessageSquare, TrendingUp, Settings, X, LogOut } from "lucide-react";
 
 export default function DashboardLayout({
     children,
@@ -31,41 +31,6 @@ export default function DashboardLayout({
 
     return (
         <div className="min-h-screen bg-slate-50">
-            {/* Top Navigation */}
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-                <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            {/* Mobile Menu Button */}
-                            <button
-                                onClick={() => setSidebarOpen(true)}
-                                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
-                            >
-                                <Menu className="w-5 h-5" />
-                            </button>
-                            <Store className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
-                            <Link href="/" className="text-lg md:text-xl font-bold text-slate-800">
-                                NL Directory
-                            </Link>
-                            <span className="hidden sm:block text-sm text-slate-500 ml-1 md:ml-2">/ Dashboard</span>
-                        </div>
-                        <nav className="flex items-center gap-2 md:gap-4">
-                            <Link
-                                href={getLink("/dashboard")}
-                                className="text-xs md:text-sm text-slate-600 hover:text-blue-600"
-                            >
-                                <span className="hidden sm:inline">Mijn Bedrijf</span>
-                                <Store className="w-5 h-5 sm:hidden" />
-                            </Link>
-                            <button className="text-xs md:text-sm text-slate-600 hover:text-red-600 flex items-center gap-1">
-                                <span className="hidden sm:inline">Uitloggen</span>
-                                <LogOut className="w-4 h-4 sm:hidden" />
-                            </button>
-                        </nav>
-                    </div>
-                </div>
-            </header>
-
             <div className="container mx-auto px-3 md:px-4 py-4 md:py-6">
                 <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
                     {/* Mobile Sidebar Overlay */}
@@ -106,6 +71,18 @@ export default function DashboardLayout({
                                     <span className="font-medium">{item.label}</span>
                                 </Link>
                             ))}
+
+                            {/* Logout Button */}
+                            <button
+                                onClick={async () => {
+                                    await fetch('/api/auth/logout', { method: 'POST' });
+                                    window.location.href = '/';
+                                }}
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors w-full"
+                            >
+                                <LogOut className="w-5 h-5" />
+                                <span className="font-medium">Uitloggen</span>
+                            </button>
 
                             {/* Quick Stats Card */}
                             <div className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-xl p-5 mt-6">

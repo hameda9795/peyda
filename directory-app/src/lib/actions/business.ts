@@ -1,6 +1,7 @@
 "use server";
 
 import { db as prisma } from "@/lib/db";
+import { getCurrentUser } from "@/app/actions";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { BusinessFormData } from "@/lib/types/business-form";
@@ -217,6 +218,20 @@ export async function createBusiness(data: FormData) {
                 subCategoryId,
             } as any
         });
+
+        // Link business to the current user (owner)
+        try {
+            const currentUser = await getCurrentUser();
+            if (currentUser) {
+                await prisma.businessOwner.update({
+                    where: { id: currentUser.id },
+                    data: { businessId: business.id }
+                });
+            }
+        } catch (e) {
+            console.error("Failed to link business to owner:", e);
+            // Continue anyway - business is created
+        }
 
         // Fetch categorization details for redirection
         const subCategoryDetails = await prisma.subCategory.findUnique({
