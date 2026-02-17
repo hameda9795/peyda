@@ -6,6 +6,9 @@ import { getCategories } from "@/lib/actions/categories";
 import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/json-ld-schema";
 import { AuthModalProvider } from "@/providers/AuthModalProvider";
 
+// Force dynamic rendering to avoid database connection issues during build
+export const dynamic = 'force-dynamic';
+
 const sora = Sora({
     subsets: ["latin"],
     variable: "--font-sora",

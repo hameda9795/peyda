@@ -83,16 +83,20 @@ export async function PATCH(request: NextRequest) {
 
         switch (action) {
             case 'activate':
-                await db.business.update({
-                    where: { id: owner.businessId },
-                    data: { isActive: true },
-                });
+                if (owner.businessId) {
+                    await db.business.update({
+                        where: { id: owner.businessId },
+                        data: { isActive: true },
+                    });
+                }
                 break;
             case 'deactivate':
-                await db.business.update({
-                    where: { id: owner.businessId },
-                    data: { isActive: false },
-                });
+                if (owner.businessId) {
+                    await db.business.update({
+                        where: { id: owner.businessId },
+                        data: { isActive: false },
+                    });
+                }
                 break;
             case 'delete':
                 await db.businessOwner.delete({
