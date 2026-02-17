@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { NETHERLANDS_PROVINCES } from "@/lib/netherlands-data";
 import {
@@ -10,8 +12,10 @@ import {
     MapPin,
     ArrowUpRight
 } from "lucide-react";
+import { useAuthModal } from "@/providers/AuthModalProvider";
 
 export function PremiumFooter() {
+    const { openRegisterModal } = useAuthModal();
     const popularProvinces = NETHERLANDS_PROVINCES.slice(0, 6);
 
     const categories = [
@@ -35,7 +39,7 @@ export function PremiumFooter() {
                                 NL
                             </div>
                             <div>
-                                <span className="text-xl font-bold">NL Directory</span>
+                                <span className="text-xl font-bold">Peyda</span>
                                 <span className="block text-sm text-gray-400">Nederland's #1 bedrijvengids</span>
                             </div>
                         </Link>
@@ -110,9 +114,9 @@ export function PremiumFooter() {
                         </h4>
                         <ul className="space-y-3">
                             <li>
-                                <Link href="/bedrijf-aanmelden" className="text-gray-300 hover:text-white transition-colors">
+                                <button onClick={openRegisterModal} className="text-gray-300 hover:text-white transition-colors text-left">
                                     Bedrijf aanmelden
-                                </Link>
+                                </button>
                             </li>
                             <li>
                                 <Link href="/over-ons" className="text-gray-300 hover:text-white transition-colors">
@@ -138,9 +142,9 @@ export function PremiumFooter() {
 
                         {/* Contact Info */}
                         <div className="mt-6 pt-6 border-t border-gray-800 space-y-3">
-                            <a href="mailto:info@nldirectory.nl" className="flex items-center gap-2 text-gray-400 hover:text-white text-sm">
+                            <a href="mailto:info@peyda.nl" className="flex items-center gap-2 text-gray-400 hover:text-white text-sm">
                                 <Mail className="w-4 h-4" />
-                                info@nldirectory.nl
+                                info@peyda.nl
                             </a>
                             <a href="tel:+31201234567" className="flex items-center gap-2 text-gray-400 hover:text-white text-sm">
                                 <Phone className="w-4 h-4" />
@@ -156,7 +160,7 @@ export function PremiumFooter() {
                 <div className="container mx-auto px-6 py-6">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <p className="text-sm text-gray-500">
-                            © {new Date().getFullYear()} NL Directory. Alle rechten voorbehouden.
+                            © {new Date().getFullYear()} Peyda. Alle rechten voorbehouden.
                         </p>
 
                         {/* Language Selector */}

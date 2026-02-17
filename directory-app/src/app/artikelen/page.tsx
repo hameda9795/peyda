@@ -5,16 +5,16 @@ import Image from "next/image";
 import Script from "next/script";
 import { Calendar, User, ArrowRight } from "lucide-react";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 export const metadata: Metadata = {
-    title: "Artikelen & Tips voor Ondernemers | NL Directory",
+    title: "Artikelen & Tips voor Ondernemers | Peyda",
     description: "Ontdek tips, gidsen en verhalen over lokale bedrijven in Nederland. Van restauranttips tot ondernemersadvies - alles voor lokale professionals.",
     alternates: {
         canonical: `${BASE_URL}/artikelen`
     },
     openGraph: {
-        title: "Artikelen & Tips voor Ondernemers | NL Directory",
+        title: "Artikelen & Tips voor Ondernemers | Peyda",
         description: "Ontdek tips, gidsen en verhalen over lokale bedrijven in Nederland.",
         url: `${BASE_URL}/artikelen`,
         type: "website",
@@ -31,7 +31,7 @@ export default function ArticlesPage() {
     const articleListSchema = {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": "Artikelen & Tips | NL Directory",
+        "name": "Artikelen & Tips | Peyda",
         "description": "Artikelen en tips voor ondernemers en lokale bedrijven in Nederland",
         "numberOfItems": articles.length,
         "itemListElement": articles.map((article, index) => ({

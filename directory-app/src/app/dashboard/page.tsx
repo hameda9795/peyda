@@ -47,9 +47,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     // Get current user and their business
     const currentUser = await getCurrentUser();
 
-    // If no user or no business, redirect to home
+    // If no user or no business, redirect to registration page with message
     if (!currentUser || !currentUser.businessId) {
-        redirect('/');
+        redirect('/bedrijf-aanmelden?message=no-business');
     }
 
     // Always use the current user's business ID (ignore URL params for security)

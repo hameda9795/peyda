@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useAuthModal } from "@/providers/AuthModalProvider";
 
 export function Footer() {
+    const { openRegisterModal } = useAuthModal();
+
     return (
         <footer className="border-t border-zinc-800 bg-zinc-900 py-12 px-6">
             <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
                     <div className="flex items-center gap-2 mb-4">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">NL</span>
+                            <span className="text-white font-bold text-sm">P</span>
                         </div>
                         <span className="text-lg font-bold text-white">
-                            NL Directory
+                            Peyda
                         </span>
                     </div>
                     <p className="text-sm text-zinc-400 mt-4">
@@ -32,7 +35,7 @@ export function Footer() {
                 <div>
                     <h4 className="text-sm font-semibold text-white mb-4">Ondernemers</h4>
                     <ul className="space-y-3">
-                        <li><Link href="/bedrijf-aanmelden" className="text-zinc-300 hover:text-emerald-400 transition-colors block min-h-[44px] flex items-center">Bedrijf aanmelden</Link></li>
+                        <li><button onClick={openRegisterModal} className="text-zinc-300 hover:text-emerald-400 transition-colors block min-h-[44px] flex items-center text-left">Bedrijf aanmelden</button></li>
                         <li><Link href="/dashboard" className="text-zinc-300 hover:text-emerald-400 transition-colors block min-h-[44px] flex items-center">Dashboard</Link></li>
                         <li><Link href="/contact" className="text-zinc-300 hover:text-emerald-400 transition-colors block min-h-[44px] flex items-center">Support</Link></li>
                     </ul>
@@ -47,7 +50,7 @@ export function Footer() {
                 </div>
             </div>
             <div className="container mx-auto mt-12 pt-8 border-t border-zinc-800 text-center text-sm text-zinc-500">
-                &copy; {new Date().getFullYear()} NL Directory. Alle rechten voorbehouden.
+                &copy; {new Date().getFullYear()} Peyda. Alle rechten voorbehouden.
             </div>
         </footer>
     );

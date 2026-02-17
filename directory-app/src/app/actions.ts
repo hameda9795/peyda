@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { sendOTPEmail } from '@/lib/email'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import crypto from 'crypto'
 
 // Email validation
 function isValidEmail(email: string): boolean {
@@ -14,6 +15,17 @@ function isValidEmail(email: string): boolean {
 // Generate 6-digit OTP code
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+// Hash OTP for secure storage
+function hashOTP(code: string): string {
+  const salt = process.env.OTP_SALT || 'peyda-otp-salt-2024'
+  return crypto.createHmac('sha256', salt).update(code).digest('hex')
+}
+
+// Verify OTP against stored hash
+function verifyOTPHash(code: string, hashedCode: string): boolean {
+  return hashOTP(code) === hashedCode
 }
 
 // Request OTP - Send verification code to email
@@ -58,6 +70,9 @@ export async function requestOtp(email: string, isRegistration: boolean = false)
     // Generate 6-digit code
     const code = generateOTP()
 
+    // Hash the OTP for secure storage
+    const hashedCode = hashOTP(code)
+
     // Set expiration to 10 minutes
     const expires = new Date(Date.now() + 10 * 60 * 1000)
 
@@ -66,11 +81,11 @@ export async function requestOtp(email: string, isRegistration: boolean = false)
       where: { identifier: normalizedEmail }
     })
 
-    // Create new verification token
+    // Create new verification token (store hashed version)
     await db.verificationToken.create({
       data: {
         identifier: normalizedEmail,
-        token: code,
+        token: hashedCode,
         expires
       }
     })
@@ -107,27 +122,36 @@ export async function verifyOtp(
 
     const normalizedEmail = email.toLowerCase().trim()
 
-    // Find the verification token
-    const verificationToken = await db.verificationToken.findFirst({
+    // Find the verification token (we need to get all tokens for this email to compare)
+    const verificationTokens = await db.verificationToken.findMany({
       where: {
         identifier: normalizedEmail,
-        token: code
-      }
+      },
+      orderBy: { expires: 'desc' }
     })
 
-    // Check if token exists
-    if (!verificationToken) {
+    // Find the valid token by comparing hashes
+    let validToken = null
+    for (const token of verificationTokens) {
+      if (verifyOTPHash(code, token.token)) {
+        validToken = token
+        break
+      }
+    }
+
+    // Check if token exists and is valid
+    if (!validToken) {
       return { success: false, error: 'Ongeldige code' }
     }
 
     // Check if token has expired (10 minutes)
-    if (verificationToken.expires < new Date()) {
+    if (validToken.expires < new Date()) {
       // Delete expired token
       await db.verificationToken.delete({
         where: {
           identifier_token: {
             identifier: normalizedEmail,
-            token: code
+            token: validToken.token
           }
         }
       })
@@ -160,18 +184,18 @@ export async function verifyOtp(
       where: {
         identifier_token: {
           identifier: normalizedEmail,
-          token: code
+          token: validToken.token
         }
       }
     })
 
-    // Create session cookie
+    // Create session cookie (expires in 3 hours)
     const cookieStore = await cookies()
     cookieStore.set('session_token', businessOwner.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+      maxAge: 3 * 60 * 60 // 3 hours in seconds
     })
 
     return { success: true }
@@ -223,6 +247,21 @@ export async function isAuthenticated(): Promise<boolean> {
 export async function userHasBusiness(): Promise<boolean> {
   const user = await getCurrentUser()
   return user?.businessId !== null && user?.businessId !== undefined
+}
+
+// Check if user has a PUBLISHED business (not just registered)
+export async function userHasPublishedBusiness(): Promise<boolean> {
+  const user = await getCurrentUser()
+  if (!user?.businessId) return false
+
+  // Check if the business is published
+  return user.business?.publishStatus === 'PUBLISHED'
+}
+
+// Get current user email (for secure form pre-fill)
+export async function getUserEmail(): Promise<string | null> {
+  const user = await getCurrentUser()
+  return user?.email || null
 }
 
 // Check if an email has a registered business (for login flow)

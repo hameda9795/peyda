@@ -99,6 +99,7 @@ export async function GET(request: NextRequest) {
             reviewCount: business.reviewCount,
             isVerified: business.isVerified,
             status: business.status,
+            publishStatus: business.publishStatus,
             address: {
                 street: business.street,
                 postalCode: business.postalCode,

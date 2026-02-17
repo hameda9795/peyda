@@ -46,17 +46,17 @@ export function generateOrganizationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "NL Directory",
-    "url": "https://nldirectory.nl",
-    "logo": "https://nldirectory.nl/logo.png",
+    "name": "Peyda",
+    "url": "https://peyda.nl",
+    "logo": "https://peyda.nl/logo.png",
     "sameAs": [
-      "https://facebook.com/nldirectory",
-      "https://instagram.com/nldirectory",
-      "https://twitter.com/nldirectory"
+      "https://facebook.com/peyda.nl",
+      "https://instagram.com/peyda.nl",
+      "https://twitter.com/peyda_nl"
     ],
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+31-85-123-4567",
+      "email": "info@peyda.nl",
       "contactType": "customer service",
       "availableLanguage": "Dutch"
     }
@@ -70,13 +70,13 @@ export function generateWebSiteSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "NL Directory - Lokale Bedrijvengids Nederland",
-    "url": "https://nldirectory.nl",
+    "name": "Peyda - De Bedrijvengids van Nederland",
+    "url": "https://peyda.nl",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://nldirectory.nl/zoeken?q={search_term_string}"
+        "urlTemplate": "https://peyda.nl/zoeken?q={search_term_string}"
       },
       "query-input": "required name=search_term_string"
     }

@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
 import { getCategories } from "@/lib/actions/categories";
 import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/json-ld-schema";
+import { AuthModalProvider } from "@/providers/AuthModalProvider";
 
 const sora = Sora({
     subsets: ["latin"],
@@ -15,7 +16,7 @@ const fraunces = Fraunces({
     variable: "--font-fraunces",
 });
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 // JSON-LD schemas for the entire site
 const globalSchemas = JSON.stringify([
@@ -26,10 +27,10 @@ const globalSchemas = JSON.stringify([
 export const metadata: Metadata = {
     metadataBase: new URL(BASE_URL),
     title: {
-        default: "NL Directory - De Bedrijvengids van Nederland",
-        template: "%s | NL Directory",
+        default: "Peyda - De Bedrijvengids van Nederland",
+        template: "%s | Peyda",
     },
-    description: "De meest complete bedrijvengids voor heel Nederland. Vind lokale bedrijven, restaurants, kappers, loodgieters en meer in jouw stad of wijk.",
+    description: "De meest complete bedrijvengids voor heel Nederland. Vind lokale bedrijven, restaurants, kappers, loodgieters en meer in jouw stad of wijk met Peyda.",
     keywords: [
         "bedrijvengids",
         "lokale bedrijven",
@@ -41,9 +42,9 @@ export const metadata: Metadata = {
         "professionals",
         "ambachtslieden",
     ],
-    authors: [{ name: "NL Directory" }],
-    creator: "NL Directory",
-    publisher: "NL Directory",
+    authors: [{ name: "Peyda" }],
+    creator: "Peyda",
+    publisher: "Peyda",
     robots: {
         index: true,
         follow: true,
@@ -59,13 +60,13 @@ export const metadata: Metadata = {
         type: "website",
         locale: "nl_NL",
         url: BASE_URL,
-        siteName: "NL Directory",
-        title: "NL Directory - De Bedrijvengids van Nederland",
-        description: "Vind lokale bedrijven in heel Nederland. Van restaurants tot loodgieters - ontdek de beste professionals in jouw buurt.",
+        siteName: "Peyda",
+        title: "Peyda - De Bedrijvengids van Nederland",
+        description: "Vind lokale bedrijven in heel Nederland. Van restaurants tot loodgieters - ontdek de beste professionals in jouw buurt met Peyda.",
     },
     twitter: {
         card: "summary",
-        title: "NL Directory - De Bedrijvengids van Nederland",
+        title: "Peyda - De Bedrijvengids van Nederland",
         description: "Vind lokale bedrijven in heel Nederland.",
     },
     alternates: {
@@ -73,6 +74,8 @@ export const metadata: Metadata = {
     },
     icons: {
         icon: "/favicon.ico",
+        shortcut: "/favicon-16.ico",
+        apple: "/favicon-32.ico",
     },
     category: "business",
 };
@@ -100,9 +103,11 @@ export default async function RootLayout({
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: globalSchemas }}
                 />
-                <AppShell categories={categories}>
-                    {children}
-                </AppShell>
+                <AuthModalProvider>
+                    <AppShell categories={categories}>
+                        {children}
+                    </AppShell>
+                </AuthModalProvider>
             </body>
         </html>
     );

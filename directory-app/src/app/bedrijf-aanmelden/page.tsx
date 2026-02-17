@@ -27,6 +27,7 @@ import { StepAdditional } from '@/components/register/StepAdditional';
 import { BusinessPreview } from '@/components/register/BusinessPreview';
 import { BusinessFormData } from '@/lib/types/business-form';
 import { createBusiness } from '@/lib/actions/business';
+import { getUserEmail } from '@/app/actions';
 
 const STEPS = [
     { id: 1, title: 'Basisgegevens', description: 'Naam & Categorie', icon: Building2 },
@@ -84,7 +85,7 @@ const initialFormData: BusinessFormData = {
     faq: [],
 };
 
-export default function BusinessRegistrationPage({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
+export default function BusinessRegistrationPage({ searchParams }: { searchParams: Promise<{ email?: string; message?: string }> }) {
     const params = use(searchParams);
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
@@ -97,17 +98,30 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
     const [aiData, setAiData] = useState<any>(null);
     const [showPreview, setShowPreview] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [redirectMessage, setRedirectMessage] = useState<string | null>(null);
 
     useEffect(() => {
         setMounted(true);
-    }, []);
 
-    // Prefill email from query param
-    useEffect(() => {
-        if (params.email) {
-            const decodedEmail = decodeURIComponent(params.email);
-            setFormData(prev => ({ ...prev, email: decodedEmail }));
+        // Check for redirect message
+        if (params.message === 'no-business') {
+            setRedirectMessage('Je moet eerst jouw bedrijf registreren om toegang te krijgen tot het dashboard.');
         }
+    }, [params.message]);
+
+    // Prefill email from session (secure) - fallback to URL param only if no session
+    useEffect(() => {
+        async function fetchUserEmail() {
+            const userEmail = await getUserEmail();
+            if (userEmail) {
+                setFormData(prev => ({ ...prev, email: userEmail }));
+            } else if (params.email) {
+                // Fallback only if no session (backwards compatibility)
+                const decodedEmail = decodeURIComponent(params.email);
+                setFormData(prev => ({ ...prev, email: decodedEmail }));
+            }
+        }
+        fetchUserEmail();
     }, [params.email]);
 
     const updateFormData = (data: Partial<BusinessFormData>) => {
@@ -546,6 +560,15 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                         {/* Form Content */}
                         <div className="relative">
                             <AnimatePresence mode="wait" custom={direction}>
+                                {redirectMessage && (
+                                    <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+                                        <div className="text-amber-600 mt-0.5">⚠️</div>
+                                        <div>
+                                            <p className="text-sm text-amber-800">{redirectMessage}</p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <motion.div
                                     key={currentStep}
                                     custom={direction}

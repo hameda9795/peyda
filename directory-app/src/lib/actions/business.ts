@@ -80,6 +80,15 @@ async function saveFile(file: File | null, folder: string): Promise<string | nul
 
 export async function createBusiness(data: FormData) {
     try {
+        // Check if user already has a business - prevent multiple businesses per user
+        const existingUser = await getCurrentUser();
+        if (existingUser?.businessId) {
+            return {
+                success: false,
+                error: "Je hebt al een bedrijf geregistreerd. Je kunt maar één bedrijf per account hebben."
+            };
+        }
+
         // Extract basic fields
         const name = data.get('name') as string;
         const categoryId = data.get('category') as string;
@@ -157,6 +166,14 @@ export async function createBusiness(data: FormData) {
         const provinceName = locationData?.province.name || null;
         const provinceSlugValue = locationData?.province.slug || null;
 
+        // Get user email from session for security (don't trust form data)
+        // We already have existingUser from the check above
+        const userEmail = existingUser?.email;
+
+        if (!userEmail) {
+            throw new Error("Je moet ingelogd zijn om een bedrijf te registreren.");
+        }
+
         const business = await prisma.business.create({
             data: {
                 name,
@@ -173,9 +190,9 @@ export async function createBusiness(data: FormData) {
                 provinceSlug: provinceSlugValue,
                 neighborhood: getStr('neighborhood'),
 
-                // Contact
+                // Contact - use session email for security
                 phone: getStr('phone'),
-                email: getStr('email'),
+                email: userEmail,
                 website: getStr('website'),
                 instagram: getStr('instagram'),
                 facebook: getStr('facebook'),
@@ -213,18 +230,18 @@ export async function createBusiness(data: FormData) {
                 faq: data.get('faq') ? JSON.parse(data.get('faq') as string) : [],
 
                 status: 'approved',
+                publishStatus: 'DRAFT',
 
                 // Relation
                 subCategoryId,
             } as any
         });
 
-        // Link business to the current user (owner)
+        // Link business to the current user (owner) - we already have existingUser from above
         try {
-            const currentUser = await getCurrentUser();
-            if (currentUser) {
+            if (existingUser) {
                 await prisma.businessOwner.update({
-                    where: { id: currentUser.id },
+                    where: { id: existingUser.id },
                     data: { businessId: business.id }
                 });
             }
@@ -431,7 +448,8 @@ export async function getBusinessesByCategorySlug(categorySlug: string, limit: n
                         }
                     }
                 },
-                status: 'approved'
+                status: 'approved',
+                publishStatus: 'PUBLISHED'
             },
             take: limit,
             orderBy: [
@@ -491,7 +509,8 @@ export async function getBusinessesByCity(cityName: string, limit: number = 10) 
                     equals: cityName,
                     mode: 'insensitive'
                 },
-                status: 'approved'
+                status: 'approved',
+                publishStatus: 'PUBLISHED'
             },
             take: limit,
             orderBy: [
@@ -551,7 +570,8 @@ export async function getBusinessesByNeighborhood(neighborhoodName: string, limi
                     equals: neighborhoodName,
                     mode: 'insensitive'
                 },
-                status: 'approved'
+                status: 'approved',
+                publishStatus: 'PUBLISHED'
             },
             take: limit,
             orderBy: [
@@ -612,7 +632,8 @@ export async function getBusinessesByNeighborhoodGrouped(neighborhoodName: strin
                     equals: neighborhoodName,
                     mode: 'insensitive'
                 },
-                status: 'approved'
+                status: 'approved',
+                publishStatus: 'PUBLISHED'
             },
             orderBy: [
                 { createdAt: 'desc' },
@@ -692,6 +713,7 @@ export async function getBusinessCountsByCity() {
             by: ['city'],
             where: {
                 status: 'approved',
+                publishStatus: 'PUBLISHED',
             },
             _count: { id: true }
         });
@@ -714,6 +736,7 @@ export async function getProvinceStats() {
             by: ['provinceSlug'],
             where: {
                 status: 'approved',
+                publishStatus: 'PUBLISHED',
                 provinceSlug: { not: null }
             },
             _count: { id: true }
@@ -732,6 +755,7 @@ export async function getProvinceStats() {
             by: ['provinceSlug', 'city'],
             where: {
                 status: 'approved',
+                publishStatus: 'PUBLISHED',
                 provinceSlug: { not: null },
             },
             _count: { id: true },
@@ -777,6 +801,7 @@ export async function getTopCitiesByBusinessCount(limit: number = 6) {
             by: ['city'],
             where: {
                 status: 'approved',
+                publishStatus: 'PUBLISHED',
             },
             _count: { id: true },
             orderBy: {
@@ -818,7 +843,7 @@ export async function getTopCitiesByBusinessCount(limit: number = 6) {
 export async function getTotalBusinessCount() {
     try {
         const count = await prisma.business.count({
-            where: { status: 'approved' }
+            where: { status: 'approved', publishStatus: 'PUBLISHED' }
         });
         return count;
     } catch (error) {
@@ -832,7 +857,8 @@ export async function getAllFeaturedBusinesses(limit: number = 8) {
     try {
         const businesses = await prisma.business.findMany({
             where: {
-                status: 'approved'
+                status: 'approved',
+                publishStatus: 'PUBLISHED'
             },
             take: limit,
             orderBy: [
@@ -917,7 +943,8 @@ export async function getRelatedBusinessesById(businessId: string, subCategoryId
             where: {
                 subCategoryId,
                 id: { not: businessId },
-                status: 'approved'
+                status: 'approved',
+                publishStatus: 'PUBLISHED'
             },
             take: limit,
             orderBy: [
@@ -945,7 +972,8 @@ export async function getRelatedBusinessesById(businessId: string, subCategoryId
                         categoryId: subCategory.categoryId
                     },
                     id: { notIn: existingIds },
-                    status: 'approved'
+                    status: 'approved',
+                publishStatus: 'PUBLISHED'
                 },
                 take: remaining,
                 orderBy: [
@@ -997,4 +1025,54 @@ export async function getRelatedBusinessesById(businessId: string, subCategoryId
         console.error("Failed to fetch related businesses:", error);
         return [];
     }
+}
+
+// Publish business - change from DRAFT to PUBLISHED
+export async function publishBusiness(): Promise<{ success: boolean; error?: string }> {
+    try {
+        const currentUser = await getCurrentUser();
+
+        if (!currentUser || !currentUser.businessId) {
+            return { success: false, error: 'Geen bedrijf gevonden om te publiceren.' };
+        }
+
+        await prisma.business.update({
+            where: { id: currentUser.businessId },
+            data: {
+                publishStatus: 'PUBLISHED',
+                publishedAt: new Date()
+            }
+        });
+
+        revalidatePath('/dashboard');
+        revalidatePath('/profile');
+
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to publish business:", error);
+        return { success: false, error: 'Er is iets misgegaan bij het publiceren.' };
+    }
+}
+
+// Check if business is published
+export async function isBusinessPublished(): Promise<boolean> {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || !currentUser.businessId) return false;
+
+    const business = await prisma.business.findUnique({
+        where: { id: currentUser.businessId },
+        select: { publishStatus: true }
+    });
+
+    return business?.publishStatus === 'PUBLISHED';
+}
+
+// Get current user's business (for dashboard)
+export async function getCurrentUserBusiness() {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || !currentUser.businessId) return null;
+
+    return await prisma.business.findUnique({
+        where: { id: currentUser.businessId }
+    });
 }

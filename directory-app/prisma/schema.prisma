@@ -138,6 +138,8 @@ model Business {
   isVerified    Boolean     @default(false)
   isActive      Boolean     @default(true)
   status        String      @default("pending") // pending, approved, rejected
+  publishStatus String      @default("DRAFT")   // DRAFT, PUBLISHED - for registration flow
+  publishedAt   DateTime?                          // When business was published
 
   subCategoryId String
   subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
@@ -152,6 +154,7 @@ model Business {
 
   @@index([subCategoryId])
   @@index([status])
+  @@index([publishStatus])
   @@index([provinceSlug])
   @@index([city])
   @@map("businesses")

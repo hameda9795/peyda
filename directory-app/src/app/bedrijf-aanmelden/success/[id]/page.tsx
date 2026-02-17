@@ -131,8 +131,8 @@ export default function SuccessPage() {
                     className="text-center text-slate-500 text-sm mt-6"
                 >
                     Heeft u vragen? Neem contact met ons op via{' '}
-                    <a href="mailto:info@utrechtbusiness.nl" className="text-emerald-600 hover:underline">
-                        info@utrechtbusiness.nl
+                    <a href="mailto:info@peyda.nl" className="text-emerald-600 hover:underline">
+                        info@peyda.nl
                     </a>
                 </motion.p>
             </div>

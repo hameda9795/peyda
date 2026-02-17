@@ -74,7 +74,7 @@ export default async function BusinessPage({ params }: Props) {
         notFound();
     }
 
-    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
     const currentUrl = `${BASE_URL}/${province}/${city}/${neighborhood}/${category}/${subcategory}/${slug}`;
 
     // JSON-LD Schema - LocalBusiness

@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             `goede ${categoryName} ${cityName}`,
         ],
         alternates: {
-            canonical: `https://nldirectory.nl/beste/${citySlug}/${categorySlug}`,
+            canonical: `https://peyda.nl/beste/${citySlug}/${categorySlug}`,
         },
         openGraph: {
             title,
@@ -128,7 +128,7 @@ export default async function ComparisonPage({ params }: Props) {
         }
     });
 
-    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
     const currentUrl = `${BASE_URL}/beste/${citySlug}/${categorySlug}`;
 
     // JSON-LD Schema - ItemList for comparison

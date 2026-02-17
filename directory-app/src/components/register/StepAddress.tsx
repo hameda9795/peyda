@@ -405,17 +405,17 @@ export function StepAddress({ formData, updateFormData }: StepProps) {
                         />
                     </div>
 
-                    {/* Email */}
+                    {/* Email - Read-only, set from account */}
                     <div className="space-y-2">
                         <label className="premium-label">
                             E-mailadres <span className="text-rose-500">*</span>
+                            <span className="ml-2 text-xs font-normal text-slate-500">(van je account)</span>
                         </label>
                         <input
                             type="email"
                             value={formData.email}
-                            onChange={(e) => updateFormData({ email: e.target.value })}
-                            placeholder="info@uwbedrijf.nl"
-                            className="premium-input w-full px-4"
+                            readOnly
+                            className="premium-input w-full px-4 bg-slate-50 cursor-not-allowed"
                         />
                     </div>
 

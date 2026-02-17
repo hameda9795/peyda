@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return { title: 'Pagina niet gevonden' };
     }
 
-    const title = `${category.name} in ${city.name} - Vind de beste ${category.name.toLowerCase()} | NL Directory`;
+    const title = `${category.name} in ${city.name} - Vind de beste ${category.name.toLowerCase()} | Peyda`;
     const description = `Ontdek de beste ${category.name.toLowerCase()} in ${city.name}, ${city.province.name}. Bekijk beoordelingen, openingstijden en contactgegevens van lokale bedrijven.`;
 
-    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
     return {
         title,
@@ -73,7 +73,7 @@ export default async function CityServicePage({ params }: Props) {
         notFound();
     }
 
-    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
     const currentUrl = `${BASE_URL}/diensten/${citySlug}/${categorySlug}`;
 
     // JSON-LD Schema - ItemList

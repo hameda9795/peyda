@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 
 export const metadata: Metadata = {
-    title: "Contact | Utrecht Business Directory",
-    description: "Neem contact op met het team van Utrecht Business Directory.",
+    title: "Contact | Peyda",
+    description: "Neem contact op met het team van Peyda.",
 };
 
 export default function ContactPage() {
@@ -39,7 +39,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <p className="font-medium text-lg">Email</p>
-                                        <p className="text-indigo-200">info@utrechtdirectory.nl</p>
+                                        <p className="text-indigo-200">info@peyda.nl</p>
                                     </div>
                                 </div>
 

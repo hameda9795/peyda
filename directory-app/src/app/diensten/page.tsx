@@ -5,10 +5,10 @@ import { getCategories } from "@/lib/actions/categories";
 import { NETHERLANDS_PROVINCES } from "@/lib/netherlands-data";
 
 export const metadata: Metadata = {
-    title: "Diensten per Stad - Vind Lokale Bedrijven | NL Directory",
+    title: "Diensten per Stad - Vind Lokale Bedrijven | Peyda",
     description: "Zoek bedrijven per stad en dienst. Vind de beste lokale professionals in jouw stad - van restaurants tot loodgieters, kappers en meer.",
     alternates: {
-        canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl'}/diensten`
+        canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl'}/diensten`
     }
 };
 
@@ -135,7 +135,7 @@ export default async function DienstenPage() {
                             Lokale Bedrijven Vinden in Nederland
                         </h2>
                         <p className="text-slate-600">
-                            NL Directory is de meest complete bedrijvengids van Nederland. Of je nu op zoek bent naar
+                            Peyda is de meest complete bedrijvengids van Nederland. Of je nu op zoek bent naar
                             een restaurant in Amsterdam, een kapper in Utrecht, of een loodgieter in Rotterdam - wij
                             helpen je de beste lokale professionals te vinden.
                         </p>

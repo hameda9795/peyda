@@ -6,6 +6,7 @@ import { Search, Bell, Menu, X, ChevronDown, User, LogOut, LayoutDashboard } fro
 import { MegaMenu } from "./MegaMenu";
 import { SearchBar } from "./SearchBar";
 import LoginModal from "@/components/LoginModal";
+import { BusinessRegistrationPrompt } from "@/components/BusinessRegistrationPrompt";
 import { getCurrentUser } from "@/app/actions";
 
 interface MobileMenuProps {
@@ -41,24 +42,19 @@ function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick
     return (
         <>
             {/* Backdrop */}
-            <div 
+            <div
                 className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                 onClick={onClose}
             />
-            
+
             {/* Slide-in Menu */}
             <div className={`fixed top-0 left-0 w-[280px] h-full bg-white z-50 lg:hidden transition-transform duration-300 ease-out shadow-xl ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-zinc-200">
-                    <Link href="/" className="flex items-center gap-2" onClick={onClose}>
-                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200">
-                            <span className="text-white font-bold text-sm">NL</span>
-                        </div>
-                        <span className="text-lg font-bold tracking-tight text-zinc-900">
-                            NL<span className="text-zinc-500 text-sm font-medium">Directory</span>
-                        </span>
+                    <Link href="/" onClick={onClose}>
+                        <img src="/logo.png" alt="Peyda" className="h-35 w-35" />
                     </Link>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors"
                         aria-label="Close menu"
@@ -69,8 +65,8 @@ function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick
 
                 {/* Search */}
                 <div className="p-4 border-b border-zinc-200">
-                    <Link 
-                        href="/search" 
+                    <Link
+                        href="/search"
                         onClick={onClose}
                         className="flex items-center gap-3 px-4 py-3 bg-zinc-100 rounded-full min-h-[48px]"
                     >
@@ -96,7 +92,7 @@ function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick
                     <ul className="space-y-2">
                         {mainLinks.map((link) => (
                             <li key={link.href}>
-                                <Link 
+                                <Link
                                     href={link.href}
                                     onClick={onClose}
                                     className="block px-4 py-3 min-h-[44px] text-base font-medium text-zinc-700 hover:text-emerald-600 hover:bg-zinc-50 rounded-lg transition-colors"
@@ -115,7 +111,7 @@ function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick
                         <ul className="space-y-1">
                             {categories.slice(0, 8).map((category: any) => (
                                 <li key={category.id}>
-                                    <Link 
+                                    <Link
                                         href={`/categorieen/${category.slug}`}
                                         onClick={onClose}
                                         className="flex items-center justify-between px-4 py-3 min-h-[44px] text-sm text-zinc-600 hover:text-emerald-600 hover:bg-zinc-50 rounded-lg transition-colors"
@@ -152,30 +148,37 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [redirectToRegister, setRedirectToRegister] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userBusinessId, setUserBusinessId] = useState<string | null>(null);
+    const [hasPublishedBusiness, setHasPublishedBusiness] = useState(false);
+    const [showBusinessPrompt, setShowBusinessPrompt] = useState(false);
 
     // Check authentication status on mount
     useEffect(() => {
         const checkAuth = async () => {
             try {
                 const user = await getCurrentUser();
-                setIsLoggedIn(!!user);
-                setUserBusinessId(user?.businessId || null);
+                // Only show profile icon if user has a PUBLISHED business
+                const isPublished = user?.business?.publishStatus === 'PUBLISHED';
+                setHasPublishedBusiness(isPublished);
             } catch (error) {
                 console.error('Auth check failed:', error);
-                setIsLoggedIn(false);
-                setUserBusinessId(null);
+                setHasPublishedBusiness(false);
             }
         };
         checkAuth();
     }, []);
 
-    const handleLoginSuccess = () => {
+    const handleLoginSuccess = async () => {
+        // Check if user has a published business
+        const user = await getCurrentUser();
+
         if (redirectToRegister) {
             window.location.href = '/bedrijf-aanmelden';
-        } else {
+        } else if (user?.business?.publishStatus === 'PUBLISHED') {
             window.location.href = '/dashboard';
+        } else {
+            // User logged in but no published business - show prompt
+            setShowLoginModal(false);
+            setShowBusinessPrompt(true);
         }
     };
 
@@ -208,7 +211,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                     {/* Left Section - Hamburger + Logo */}
                     <div className="flex items-center gap-2 lg:gap-8">
                         {/* Hamburger Menu Button */}
-                        <button 
+                        <button
                             onClick={() => setMobileMenuOpen(true)}
                             className="lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors"
                             aria-label="Open menu"
@@ -217,13 +220,8 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                         </button>
 
                         {/* Logo - Always visible */}
-                        <Link href="/" className="flex items-center gap-2">
-                            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200">
-                                <span className="text-white font-bold text-sm">NL</span>
-                            </div>
-                            <span className="text-xl font-bold tracking-tight text-zinc-900">
-                                NL<span className="text-zinc-500 text-base font-medium ml-1">Directory</span>
-                            </span>
+                        <Link href="/">
+                            <img src="/logo.png" alt="Peyda" className="h-35 w-35" />
                         </Link>
 
                         {/* Desktop Navigation */}
@@ -268,7 +266,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
 
                         {/* User Button / Login */}
                         <div className="relative user-menu">
-                            {isLoggedIn ? (
+                            {hasPublishedBusiness ? (
                                 <>
                                     <button
                                         onClick={() => setShowUserMenu(!showUserMenu)}
@@ -278,9 +276,9 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                                         <User className="h-5 w-5" />
                                     </button>
 
-                                    {/* User Dropdown - Logged in */}
+                                    {/* User Dropdown */}
                                     {showUserMenu && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-zinc-100 py-2 z-50">
+                                        <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-zinc-100 py-2 z-50">
                                             <button
                                                 onClick={() => {
                                                     setShowUserMenu(false);
@@ -295,8 +293,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                                                 onClick={async () => {
                                                     setShowUserMenu(false);
                                                     await fetch('/api/auth/logout', { method: 'POST' });
-                                                    setIsLoggedIn(false);
-                                                    setUserBusinessId(null);
+                                                    setHasPublishedBusiness(false);
                                                     window.location.href = '/';
                                                 }}
                                                 className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -345,6 +342,13 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
 
             {/* Login Modal */}
             <LoginModal isOpen={showLoginModal} onClose={() => { setShowLoginModal(false); setRedirectToRegister(false); }} onSuccess={handleLoginSuccess} isRegistration={redirectToRegister} />
+
+            {/* Business Registration Prompt Modal */}
+            <BusinessRegistrationPrompt
+                isOpen={showBusinessPrompt}
+                onClose={() => setShowBusinessPrompt(false)}
+            />
         </>
     );
 }
+

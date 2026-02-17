@@ -6,7 +6,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { Calendar, ChevronLeft, Share2, Clock, Facebook, Twitter, Linkedin } from "lucide-react";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 type Props = {
     params: Promise<{ slug: string }>;

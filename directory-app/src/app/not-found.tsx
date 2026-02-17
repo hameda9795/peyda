@@ -13,7 +13,7 @@ export default function NotFound() {
                 </div>
 
                 <h1 className="text-4xl font-bold text-slate-900 mb-4">
-                    Oeps! Je bent verdwaald in Utrecht
+                    Oeps! Je bent verdwaald
                 </h1>
 
                 <p className="text-lg text-slate-600 mb-10 max-w-lg mx-auto">
@@ -30,7 +30,7 @@ export default function NotFound() {
                     </Link>
 
                     <a
-                        href="/utrecht/eten-drinken"
+                        href="/categorieen/eten-drinken"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl font-medium hover:bg-slate-50 transition-colors hover:border-slate-300"
                     >
                         <Search className="h-5 w-5 text-slate-400" />
@@ -41,9 +41,9 @@ export default function NotFound() {
                 <div className="mt-16 pt-8 border-t border-slate-200">
                     <p className="text-sm text-slate-400">
                         Populaire categorieën: {' '}
-                        <Link href="/utrecht/eten-drinken" className="text-indigo-600 hover:underline">Eten & Drinken</Link>, {' '}
-                        <Link href="/utrecht/winkels" className="text-indigo-600 hover:underline">Winkels</Link>, {' '}
-                        <Link href="/utrecht/gezondheid" className="text-indigo-600 hover:underline">Gezondheid</Link>
+                        <Link href="/categorieen/eten-drinken" className="text-indigo-600 hover:underline">Eten & Drinken</Link>, {' '}
+                        <Link href="/categorieen/winkels" className="text-indigo-600 hover:underline">Winkels</Link>, {' '}
+                        <Link href="/categorieen/gezondheid" className="text-indigo-600 hover:underline">Gezondheid</Link>
                     </p>
                 </div>
             </div>

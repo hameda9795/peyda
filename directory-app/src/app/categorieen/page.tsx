@@ -8,7 +8,7 @@ import { NETHERLANDS_PROVINCES, getTopCities } from "@/lib/netherlands-data";
 import { cleanCategoryName, stripSeoSlug } from "@/lib/seo-slug";
 import { generateWebPageSchema, generateBreadcrumbSchema, generateCollectionPageSchema } from "@/lib/json-ld-schema";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 export const metadata: Metadata = {
     title: "Bedrijfscategorieen | Lokale Bedrijvengids Nederland",

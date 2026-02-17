@@ -58,7 +58,7 @@ export default function ReviewsPage({ searchParams }: { searchParams: Promise<{ 
     // Use either the resolved params or searchParams hook
     const businessId = params.businessId || searchParamsHook?.get("businessId") || undefined;
 
-    const reviewLink = "https://nldirectory.nl/review/voorbeeld-restaurant";
+    const reviewLink = "https://peyda.nl/review/voorbeeld-restaurant";
 
     // Fetch real data
     useEffect(() => {

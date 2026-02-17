@@ -13,7 +13,7 @@ import { db as prisma } from "@/lib/db";
 import { CategoryContent } from "@/components/CategoryContent";
 import { generateWebPageSchema, generateBreadcrumbSchema, generateFaqSchema, type FaqItem } from "@/lib/json-ld-schema";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 type Props = {
     params: Promise<{ category: string }>;

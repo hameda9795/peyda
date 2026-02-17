@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Privacybeleid | Utrecht Business Directory",
-    description: "Privacybeleid en algemene voorwaarden van Utrecht Business Directory.",
+    title: "Privacybeleid | Peyda",
+    description: "Privacybeleid en algemene voorwaarden van Peyda.",
 };
 
 export default function PrivacyPage() {
@@ -18,7 +18,7 @@ export default function PrivacyPage() {
 
                 <article className="prose prose-indigo prose-lg text-zinc-600">
                     <p className="lead">
-                        Bij Utrecht Business Directory hechten we veel waarde aan jouw privacy. In dit privacybeleid leggen we uit hoe we omgaan met jouw persoonsgegevens.
+                        Bij Peyda hechten we veel waarde aan jouw privacy. In dit privacybeleid leggen we uit hoe we omgaan met jouw persoonsgegevens.
                     </p>
 
                     <h2 className="text-2xl font-bold text-zinc-900 mt-10 mb-4">1. Gegevens die we verzamelen</h2>
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
 
                     <h2 className="text-2xl font-bold text-zinc-900 mt-10 mb-4">5. Jouw rechten</h2>
                     <p>
-                        Je hebt het recht om jouw persoonsgegevens in te zien, te corrigeren of te laten verwijderen. Neem hiervoor contact op via info@utrechtdirectory.nl.
+                        Je hebt het recht om jouw persoonsgegevens in te zien, te corrigeren of te laten verwijderen. Neem hiervoor contact op via info@peyda.nl.
                     </p>
 
                     <div className="mt-12 p-6 bg-zinc-50 rounded-xl border border-zinc-100">

@@ -8,7 +8,7 @@ import Script from "next/script";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 type Props = {
     params: Promise<{

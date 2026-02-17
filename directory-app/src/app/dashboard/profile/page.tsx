@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, use } from "react";
 import { Save, Upload, X, Instagram, Facebook, Linkedin, Globe, Plus, Trash2 } from "lucide-react";
-import { updateProfile as updateProfileAction, updateOpeningHours, generateSeoData } from "../actions";
+import { updateProfile as updateProfileAction, updateOpeningHours, generateSeoData, publishBusiness } from "../actions";
 import { SeoStatusWidget } from "@/components/dashboard/SeoStatusWidget";
 
 const defaultOpeningHours = [
@@ -74,6 +74,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
     const [success, setSuccess] = useState(false);
+    const [publishing, setPublishing] = useState(false);
     const [images, setImages] = useState<Array<{ id: string; url: string; altText: string }>>([]);
     const businessId = params.businessId;
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,6 +91,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
     const [faqList, setFaqList] = useState<FAQ[]>([]);
 
     // SEO State
+    const [publishStatus, setPublishStatus] = useState<'DRAFT' | 'PUBLISHED' | null>(null);
     const [seoStatus, setSeoStatus] = useState<'PENDING' | 'GENERATING' | 'COMPLETED' | 'FAILED' | null>(null);
     const [seoLastUpdate, setSeoLastUpdate] = useState<Date | null>(null);
     const [isGeneratingSeo, setIsGeneratingSeo] = useState(false);
@@ -188,6 +190,11 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                     // Load FAQ
                     if (data.faq && Array.isArray(data.faq)) {
                         setFaqList(data.faq);
+                    }
+
+                    // Load publish status
+                    if (data.publishStatus) {
+                        setPublishStatus(data.publishStatus);
                     }
 
                     // Load SEO status
@@ -347,6 +354,24 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
         }
     };
 
+    // Handle publish business
+    const handlePublish = async () => {
+        setPublishing(true);
+        try {
+            const result = await publishBusiness(businessId);
+            if (result.success) {
+                setPublishStatus('PUBLISHED');
+            } else {
+                alert(result.error || 'Failed to publish business');
+            }
+        } catch (error) {
+            console.error('Error publishing:', error);
+            alert('Er is iets misgegaan bij het publiceren');
+        } finally {
+            setPublishing(false);
+        }
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setSuccess(false);
@@ -440,6 +465,36 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
     return (
         <div className="space-y-6">
+            {/* DRAFT Status Warning */}
+            {publishStatus === 'DRAFT' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                    <div className="text-amber-600 mt-0.5">⚠️</div>
+                    <div className="flex-1">
+                        <h3 className="font-semibold text-amber-800">Jouw bedrijf is nog niet zichtbaar</h3>
+                        <p className="text-sm text-amber-700 mt-1">
+                            Jouw bedrijf is nog in concept. Om jouw bedrijf te laten zien in de directory, moet je jouw bedrijf publiceren.
+                        </p>
+                        <button
+                            onClick={handlePublish}
+                            disabled={publishing}
+                            className="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                        >
+                            {publishing ? (
+                                <>
+                                    <span className="animate-spin">⏳</span>
+                                    Publiceren...
+                                </>
+                            ) : (
+                                <>
+                                    <span>🚀</span>
+                                    Nu Publiceren
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="bg-white rounded-xl p-6 border border-slate-200">
                 <div className="flex items-center justify-between flex-wrap gap-4">

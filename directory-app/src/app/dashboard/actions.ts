@@ -1634,6 +1634,33 @@ export async function generateSeoData(businessId?: string) {
     }
 }
 
+// Function to publish a business (change from DRAFT to PUBLISHED)
+export async function publishBusiness(businessId?: string) {
+    try {
+        const business = await getBusiness(businessId);
+
+        if (!business) {
+            return { success: false, error: 'Business not found' };
+        }
+
+        await prisma.business.update({
+            where: { id: business.id },
+            data: {
+                publishStatus: 'PUBLISHED',
+                publishedAt: new Date()
+            }
+        });
+
+        revalidatePath('/dashboard/profile');
+        revalidatePath('/dashboard');
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error publishing business:', error);
+        return { success: false, error: 'Failed to publish business' };
+    }
+}
+
 // Function to get SEO status for a business
 export async function getSeoStatus(businessId?: string) {
     try {

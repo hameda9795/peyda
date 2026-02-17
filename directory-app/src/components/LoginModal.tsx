@@ -35,11 +35,11 @@ export default function LoginModal({
       const user = await getCurrentUser();
       if (user) {
         // User is already logged in
-        if (user.businessId) {
-          // Has business, redirect to dashboard
+        if (user.business?.publishStatus === 'PUBLISHED') {
+          // Has published business, redirect to dashboard
           window.location.href = "/dashboard";
         } else {
-          // No business, redirect to register
+          // No business or not published, redirect to register
           window.location.href = "/bedrijf-aanmelden";
         }
       }
@@ -123,15 +123,15 @@ export default function LoginModal({
         return;
       }
 
-      // Normal login flow - check if user has business
+      // Normal login flow - check if user has a PUBLISHED business
       const user = await getCurrentUser();
       if (onSuccess) {
         onSuccess();
-      } else if (user?.businessId) {
-        // Has business, go to dashboard
+      } else if (user?.business?.publishStatus === 'PUBLISHED') {
+        // Has published business, go to dashboard
         window.location.href = "/dashboard";
       } else {
-        // No business yet, go to registration with email
+        // No business or business not published yet, go to registration with email
         const encodedEmail = encodeURIComponent(email);
         window.location.href = `/bedrijf-aanmelden?email=${encodedEmail}`;
       }
@@ -234,7 +234,7 @@ export default function LoginModal({
                 Er is nog geen bedrijf gekoppeld aan dit e-mailadres.
               </p>
               <p className="text-gray-600 mt-2">
-                Wilt u uw bedrijf toevoegen aan NL Directory?
+                Wilt u uw bedrijf toevoegen aan Peyda?
               </p>
             </div>
 

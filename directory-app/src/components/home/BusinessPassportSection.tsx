@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Globe, MapPin, Star } from "lucide-react";
+import { useAuthModal } from "@/providers/AuthModalProvider";
 
 export function BusinessPassportSection() {
+    const { openRegisterModal } = useAuthModal();
+
     return (
         <section className="passport-section">
             <div className="container mx-auto px-4 max-w-6xl">
@@ -42,10 +47,10 @@ export function BusinessPassportSection() {
                             <span><Star className="w-4 h-4 text-emerald-600" /> Highlight badges voor topkwaliteit</span>
                             <span><Globe className="w-4 h-4 text-emerald-600" /> Deelbaar profiel voor Google en social</span>
                         </div>
-                        <Link href="/bedrijf-aanmelden" className="passport-cta">
+                        <button onClick={openRegisterModal} className="passport-cta">
                             Maak jouw bedrijfspaspoort
                             <ArrowRight className="w-4 h-4" />
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>

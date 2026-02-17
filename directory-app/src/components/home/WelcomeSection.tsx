@@ -4,10 +4,12 @@ import Link from "next/link";
 import { ArrowRight, Check, Search, Sparkles, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuthModal } from "@/providers/AuthModalProvider";
 
 export function WelcomeSection() {
     const router = useRouter();
     const [query, setQuery] = useState("");
+    const { openRegisterModal } = useAuthModal();
 
     const atlasPins = [
         {
@@ -154,10 +156,10 @@ export function WelcomeSection() {
                                 </span>
                             </div>
                             <div className="owner-cta">
-                                <Link href="/bedrijf-aanmelden" className="owner-btn">
+                                <button onClick={openRegisterModal} className="owner-btn">
                                     Bedrijf aanmelden
                                     <ArrowRight className="h-4 w-4" />
-                                </Link>
+                                </button>
                                 <Link href="/over-ons" className="owner-link">
                                     Zo werkt lokale zichtbaarheid
                                     <TrendingUp className="h-4 w-4" />

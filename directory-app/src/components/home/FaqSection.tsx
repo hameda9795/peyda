@@ -2,7 +2,7 @@ import Script from "next/script";
 
 const faqs = [
     {
-        question: "Hoe helpt NL Directory mijn lokale vindbaarheid?",
+        question: "Hoe helpt Peyda mijn lokale vindbaarheid?",
         answer: "We tonen een complete bedrijfspagina met categorie, locatie en contactgegevens. Dit helpt zoekmachines en bezoekers om je sneller te vinden in lokale zoekopdrachten."
     },
     {
@@ -18,7 +18,7 @@ const faqs = [
         answer: "Je kunt aangeven in welke stad of regio je actief bent, zodat je zichtbaar wordt in de juiste lokale resultaten."
     },
     {
-        question: "Is zoeken op NL Directory gratis voor bezoekers?",
+        question: "Is zoeken op Peyda gratis voor bezoekers?",
         answer: "Ja. Iedereen kan bedrijven zoeken, vergelijken en contact opnemen zonder account."
     }
 ];

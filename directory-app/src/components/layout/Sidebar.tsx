@@ -9,11 +9,13 @@ import { FilterSidebar } from "@/components/filtering/FilterSidebar";
 import { getCategories } from "@/lib/categories-static";
 
 import { useSidebar } from "@/providers/SidebarProvider";
+import { useAuthModal } from "@/providers/AuthModalProvider";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
     const pathname = usePathname();
     const { isOpen, close } = useSidebar();
+    const { openRegisterModal } = useAuthModal();
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
     const categories = getCategories();
@@ -77,14 +79,16 @@ export function Sidebar() {
                             </div>
                             <SidebarItem icon={BookOpen} label="Artikelen" href="/artikelen" onClick={close} />
                             <SidebarItem icon={Layers} label="Collecties" href="/collections" onClick={close} />
-                            <Link
-                                href="/bedrijf-toevoegen"
-                                onClick={close}
-                                className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-white bg-zinc-900 hover:bg-zinc-800 transition-colors shadow-sm mt-4"
+                            <button
+                                onClick={() => {
+                                    close();
+                                    openRegisterModal();
+                                }}
+                                className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-white bg-zinc-900 hover:bg-zinc-800 transition-colors shadow-sm mt-4 w-full"
                             >
                                 <Plus className="h-4.5 w-4.5" />
                                 Bedrijf toevoegen
-                            </Link>
+                            </button>
                         </div>
                     </div>
 
@@ -143,7 +147,13 @@ export function Sidebar() {
                                     <CheckCircle2 className="h-3 w-3" /> Eigen bedrijfspagina
                                 </li>
                             </ul>
-                            <button className="w-full text-xs bg-white text-indigo-700 font-bold py-2.5 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm">
+                            <button
+                                onClick={() => {
+                                    close();
+                                    openRegisterModal();
+                                }}
+                                className="w-full text-xs bg-white text-indigo-700 font-bold py-2.5 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
+                            >
                                 Gratis aanmelden
                             </button>
                         </div>

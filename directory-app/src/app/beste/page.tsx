@@ -5,7 +5,7 @@ import { NETHERLANDS_PROVINCES } from "@/lib/netherlands-data";
 import { Award, MapPin, ArrowRight, TrendingUp } from "lucide-react";
 
 export const metadata: Metadata = {
-    title: "Beste Bedrijven per Stad - Top 10 Vergelijkingen | NL Directory",
+    title: "Beste Bedrijven per Stad - Top 10 Vergelijkingen | Peyda",
     description: "Vind de beste bedrijven in jouw stad. Vergelijk top-rated restaurants, loodgieters, kappers en meer. Gebaseerd op echte klantbeoordelingen.",
     keywords: [
         "beste bedrijven nederland",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
         "lokale bedrijven vergelijken"
     ],
     alternates: {
-        canonical: "https://nldirectory.nl/beste",
+        canonical: "https://peyda.nl/beste",
     },
 };
 
@@ -164,7 +164,7 @@ export default async function BestePage() {
                 <div className="max-w-3xl mx-auto prose prose-slate">
                     <h2>Waarom onze vergelijkingen gebruiken?</h2>
                     <p>
-                        Op NL Directory helpen we je de beste lokale bedrijven te vinden in jouw stad.
+                        Op Peyda helpen we je de beste lokale bedrijven te vinden in jouw stad.
                         Onze vergelijkingen zijn gebaseerd op echte klantbeoordelingen, zodat je een
                         weloverwogen keuze kunt maken.
                     </p>

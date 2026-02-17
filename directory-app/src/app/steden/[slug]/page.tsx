@@ -13,7 +13,7 @@ import { CityContent } from "@/components/CityContent";
 import { CITY_KEYWORDS } from "@/lib/city-keywords";
 import { generateBreadcrumbSchema, generateFaqSchema, generatePlaceSchema, generateWebPageSchema } from "@/lib/json-ld-schema";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 type Props = {
     params: Promise<{ slug: string }>;
@@ -162,184 +162,184 @@ export default async function CityPage({ params }: Props) {
                 dangerouslySetInnerHTML={{ __html: schemaScripts }}
             />
             <main className="seo-shell">
-            <div className="seo-container">
-                {/* Breadcrumb */}
-                <nav className="seo-breadcrumb">
-                    <Link href="/">Home</Link>
-                    <span>/</span>
-                    <Link href="/steden">Steden</Link>
-                    {province && (
-                        <>
-                            <span>/</span>
-                            <Link href={`/provincies/${province.slug}`}>{province.name}</Link>
-                        </>
-                    )}
-                    <span>/</span>
-                    <span>{cityName}</span>
-                </nav>
-
-                {/* Hero Section */}
-                <section className="seo-hero">
-                    <div className="seo-hero-grid">
-                        <div>
-                            <span className="seo-kicker">{province?.icon || '🏙️'} Stad</span>
-                            <h1 className="seo-title">{cityName}</h1>
-                            <p className="seo-subtitle">
-                                Welkom bij de lokale bedrijvengids voor {cityName}
-                                {province ? ` in ${province.name}` : ''}.
-                                {neighborhoods.length > 0
-                                    ? ` Ontdek ${neighborhoods.length} wijken met lokale bedrijven, diensten en specialisten.`
-                                    : ' Ontdek lokale bedrijven, winkels en diensten.'}
-                            </p>
-                            <div className="seo-meta">
-                                {province && <span>{province.icon} {province.name}</span>}
-                                {neighborhoods.length > 0 && <span>{neighborhoods.length} wijken</span>}
-                                <span>Lokale diensten</span>
-                            </div>
-                            <div className="seo-hero-actions">
-                                <Link href="/categorieen" className="seo-cta">
-                                    Zoek per categorie
-                                </Link>
-                            </div>
-                        </div>
-                        <div className="seo-hero-panel">
-                            <div className="seo-icon-badge">{province?.icon || '🏙️'}</div>
-                            <div className="seo-card-title">{cityName}</div>
-                            <p className="seo-card-meta">
-                                {cityKeywords.contentSections.intro.split('.')[0]}.
-                            </p>
-                            <div className="seo-stat-grid">
-                                <div className="seo-stat">
-                                    <span>Wijken</span>
-                                    {neighborhoods.length || 'Alle'}
-                                </div>
-                                <div className="seo-stat">
-                                    <span>Categorieën</span>
-                                    {topCategories.length}+
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* AI Generated City Content */}
-                <CityContent
-                    citySlug={slug}
-                    cityName={cityName}
-                    province={province?.name}
-                    initialContent={generatedContent}
-                />
-            </div>
-
-            {/* Neighborhood Business Sections */}
-            {neighborhoodsWithBusinesses.length > 0 ? (
-                neighborhoodsWithBusinesses.map(({ neighborhood, businesses }, index) => (
-                    <BusinessScrollSection
-                        key={neighborhood.id}
-                        title={`Bedrijven in ${neighborhood.name}`}
-                        businesses={businesses}
-                        viewAllHref={`/wijken/${slug}/${neighborhood.slug}`}
-                        viewAllText={`Alle bedrijven in ${neighborhood.name}`}
-                        accentIndex={index}
-                    />
-                ))
-            ) : neighborhoods.length > 0 ? (
                 <div className="seo-container">
-                    <section className="seo-section">
-                        <h2 className="seo-section-title">Wijken in {cityName}</h2>
-                        <div className="seo-grid">
-                            {neighborhoods.map((neighborhood) => (
-                                <Link
-                                    key={neighborhood.id}
-                                    href={`/wijken/${slug}/${neighborhood.slug}`}
-                                    className="seo-card"
-                                >
-                                    <div className="seo-card-title">{neighborhood.name}</div>
-                                    <div className="seo-card-meta">
-                                        Ontdek lokale bedrijven en diensten
+                    {/* Breadcrumb */}
+                    <nav className="seo-breadcrumb">
+                        <Link href="/">Home</Link>
+                        <span>/</span>
+                        <Link href="/steden">Steden</Link>
+                        {province && (
+                            <>
+                                <span>/</span>
+                                <Link href={`/provincies/${province.slug}`}>{province.name}</Link>
+                            </>
+                        )}
+                        <span>/</span>
+                        <span>{cityName}</span>
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section className="seo-hero">
+                        <div className="seo-hero-grid">
+                            <div>
+                                <span className="seo-kicker">{province?.icon || '🏙️'} Stad</span>
+                                <h1 className="seo-title">{cityName}</h1>
+                                <p className="seo-subtitle">
+                                    Welkom bij de lokale bedrijvengids voor {cityName}
+                                    {province ? ` in ${province.name}` : ''}.
+                                    {neighborhoods.length > 0
+                                        ? ` Ontdek ${neighborhoods.length} wijken met lokale bedrijven, diensten en specialisten.`
+                                        : ' Ontdek lokale bedrijven, winkels en diensten.'}
+                                </p>
+                                <div className="seo-meta">
+                                    {province && <span>{province.icon} {province.name}</span>}
+                                    {neighborhoods.length > 0 && <span>{neighborhoods.length} wijken</span>}
+                                    <span>Lokale diensten</span>
+                                </div>
+                                <div className="seo-hero-actions">
+                                    <Link href="/categorieen" className="seo-cta">
+                                        Zoek per categorie
+                                    </Link>
+                                </div>
+                            </div>
+                            <div className="seo-hero-panel">
+                                <div className="seo-icon-badge">{province?.icon || '🏙️'}</div>
+                                <div className="seo-card-title">{cityName}</div>
+                                <p className="seo-card-meta">
+                                    {cityKeywords.contentSections.intro.split('.')[0]}.
+                                </p>
+                                <div className="seo-stat-grid">
+                                    <div className="seo-stat">
+                                        <span>Wijken</span>
+                                        {neighborhoods.length || 'Alle'}
                                     </div>
-                                </Link>
-                            ))}
+                                    <div className="seo-stat">
+                                        <span>Categorieën</span>
+                                        {topCategories.length}+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </section>
-                </div>
-            ) : (
-                <div className="seo-container">
-                    <section className="seo-section">
-                        <div className="seo-empty">
-                            <div className="seo-empty-icon">🏘️</div>
-                            <div className="seo-empty-title">Wijken binnenkort beschikbaar</div>
-                            <p className="seo-empty-text">
-                                We voegen binnenkort wijken toe voor {cityName}.
-                            </p>
-                        </div>
-                    </section>
-                </div>
-            )}
 
-            <div className="seo-container">
-                {/* All Neighborhoods */}
-                {neighborhoods.length > 8 && (
-                    <section className="seo-section">
-                        <h2 className="seo-section-title">Alle wijken in {cityName}</h2>
-                        <div className="seo-chip-row">
-                            {neighborhoods.map((neighborhood) => (
-                                <Link
-                                    key={neighborhood.id}
-                                    href={`/wijken/${slug}/${neighborhood.slug}`}
-                                    className="seo-chip"
-                                >
-                                    {neighborhood.name}
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
+                    {/* AI Generated City Content */}
+                    <CityContent
+                        citySlug={slug}
+                        cityName={cityName}
+                        province={province?.name}
+                        initialContent={generatedContent}
+                    />
+                </div>
+
+                {/* Neighborhood Business Sections */}
+                {neighborhoodsWithBusinesses.length > 0 ? (
+                    neighborhoodsWithBusinesses.map(({ neighborhood, businesses }, index) => (
+                        <BusinessScrollSection
+                            key={neighborhood.id}
+                            title={`Bedrijven in ${neighborhood.name}`}
+                            businesses={businesses}
+                            viewAllHref={`/wijken/${slug}/${neighborhood.slug}`}
+                            viewAllText={`Alle bedrijven in ${neighborhood.name}`}
+                            accentIndex={index}
+                        />
+                    ))
+                ) : neighborhoods.length > 0 ? (
+                    <div className="seo-container">
+                        <section className="seo-section">
+                            <h2 className="seo-section-title">Wijken in {cityName}</h2>
+                            <div className="seo-grid">
+                                {neighborhoods.map((neighborhood) => (
+                                    <Link
+                                        key={neighborhood.id}
+                                        href={`/wijken/${slug}/${neighborhood.slug}`}
+                                        className="seo-card"
+                                    >
+                                        <div className="seo-card-title">{neighborhood.name}</div>
+                                        <div className="seo-card-meta">
+                                            Ontdek lokale bedrijven en diensten
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    </div>
+                ) : (
+                    <div className="seo-container">
+                        <section className="seo-section">
+                            <div className="seo-empty">
+                                <div className="seo-empty-icon">🏘️</div>
+                                <div className="seo-empty-title">Wijken binnenkort beschikbaar</div>
+                                <p className="seo-empty-text">
+                                    We voegen binnenkort wijken toe voor {cityName}.
+                                </p>
+                            </div>
+                        </section>
+                    </div>
                 )}
 
-                {/* Categories */}
-                <section className="seo-section seo-surface">
-                    <h2 className="seo-section-title">Populaire categorieën in {cityName}</h2>
-                    <div className="seo-chip-row">
-                        {topCategories.map((category: any) => {
-                            const categorySlug = stripSeoSlug(category.slug);
-                            return (
-                                <Link
-                                    key={category.id}
-                                    href={`/categorieen/${categorySlug}`}
-                                    className="seo-chip"
-                                >
-                                    {category.name.replace(" in Utrecht", "").replace(" in Nederland", "")}
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </section>
+                <div className="seo-container">
+                    {/* All Neighborhoods */}
+                    {neighborhoods.length > 8 && (
+                        <section className="seo-section">
+                            <h2 className="seo-section-title">Alle wijken in {cityName}</h2>
+                            <div className="seo-chip-row">
+                                {neighborhoods.map((neighborhood) => (
+                                    <Link
+                                        key={neighborhood.id}
+                                        href={`/wijken/${slug}/${neighborhood.slug}`}
+                                        className="seo-chip"
+                                    >
+                                        {neighborhood.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
-                {/* Related Links */}
-                <section className="seo-section">
-                    <h2 className="seo-section-title">Meer ontdekken</h2>
-                    <div className="seo-rail">
-                        {province && (
+                    {/* Categories */}
+                    <section className="seo-section seo-surface">
+                        <h2 className="seo-section-title">Populaire categorieën in {cityName}</h2>
+                        <div className="seo-chip-row">
+                            {topCategories.map((category: any) => {
+                                const categorySlug = stripSeoSlug(category.slug);
+                                return (
+                                    <Link
+                                        key={category.id}
+                                        href={`/categorieen/${categorySlug}`}
+                                        className="seo-chip"
+                                    >
+                                        {category.name.replace(" in Utrecht", "").replace(" in Nederland", "")}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </section>
+
+                    {/* Related Links */}
+                    <section className="seo-section">
+                        <h2 className="seo-section-title">Meer ontdekken</h2>
+                        <div className="seo-rail">
+                            {province && (
+                                <div className="seo-rail-item">
+                                    <Link href={`/provincies/${province.slug}`} className="seo-chip">
+                                        Alle steden in {province.name}
+                                    </Link>
+                                </div>
+                            )}
                             <div className="seo-rail-item">
-                                <Link href={`/provincies/${province.slug}`} className="seo-chip">
-                                    Alle steden in {province.name}
+                                <Link href="/steden" className="seo-chip">
+                                    Overzicht alle steden
                                 </Link>
                             </div>
-                        )}
-                        <div className="seo-rail-item">
-                            <Link href="/steden" className="seo-chip">
-                                Overzicht alle steden
-                            </Link>
+                            <div className="seo-rail-item">
+                                <Link href="/categorieen" className="seo-chip">
+                                    Alle categorieën
+                                </Link>
+                            </div>
                         </div>
-                        <div className="seo-rail-item">
-                            <Link href="/categorieen" className="seo-chip">
-                                Alle categorieën
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </main>
+                    </section>
+                </div>
+            </main>
         </>
     );
 }

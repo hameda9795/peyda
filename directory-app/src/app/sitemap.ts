@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { db as prisma } from '@/lib/db';
 import { NETHERLANDS_PROVINCES } from '@/lib/netherlands-data';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nldirectory.nl';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const now = new Date();
