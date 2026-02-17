@@ -73,9 +73,17 @@ export const metadata: Metadata = {
         canonical: BASE_URL,
     },
     icons: {
-        icon: "/favicon.ico",
+        icon: [
+            { url: "/favicon.ico" },
+            { url: "/favicon-16.ico", sizes: "16x16", type: "image/x-icon" },
+            { url: "/favicon-32.ico", sizes: "32x32", type: "image/x-icon" },
+            { url: "/favicon-48.ico", sizes: "48x48", type: "image/x-icon" },
+        ],
         shortcut: "/favicon-16.ico",
-        apple: "/favicon-32.ico",
+        apple: [
+            { url: "/favicon-32.ico" },
+            { url: "/favicon-48.ico", sizes: "48x48" },
+        ],
     },
     category: "business",
 };
