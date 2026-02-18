@@ -43,6 +43,18 @@ export function MegaMenu({ categories }: MegaMenuProps) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Prevent body scroll when menu is open
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]);
+
     const currentCategory = categories.find((c) => c.name === activeCategory) || categories[0];
 
     return (
@@ -74,7 +86,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="fixed inset-0 top-16 z-30 bg-black/20 backdrop-blur-sm"
+                            className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm"
                             aria-hidden="true"
                         />
 
@@ -84,17 +96,17 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.98 }}
                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            className="absolute top-full left-0 mt-3 w-[1100px] z-50 p-2"
+                            className="fixed top-16 left-1/2 -translate-x-1/2 w-[1100px] max-w-[calc(100vw-2rem)] z-[9999] p-2"
                         >
                             {/* Glassmorphism Panel */}
-                            <div className="relative overflow-hidden rounded-2xl bg-white/95 backdrop-blur-3xl shadow-2xl ring-1 ring-black/5 flex h-[650px]">
+                            <div className="relative overflow-hidden rounded-2xl bg-white/95 backdrop-blur-3xl shadow-2xl ring-1 ring-black/5 flex max-h-[calc(100vh-8rem)]">
 
                                 {/* Decorative gradients */}
                                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-20" />
                                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />
 
                                 {/* Sidebar: Categories List */}
-                                <div className="w-[300px] border-r border-zinc-100/50 bg-zinc-50/30 flex flex-col py-3 overflow-y-auto max-h-full custom-scrollbar pr-1 relative z-10">
+                                <div className="w-[300px] border-r border-zinc-100/50 bg-zinc-50/30 flex flex-col py-3 overflow-y-auto custom-scrollbar pr-1 relative z-10" style={{ maxHeight: 'calc(100vh - 8rem - 1rem)' }}>
                                     {categories.map((category) => {
                                         const Icon = getCategoryIcon(category.slug);
                                         const isActive = activeCategory === category.name;
@@ -134,14 +146,14 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                 </div>
 
                                 {/* Content Area */}
-                                <div className="flex-1 p-8 relative z-10 flex flex-col h-full bg-white/40 overflow-y-auto custom-scrollbar">
+                                <div className="flex-1 p-8 relative z-10 flex flex-col bg-white/40 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100vh - 8rem - 1rem)' }}>
                                     {currentCategory ? (
                                         <motion.div
                                             key={currentCategory.slug}
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ duration: 0.3, ease: "easeOut" }}
-                                            className="h-full flex flex-col"
+                                            className="min-h-0 flex flex-col"
                                         >
                                             {/* Header */}
                                             <div className="flex justify-between items-center mb-6">
@@ -168,7 +180,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                             </div>
 
                                             {/* Main Content Grid */}
-                                            <div className="grid grid-cols-2 gap-8 flex-1">
+                                            <div className="grid grid-cols-2 gap-8 flex-1 min-h-0">
 
                                                 {/* Subcategories */}
                                                 <div className="space-y-6">
@@ -272,7 +284,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
 
                                         </motion.div>
                                     ) : (
-                                        <div className="h-full flex flex-col items-center justify-center text-zinc-400">
+                                        <div className="min-h-0 flex flex-col items-center justify-center text-zinc-400">
                                             Loading...
                                         </div>
                                     )}
