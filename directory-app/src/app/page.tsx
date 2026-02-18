@@ -79,7 +79,7 @@ function getCategoryGradient(index: number): string {
 
 export default async function Home() {
   // Fetch all categories from database
-  const allCategories = await getCategories();
+  const allCategories = await getCategories().catch(() => []);
 
   // Fetch businesses for each category
   const sectionData = await Promise.all(
@@ -110,14 +110,14 @@ export default async function Home() {
     .slice(0, 8);
 
   // Fetch popular/most reviewed businesses
-  const popularBusinesses = await getAllFeaturedBusinesses(10);
+  const popularBusinesses = await getAllFeaturedBusinesses(10).catch(() => []);
 
   // Fetch location data for Netherlands section
   const [provinceStats, topCities, totalBusinesses, cityCounts] = await Promise.all([
-    getProvinceStats(),
-    getTopCitiesByBusinessCount(6),
-    getTotalBusinessCount(),
-    getBusinessCountsByCity()
+    getProvinceStats().catch(() => []),
+    getTopCitiesByBusinessCount(6).catch(() => []),
+    getTotalBusinessCount().catch(() => 0),
+    getBusinessCountsByCity().catch(() => [])
   ]);
 
   return (
