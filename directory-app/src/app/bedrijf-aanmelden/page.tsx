@@ -25,6 +25,7 @@ import { StepHoursServices } from '@/components/register/StepHoursServices';
 import { StepImages } from '@/components/register/StepImages';
 import { StepAdditional } from '@/components/register/StepAdditional';
 import { BusinessPreview } from '@/components/register/BusinessPreview';
+import { HelpModal } from '@/components/register/HelpModal';
 import { BusinessFormData } from '@/lib/types/business-form';
 import { createBusiness } from '@/lib/actions/business';
 import { getUserEmail } from '@/app/actions';
@@ -99,6 +100,9 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
     const [showPreview, setShowPreview] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [redirectMessage, setRedirectMessage] = useState<string | null>(null);
+
+    // Help Modal
+    const [showHelpModal, setShowHelpModal] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -399,15 +403,9 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                 </div>
 
                 {/* Header Brand */}
-                <div className="relative z-10 p-10">
-                    <Link href="/" className="inline-flex items-center gap-3 group mb-12">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/10 group-hover:scale-105 transition-all duration-300">
-                            <span className="text-white font-bold text-xl">U</span>
-                        </div>
-                        <div>
-                            <span className="block text-white font-bold text-lg tracking-tight leading-none">Utrecht</span>
-                            <span className="block text-indigo-200/60 text-xs font-medium tracking-widest uppercase mt-0.5">Business Directory</span>
-                        </div>
+                <div className="relative z-10 p-8">
+                    <Link href="/" className="inline-block group mb-8">
+                        <img src="/logo.png" alt="Peyda" className="w-[180px] h-auto object-contain group-hover:scale-105 transition-all duration-300" />
                     </Link>
 
                     <div className="mb-12 space-y-4">
@@ -422,7 +420,7 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                             </span>
                         </h1>
                         <p className="text-slate-400 text-base leading-relaxed max-w-sm">
-                            Word onderdeel van het snelst groeiende zakelijke netwerk in Utrecht. Professioneel, vindbaar en lokaal.
+                            Word onderdeel van het snelst groeiende zakelijke netwerk in Nederland. Professioneel, vindbaar en lokaal.
                         </p>
                     </div>
 
@@ -505,10 +503,8 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                 {/* Mobile Header (Only visible on small screens) */}
                 <div className="lg:hidden p-4 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-30">
                     <Link href="/" className="font-bold text-slate-900 flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                            <span className="text-white font-bold">U</span>
-                        </div>
-                        <span className="text-sm">Utrecht Directory</span>
+                        <img src="/logo.png" alt="Peyda" className="h-8 w-auto" />
+                        <span className="text-sm">Peyda Directory</span>
                     </Link>
                     <div className="text-xs font-medium text-slate-500 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
                         Stap {currentStep} van {STEPS.length}
@@ -528,7 +524,10 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                                 Terug
                             </Link>
 
-                            <button className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
+                            <button
+                                onClick={() => setShowHelpModal(true)}
+                                className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+                            >
                                 Hulp nodig?
                             </button>
                         </div>
@@ -641,6 +640,9 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                     </div>
                 </div>
             </div>
+
+            {/* Help Modal */}
+            <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
         </div>
     );
 }

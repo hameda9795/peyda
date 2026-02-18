@@ -123,7 +123,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Atlas Hero */}
-      <WelcomeSection />
+      <WelcomeSection totalBusinesses={totalBusinesses} />
 
       {/* Business Passport */}
       <BusinessPassportSection />

@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuthModal } from "@/providers/AuthModalProvider";
 
-export function WelcomeSection() {
+interface WelcomeSectionProps {
+    totalBusinesses?: number;
+}
+
+export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
     const router = useRouter();
     const [query, setQuery] = useState("");
     const { openRegisterModal } = useAuthModal();
@@ -81,7 +85,7 @@ export function WelcomeSection() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                                 <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
                             </span>
-                            15.000+ bedrijven en diensten in Nederland
+                            {totalBusinesses > 0 ? `${totalBusinesses.toLocaleString('nl-NL')}+` : "15.000+"} bedrijven en diensten in Nederland
                         </div>
 
                         <h1 className="atlas-title display-font">
@@ -167,7 +171,7 @@ export function WelcomeSection() {
                             </div>
                             <div className="owner-metrics">
                                 <div className="owner-metric">
-                                    <strong>3 stappen</strong>
+                                    <strong>5 stappen</strong>
                                     Aanmelden
                                 </div>
                                 <div className="owner-metric">

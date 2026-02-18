@@ -11,6 +11,15 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendOTPEmail(email: string, code: string) {
+  console.log('Attempting to send OTP email to:', email);
+  console.log('SMTP Config:', {
+    host: process.env.SMTP_HOST || 'mail.privateemail.com',
+    port: Number(process.env.SMTP_PORT) || 465,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS ? '****' : 'MISSING',
+    from: process.env.SMTP_FROM || 'noreply@peyda.nl'
+  });
+
   const html = `
 <!DOCTYPE html>
 <html dir="ltr" lang="nl">
@@ -88,17 +97,25 @@ export async function sendOTPEmail(email: string, code: string) {
 </html>
   `;
 
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || 'noreply@peyda.nl',
-    to: email,
-    subject: 'Uw inlogcode voor Peyda.nl',
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.SMTP_FROM || 'noreply@peyda.nl',
+      to: email,
+      subject: 'Uw inlogcode voor Peyda.nl',
+      html,
+    });
+    console.log('Message sent: %s', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
 }
 
 export async function verifySMTPConnection() {
   try {
     await transporter.verify();
+    console.log('SMTP Connection: Verified successfully');
     return true;
   } catch (error) {
     console.error('SMTP Connection failed:', error);

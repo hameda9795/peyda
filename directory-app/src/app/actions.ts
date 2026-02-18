@@ -33,10 +33,12 @@ export async function requestOtp(email: string, isRegistration: boolean = false)
   try {
     // Validate email format
     if (!email || !isValidEmail(email)) {
+      console.log('Invalid email format:', email);
       return { success: false, error: 'Ongeldig e-mailadres' }
     }
 
     const normalizedEmail = email.toLowerCase().trim()
+    console.log('Processing OTP request for:', normalizedEmail, 'Is registration:', isRegistration);
 
     // Check if this email already has a registered business
     const existingOwner = await db.businessOwner.findUnique({
@@ -49,23 +51,13 @@ export async function requestOtp(email: string, isRegistration: boolean = false)
       return { success: false, error: 'Dit e-mailadres is al gekoppeld aan een bedrijf. Gebruik een ander e-mailadres voor een nieuw bedrijf.' }
     }
 
-    // Check if there's a valid unused token that hasn't expired yet (within 30 min window)
-    const existingToken = await db.verificationToken.findFirst({
-      where: {
-        identifier: normalizedEmail,
-      },
-      orderBy: { expires: 'desc' }
-    })
+    // Check if there's a valid unused token that hasn't expired yet
+    // We used to block new tokens here, but that prevents "resend code" from working
+    // since we hash the token and can't resend the old one.
+    // Now we always generate a new token if requested.
 
-    // If there's a recent token (within 30 minutes), don't generate a new one
-    if (existingToken) {
-      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
-      if (existingToken.expires > thirtyMinutesAgo) {
-        // Token is still valid within 30 min window, allow resend
-        // But we won't regenerate - user can use existing code
-        return { success: true, message: 'Code is nog geldig. U kunt de bestaande code gebruiken.' }
-      }
-    }
+    // Optional: We could implement a tighter rate limit here (e.g. 1 minute) if needed in future
+    // but for now, let's ensure the user gets their code.
 
     // Generate 6-digit code
     const code = generateOTP()
@@ -92,7 +84,9 @@ export async function requestOtp(email: string, isRegistration: boolean = false)
 
     // Send OTP email
     try {
+      console.log('Sending OTP email to:', normalizedEmail);
       await sendOTPEmail(normalizedEmail, code)
+      console.log('OTP email sent successfully');
     } catch (emailError) {
       console.error('Failed to send OTP email:', emailError)
       return { success: false, error: 'Kon e-mail niet versturen. Controleer de SMTP-instellingen.' }
