@@ -68,9 +68,10 @@ export const metadata: Metadata = {
         description: "Vind lokale bedrijven in heel Nederland. Van restaurants tot loodgieters - ontdek de beste professionals in jouw buurt met Peyda.",
     },
     twitter: {
-        card: "summary",
+        card: "summary_large_image",
         title: "Peyda - De Bedrijvengids van Nederland",
         description: "Vind lokale bedrijven in heel Nederland.",
+        creator: "@peyda_nl", // hypothetical handle
     },
     alternates: {
         canonical: BASE_URL,
@@ -88,7 +89,7 @@ export const metadata: Metadata = {
             { url: "/favicon-48.ico", sizes: "48x48" },
         ],
     },
-    category: "business",
+    category: "directory", // Improved category
 };
 
 export const viewport: Viewport = {
