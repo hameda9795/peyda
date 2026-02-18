@@ -84,10 +84,10 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.98 }}
                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            className="absolute top-full left-0 mt-3 w-[1100px] z-50 p-2"
+                            className="fixed top-16 left-0 right-0 z-50 flex justify-center px-4 pt-3 pb-2"
                         >
                             {/* Glassmorphism Panel */}
-                            <div className="relative overflow-hidden rounded-2xl bg-white/95 backdrop-blur-3xl shadow-2xl ring-1 ring-black/5 flex h-[650px]">
+                            <div className="relative overflow-hidden rounded-2xl bg-white/95 backdrop-blur-3xl shadow-2xl ring-1 ring-black/5 flex h-[650px] w-full max-w-[1100px]">
 
                                 {/* Decorative gradients */}
                                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-20" />
