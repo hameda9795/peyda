@@ -33,12 +33,10 @@ export async function requestOtp(email: string, isRegistration: boolean = false)
   try {
     // Validate email format
     if (!email || !isValidEmail(email)) {
-      console.log('Invalid email format:', email);
       return { success: false, error: 'Ongeldig e-mailadres' }
     }
 
     const normalizedEmail = email.toLowerCase().trim()
-    console.log('Processing OTP request for:', normalizedEmail, 'Is registration:', isRegistration);
 
     // Check if this email already has a registered business
     const existingOwner = await db.businessOwner.findUnique({
@@ -84,9 +82,7 @@ export async function requestOtp(email: string, isRegistration: boolean = false)
 
     // Send OTP email
     try {
-      console.log('Sending OTP email to:', normalizedEmail);
       await sendOTPEmail(normalizedEmail, code)
-      console.log('OTP email sent successfully');
     } catch (emailError) {
       console.error('Failed to send OTP email:', emailError)
       return { success: false, error: 'Kon e-mail niet versturen. Controleer de SMTP-instellingen.' }
