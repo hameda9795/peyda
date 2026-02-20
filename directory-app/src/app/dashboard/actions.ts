@@ -232,20 +232,21 @@ export async function getAnalyticsData(businessId?: string) {
 
 import { supabase } from '@/lib/supabase';
 
-async function saveBusinessFile(file: File | null, folder: string): Promise<{ url: string | null; error: string | null }> {
-    if (!file) return { url: null, error: null };
+async function saveBusinessFile(fileOrUrl: File | string | null, folder: string): Promise<{ url: string | null; error: string | null }> {
+    if (!fileOrUrl) return { url: null, error: null };
+    if (typeof fileOrUrl === 'string') return { url: fileOrUrl, error: null };
 
     try {
-        console.log('saveBusinessFile called with:', file.name, file.type, file.size);
+        console.log('saveBusinessFile called with:', fileOrUrl.name, fileOrUrl.type, fileOrUrl.size);
 
-        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const fileName = `${Date.now()}-${fileOrUrl.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         const path = `${folder}/${fileName}`;
 
         console.log('Uploading to Supabase:', path);
 
         const { data, error } = await supabase.storage
             .from('uploads')
-            .upload(path, file);
+            .upload(path, fileOrUrl);
 
         if (error) {
             console.error('Supabase upload error:', error);
@@ -322,14 +323,14 @@ export async function updateProfile(formData: FormData, businessId?: string) {
         const openingHours = formData.get('openingHours') ? JSON.parse(formData.get('openingHours') as string) : []
 
         // Handle file uploads
-        const uploadedLogoFile = formData.get('logo') as File | null
-        const uploadedCoverFile = formData.get('coverImage') as File | null
+        const uploadedLogoFile = formData.get('logo') as File | string | null
+        const uploadedCoverFile = formData.get('coverImage') as File | string | null
 
         let logoUrl = business.logo
         let coverImageUrl = business.coverImage
         let uploadErrors: string[] = []
 
-        if (uploadedLogoFile && uploadedLogoFile.size > 0) {
+        if (uploadedLogoFile && (typeof uploadedLogoFile === 'string' || uploadedLogoFile.size > 0)) {
             console.log('Uploading logo...');
             const logoResult = await saveBusinessFile(uploadedLogoFile, 'logos')
             console.log('Logo upload result:', logoResult);
@@ -340,7 +341,7 @@ export async function updateProfile(formData: FormData, businessId?: string) {
             }
         }
 
-        if (uploadedCoverFile && uploadedCoverFile.size > 0) {
+        if (uploadedCoverFile && (typeof uploadedCoverFile === 'string' || uploadedCoverFile.size > 0)) {
             console.log('Uploading cover...');
             const coverResult = await saveBusinessFile(uploadedCoverFile, 'covers')
             console.log('Cover upload result:', coverResult);

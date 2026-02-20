@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, use } from "react";
 import { Save, Upload, X, Instagram, Facebook, Linkedin, Globe, Plus, Trash2 } from "lucide-react";
 import { updateProfile as updateProfileAction, updateOpeningHours, generateSeoData, publishBusiness } from "../actions";
 import { SeoStatusWidget } from "@/components/dashboard/SeoStatusWidget";
+import { supabase } from "@/lib/supabase";
 
 const defaultOpeningHours = [
     { day: "Maandag", open: "08:00", close: "18:00", closed: false },
@@ -404,9 +405,27 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             form.append('certifications', JSON.stringify(formData.certifications));
             form.append('faq', JSON.stringify(faqList.filter(f => f.question.trim() && f.answer.trim())));
 
+            const uploadToSupabase = async (file: File, folder: string) => {
+                const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                const path = `${folder}/${fileName}`;
+
+                const { data, error } = await supabase.storage
+                    .from('uploads')
+                    .upload(path, file);
+
+                if (error) throw new Error(`Fout bij uploaden afbeelding: ${error.message}`);
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('uploads')
+                    .getPublicUrl(path);
+
+                return publicUrl;
+            };
+
             // Add logo if new one uploaded
             if (formData.logo) {
-                form.append('logo', formData.logo);
+                const url = await uploadToSupabase(formData.logo, 'logos');
+                form.append('logo', url);
             }
 
             // Add logo alt text
@@ -416,7 +435,8 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
             // Add cover image if new one uploaded
             if (formData.coverImage) {
-                form.append('coverImage', formData.coverImage);
+                const url = await uploadToSupabase(formData.coverImage, 'covers');
+                form.append('coverImage', url);
             }
 
             // Add cover alt text
@@ -1148,8 +1168,8 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                         setFormData({ ...formData, amenities: newAmenities });
                                     }}
                                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.amenities.includes(amenity)
-                                            ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                                            : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                                        ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                                        : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
                                         }`}
                                 >
                                     {amenity}
@@ -1172,8 +1192,8 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                         setFormData({ ...formData, paymentMethods: newMethods });
                                     }}
                                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.paymentMethods.includes(method)
-                                            ? 'bg-green-100 text-green-700 border border-green-300'
-                                            : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                                        ? 'bg-green-100 text-green-700 border border-green-300'
+                                        : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
                                         }`}
                                 >
                                     {method}
@@ -1196,8 +1216,8 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                         setFormData({ ...formData, languages: newLangs });
                                     }}
                                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.languages.includes(lang)
-                                            ? 'bg-purple-100 text-purple-700 border border-purple-300'
-                                            : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                                        ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                                        : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
                                         }`}
                                 >
                                     {lang}

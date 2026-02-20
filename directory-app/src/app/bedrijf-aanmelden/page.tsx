@@ -29,6 +29,7 @@ import { HelpModal } from '@/components/register/HelpModal';
 import { BusinessFormData } from '@/lib/types/business-form';
 import { createBusiness } from '@/lib/actions/business';
 import { getUserEmail } from '@/app/actions';
+import { supabase } from '@/lib/supabase';
 
 const STEPS = [
     { id: 1, title: 'Basisgegevens', description: 'Naam & Categorie', icon: Building2 },
@@ -326,13 +327,37 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                 }
             });
 
-            // Append files
-            if (formData.logo) data.append('logo', formData.logo);
-            if (formData.coverImage) data.append('coverImage', formData.coverImage);
-            if (formData.gallery) {
-                formData.gallery.forEach((file) => {
-                    data.append('gallery', file);
-                });
+            const uploadToSupabase = async (file: File, folder: string) => {
+                const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                const path = `${folder}/${fileName}`;
+
+                const { data, error } = await supabase.storage
+                    .from('uploads')
+                    .upload(path, file);
+
+                if (error) throw new Error(`Fout bij uploaden afbeelding: ${error.message}`);
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('uploads')
+                    .getPublicUrl(path);
+
+                return publicUrl;
+            };
+
+            // Upload files directly to Supabase from the client to avoid Vercel 4.5MB payload limit on Server Actions
+            if (formData.logo) {
+                const url = await uploadToSupabase(formData.logo, 'logos');
+                data.append('logo', url);
+            }
+            if (formData.coverImage) {
+                const url = await uploadToSupabase(formData.coverImage, 'covers');
+                data.append('coverImage', url);
+            }
+            if (formData.gallery && formData.gallery.length > 0) {
+                for (const file of formData.gallery) {
+                    const url = await uploadToSupabase(file, 'gallery');
+                    data.append('gallery', url);
+                }
             }
 
             // Append AI-generated altTexts for gallery images

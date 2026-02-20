@@ -53,16 +53,20 @@ const stripCategoryPrefix = (subSlug: string, categorySlug: string) => {
     return result.replace(/\//g, '-');
 };
 
-async function saveFile(file: File | null, folder: string): Promise<string | null> {
-    if (!file) return null;
+async function saveFile(fileOrUrl: File | string | null, folder: string): Promise<string | null> {
+    if (!fileOrUrl) return null;
+
+    if (typeof fileOrUrl === 'string') {
+        return fileOrUrl;
+    }
 
     try {
-        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const fileName = `${Date.now()}-${fileOrUrl.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         const path = `${folder}/${fileName}`;
 
         const { data, error } = await supabase.storage
             .from('uploads')
-            .upload(path, file);
+            .upload(path, fileOrUrl);
 
         if (error) {
             console.error('Supabase upload error:', error);
@@ -75,7 +79,7 @@ async function saveFile(file: File | null, folder: string): Promise<string | nul
 
         return publicUrl;
     } catch (error) {
-        console.error(`Error saving file ${file.name}:`, error);
+        console.error(`Error saving file ${fileOrUrl.name}:`, error);
         return null;
     }
 }
@@ -131,10 +135,10 @@ export async function createBusiness(data: FormData) {
         slug = uniqueSlug;
 
         // Save images
-        const logo = await saveFile(data.get('logo') as File, 'logos');
-        const coverImage = await saveFile(data.get('coverImage') as File, 'covers');
+        const logo = await saveFile(data.get('logo') as File | string | null, 'logos');
+        const coverImage = await saveFile(data.get('coverImage') as File | string | null, 'covers');
 
-        const galleryFiles = data.getAll('gallery') as File[];
+        const galleryFiles = data.getAll('gallery') as (File | string)[];
         const galleryPromises = galleryFiles.map(f => saveFile(f, 'gallery'));
         const galleryUrls = (await Promise.all(galleryPromises)).filter(Boolean) as string[];
 
