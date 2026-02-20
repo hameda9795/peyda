@@ -350,6 +350,7 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                 const categorySlug = result.categorySlug || 'categorie';
                 const subCategorySlug = result.subCategorySlug || 'subcategorie';
 
+                window.dispatchEvent(new Event('auth-change'));
                 router.refresh();
                 router.push(`/${provinceSlug}/${citySlug}/${neighborhoodSlug}/${categorySlug}/${subCategorySlug}/${result.slug}`);
             } else {

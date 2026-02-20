@@ -160,11 +160,28 @@ export async function createBusiness(data: FormData) {
             return val ? String(val) : null;
         };
 
-        // Determine province from city
-        const cityName = getStr('city') || 'Utrecht';
-        const locationData = findProvinceByCity(cityName);
-        const provinceName = locationData?.province.name || null;
-        const provinceSlugValue = locationData?.province.slug || null;
+        // Determine province from form data (provided by user in StepAddress)
+        const cityName = getStr('city') || '';
+        const provinceFromForm = getStr('province');
+
+        // If province is provided in form (from custom city input), use it
+        // Otherwise try to find it from known cities list
+        let provinceName: string | null = null;
+        let provinceSlugValue: string | null = null;
+        let locationData = null;
+
+        if (provinceFromForm) {
+            // Use province from form data (user selected it in dropdown)
+            provinceName = provinceFromForm;
+            provinceSlugValue = createSlug(provinceFromForm);
+            // Also try to find city slug from known cities
+            locationData = findProvinceByCity(cityName);
+        } else {
+            // Fallback: try to find from known cities
+            locationData = findProvinceByCity(cityName);
+            provinceName = locationData?.province.name || null;
+            provinceSlugValue = locationData?.province.slug || null;
+        }
 
         // Get user email from session for security (don't trust form data)
         // We already have existingUser from the check above
@@ -229,8 +246,10 @@ export async function createBusiness(data: FormData) {
                 highlights: data.get('highlights') ? JSON.parse(data.get('highlights') as string) : [],
                 faq: data.get('faq') ? JSON.parse(data.get('faq') as string) : [],
 
-                status: 'approved',
-                publishStatus: 'DRAFT',
+                status: 'pending',
+                publishStatus: 'PUBLISHED',
+                seoStatus: 'COMPLETED',
+                lastSeoUpdate: new Date(),
 
                 // Relation
                 subCategoryId,
@@ -262,7 +281,8 @@ export async function createBusiness(data: FormData) {
         const neighborhoodName = getStr('neighborhood') || '';
 
         // Use the already computed province data from above
-        const provinceSlug = provinceSlugValue || 'utrecht';
+        // Default to 'nederland' only if no province was selected
+        const provinceSlug = provinceSlugValue || 'nederland';
         const citySlug = locationData?.city.slug || createSlug(cityName);
         const neighborhoodSlug = createSlug(neighborhoodName);
 
@@ -973,7 +993,7 @@ export async function getRelatedBusinessesById(businessId: string, subCategoryId
                     },
                     id: { notIn: existingIds },
                     status: 'approved',
-                publishStatus: 'PUBLISHED'
+                    publishStatus: 'PUBLISHED'
                 },
                 take: remaining,
                 orderBy: [

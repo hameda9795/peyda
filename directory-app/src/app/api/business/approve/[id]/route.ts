@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sanitizeGeneratedContent } from '@/lib/validators/highlights-validator';
+import { slugify } from '@/lib/slugify';
 
 function generateSlug(name: string): string {
     return name
@@ -9,6 +10,67 @@ function generateSlug(name: string): string {
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim();
+}
+
+// Helper to ensure city exists in database
+async function ensureCityExists(cityName: string, provinceName?: string): Promise<{ id: string; name: string; slug: string }> {
+    const citySlug = slugify(cityName);
+    
+    // Try to find existing city
+    let city = await db.city.findFirst({
+        where: {
+            OR: [
+                { slug: citySlug },
+                { name: { equals: cityName, mode: 'insensitive' } }
+            ]
+        }
+    });
+
+    // Create city if not exists
+    if (!city) {
+        city = await db.city.create({
+            data: {
+                name: cityName,
+                slug: citySlug,
+                province: provinceName || null,
+                contentStatus: 'pending'
+            }
+        });
+    }
+
+    return city;
+}
+
+// Helper to ensure neighborhood exists
+async function ensureNeighborhoodExists(
+    neighborhoodName: string, 
+    cityId: string
+): Promise<{ id: string; name: string; slug: string }> {
+    const neighborhoodSlug = slugify(neighborhoodName);
+    
+    // Try to find existing neighborhood
+    let neighborhood = await db.neighborhood.findFirst({
+        where: {
+            cityId,
+            OR: [
+                { slug: neighborhoodSlug },
+                { name: { equals: neighborhoodName, mode: 'insensitive' } }
+            ]
+        }
+    });
+
+    // Create neighborhood if not exists
+    if (!neighborhood) {
+        neighborhood = await db.neighborhood.create({
+            data: {
+                name: neighborhoodName,
+                slug: neighborhoodSlug,
+                cityId
+            }
+        });
+    }
+
+    return neighborhood;
 }
 
 export async function POST(
@@ -51,6 +113,17 @@ export async function POST(
         // Get first subcategory ID (or create a relation differently)
         const subcategoryId = formData.subcategories[0];
 
+        // Ensure city and neighborhood exist in database
+        const city = await ensureCityExists(formData.city, formData.province);
+        const neighborhood = formData.neighborhood 
+            ? await ensureNeighborhoodExists(formData.neighborhood, city.id)
+            : null;
+
+        // Generate province slug for URL - use form province or default to 'nederland'
+        const provinceSlug = formData.province 
+            ? slugify(formData.province)
+            : 'nederland';
+
         // Create business
         const business = await db.business.create({
             data: {
@@ -63,6 +136,8 @@ export async function POST(
                 street: formData.street,
                 postalCode: formData.postalCode,
                 city: formData.city,
+                province: formData.province || null,
+                provinceSlug: provinceSlug,
                 neighborhood: formData.neighborhood,
 
                 // Contact
@@ -104,8 +179,9 @@ export async function POST(
                 seoLocalText: generatedContent?.seo?.localSeoText,
 
                 // Status
-                status: 'pending', // Admin needs to approve
-                isActive: false,
+                status: 'approved',
+                isActive: true,
+                publishStatus: 'PUBLISHED',
 
                 // Relations
                 subCategoryId: subcategoryId,
@@ -120,6 +196,50 @@ export async function POST(
                 status: 'approved',
             },
         });
+
+        // Link business to owner (by email)
+        const ownerEmail = formData.email?.toLowerCase()?.trim();
+        let oldBusinessId: string | null = null;
+        
+        if (ownerEmail) {
+            let owner = await db.businessOwner.findUnique({
+                where: { email: ownerEmail }
+            });
+            
+            // Create owner if doesn't exist
+            if (!owner) {
+                owner = await db.businessOwner.create({
+                    data: {
+                        email: ownerEmail,
+                        name: formData.name || ownerEmail.split('@')[0],
+                    }
+                });
+            }
+            
+            // Always update owner's businessId to the new published business
+            // This handles both new owners and owners with existing DRAFT businesses
+            if (owner) {
+                // Store old business ID for cleanup
+                oldBusinessId = owner.businessId;
+                
+                await db.businessOwner.update({
+                    where: { id: owner.id },
+                    data: { businessId: business.id }
+                });
+                
+                // Clean up old DRAFT business if exists
+                if (oldBusinessId && oldBusinessId !== business.id) {
+                    const oldBusiness = await db.business.findUnique({
+                        where: { id: oldBusinessId }
+                    });
+                    if (oldBusiness && oldBusiness.publishStatus === 'DRAFT') {
+                        await db.business.delete({
+                            where: { id: oldBusinessId }
+                        });
+                    }
+                }
+            }
+        }
 
         return NextResponse.json({
             success: true,

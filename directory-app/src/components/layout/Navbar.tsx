@@ -17,6 +17,50 @@ interface MobileMenuProps {
     onRegisterClick: () => void;
 }
 
+// Mobile auth button component
+function MobileAuthButton({ onClose }: { onClose: () => void }) {
+    const [hasPublishedBusiness, setHasPublishedBusiness] = useState(false);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const user = await getCurrentUser();
+                setHasPublishedBusiness(user?.business?.publishStatus === 'PUBLISHED');
+            } catch {
+                setHasPublishedBusiness(false);
+            }
+        };
+        checkAuth();
+    }, []);
+
+    if (hasPublishedBusiness) {
+        return (
+            <Link
+                href="/dashboard"
+                onClick={onClose}
+                className="w-full mb-4 py-3.5 text-center text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 rounded-full transition-colors shadow-lg shadow-indigo-200 min-h-[48px] flex items-center justify-center gap-2"
+            >
+                <User className="h-5 w-5" />
+                Profiel
+            </Link>
+        );
+    }
+
+    return (
+        <button
+            onClick={() => {
+                onClose();
+                // Use a custom event to trigger login modal from parent
+                window.dispatchEvent(new CustomEvent('show-login-modal'));
+            }}
+            className="w-full mb-4 py-3.5 text-center text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 rounded-full transition-colors shadow-lg shadow-indigo-200 min-h-[48px] flex items-center justify-center gap-2"
+        >
+            <User className="h-5 w-5" />
+            Inloggen
+        </button>
+    );
+}
+
 function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick }: MobileMenuProps) {
     const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
@@ -77,17 +121,8 @@ function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick
 
                 {/* Navigation Links */}
                 <nav className="p-4 overflow-y-auto h-[calc(100%-230px)]">
-                    {/* Login Button */}
-                    <button
-                        onClick={() => {
-                            onClose();
-                            onLoginClick();
-                        }}
-                        className="w-full mb-4 py-3.5 text-center text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 rounded-full transition-colors shadow-lg shadow-indigo-200 min-h-[48px] flex items-center justify-center gap-2"
-                    >
-                        <User className="h-5 w-5" />
-                        Inloggen
-                    </button>
+                    {/* Login/Dashboard Button */}
+                    <MobileAuthButton onClose={onClose} />
 
                     <ul className="space-y-2">
                         {mainLinks.map((link) => (
@@ -151,7 +186,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
     const [hasPublishedBusiness, setHasPublishedBusiness] = useState(false);
     const [showBusinessPrompt, setShowBusinessPrompt] = useState(false);
 
-    // Check authentication status on mount
+    // Check authentication status on mount and periodically
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -165,6 +200,44 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
             }
         };
         checkAuth();
+
+        // Listen for auth changes (e.g., after business is published)
+        const handleAuthChange = () => {
+            checkAuth();
+        };
+        window.addEventListener('auth-change', handleAuthChange);
+
+        // Listen for show login modal event from mobile menu
+        const handleShowLoginModal = () => {
+            setShowLoginModal(true);
+        };
+        window.addEventListener('show-login-modal', handleShowLoginModal);
+
+        // Check auth when tab becomes visible (user returns to page)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                checkAuth();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        // Periodic check every 3 seconds for the first 30 seconds after load
+        // This helps catch auth changes after publish
+        let checkCount = 0;
+        const intervalId = setInterval(() => {
+            checkAuth();
+            checkCount++;
+            if (checkCount >= 10) {
+                clearInterval(intervalId);
+            }
+        }, 3000);
+
+        return () => {
+            window.removeEventListener('auth-change', handleAuthChange);
+            window.removeEventListener('show-login-modal', handleShowLoginModal);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            clearInterval(intervalId);
+        };
     }, []);
 
     const handleLoginSuccess = async () => {
@@ -267,43 +340,13 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                         {/* User Button / Login */}
                         <div className="relative user-menu">
                             {hasPublishedBusiness ? (
-                                <>
-                                    <button
-                                        onClick={() => setShowUserMenu(!showUserMenu)}
-                                        className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
-                                        aria-label="Menu"
-                                    >
-                                        <User className="h-5 w-5" />
-                                    </button>
-
-                                    {/* User Dropdown */}
-                                    {showUserMenu && (
-                                        <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-zinc-100 py-2 z-50">
-                                            <button
-                                                onClick={() => {
-                                                    setShowUserMenu(false);
-                                                    window.location.href = '/dashboard';
-                                                }}
-                                                className="w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 flex items-center gap-2"
-                                            >
-                                                <LayoutDashboard className="w-4 h-4" />
-                                                Dashboard
-                                            </button>
-                                            <button
-                                                onClick={async () => {
-                                                    setShowUserMenu(false);
-                                                    await fetch('/api/auth/logout', { method: 'POST' });
-                                                    setHasPublishedBusiness(false);
-                                                    window.location.href = '/';
-                                                }}
-                                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                            >
-                                                <LogOut className="w-4 h-4" />
-                                                Uitloggen
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
+                                <Link
+                                    href="/dashboard"
+                                    className="hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-full transition-colors min-h-[44px] items-center gap-2"
+                                >
+                                    <User className="h-4 w-4" />
+                                    Profiel
+                                </Link>
                             ) : (
                                 <button
                                     onClick={() => setShowLoginModal(true)}

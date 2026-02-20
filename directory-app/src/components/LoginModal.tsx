@@ -34,14 +34,19 @@ export default function LoginModal({
     try {
       const user = await getCurrentUser();
       if (user) {
-        // User is already logged in
-        if (user.business?.publishStatus === 'PUBLISHED') {
-          // Has published business, redirect to dashboard
-          window.location.href = "/dashboard";
-        } else {
-          // No business or not published, redirect to register
-          window.location.href = "/bedrijf-aanmelden";
-        }
+        // User is already logged in - close modal immediately without showing
+        onClose();
+        
+        // Small delay to ensure modal closes before navigation
+        setTimeout(() => {
+          if (user.business?.publishStatus === 'PUBLISHED') {
+            // Has published business, redirect to dashboard
+            window.location.href = "/dashboard";
+          } else {
+            // No business or not published, redirect to register
+            window.location.href = "/bedrijf-aanmelden";
+          }
+        }, 100);
       }
     } catch (error) {
       console.error("Auth check failed:", error);

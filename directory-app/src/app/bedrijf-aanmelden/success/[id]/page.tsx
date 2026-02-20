@@ -2,16 +2,37 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useEffect } from 'react';
 import {
     CheckCircle,
     Mail,
     Clock,
     ArrowRight,
     Home,
-    Sparkles
+    Sparkles,
+    LayoutDashboard
 } from 'lucide-react';
 
 export default function SuccessPage() {
+    // Dispatch auth change event to update navbar
+    useEffect(() => {
+        // Trigger auth check in navbar immediately and after a delay
+        const triggerAuthChange = () => {
+            window.dispatchEvent(new Event('auth-change'));
+        };
+        
+        // Trigger immediately
+        triggerAuthChange();
+        
+        // Trigger again after a short delay to ensure state is updated
+        const timeout1 = setTimeout(triggerAuthChange, 500);
+        const timeout2 = setTimeout(triggerAuthChange, 1500);
+        
+        return () => {
+            clearTimeout(timeout1);
+            clearTimeout(timeout2);
+        };
+    }, []);
     return (
         <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 flex items-center justify-center p-4">
             {/* Background decoration */}
@@ -114,11 +135,11 @@ export default function SuccessPage() {
                             Naar homepage
                         </Link>
                         <Link
-                            href="/bedrijf-aanmelden"
-                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-medium rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transition-all"
+                            href="/dashboard"
+                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all"
                         >
-                            Nog een bedrijf
-                            <ArrowRight className="w-5 h-5" />
+                            <LayoutDashboard className="w-5 h-5" />
+                            Naar dashboard
                         </Link>
                     </motion.div>
                 </motion.div>

@@ -9,13 +9,13 @@ const protectedRoutes = [
   '/dashboard/analytics',
 ]
 
-// Routes that should redirect to login
+// Routes that should redirect authenticated users
 const authRoutes = [
   '/bedrijf-aanmelden',
 ]
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
 
   // Check for session cookie
   const sessionToken = request.cookies.get('session_token')
@@ -26,11 +26,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // If has session and trying to access auth routes (like registration), redirect to dashboard
+  // If has session and trying to access auth routes (like registration)
   if (sessionToken && pathname === '/bedrijf-aanmelden') {
-    // Allow access if no query parameter (user might want to add another business)
-    // But if they have a business, they should go to dashboard
-    return NextResponse.next()
+    // Check if there's a message parameter (like 'no-business')
+    const message = searchParams.get('message')
+    
+    // Allow access if message=no-business (user needs to register)
+    if (message === 'no-business') {
+      return NextResponse.next()
+    }
+    
+    // Otherwise redirect to dashboard (user already has business)
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return NextResponse.next()

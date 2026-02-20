@@ -45,8 +45,11 @@ export async function POST(req: Request) {
     const { formData } = await req.json();
 
     if (!process.env.OPENAI_API_KEY) {
+      console.error('OpenAI API key not configured');
       return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 });
     }
+    
+    console.log('Generating AI content for:', formData?.name, 'website:', formData?.website);
 
     const services = (formData?.services || []).map((s: any) => s.name).filter(Boolean);
     const amenities = formData?.amenities || [];

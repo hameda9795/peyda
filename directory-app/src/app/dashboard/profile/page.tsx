@@ -361,6 +361,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             const result = await publishBusiness(businessId);
             if (result.success) {
                 setPublishStatus('PUBLISHED');
+                window.dispatchEvent(new Event('auth-change'));
             } else {
                 alert(result.error || 'Failed to publish business');
             }
@@ -1146,11 +1147,10 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                             : [...formData.amenities, amenity];
                                         setFormData({ ...formData, amenities: newAmenities });
                                     }}
-                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                                        formData.amenities.includes(amenity)
+                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.amenities.includes(amenity)
                                             ? 'bg-blue-100 text-blue-700 border border-blue-300'
                                             : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                                    }`}
+                                        }`}
                                 >
                                     {amenity}
                                 </button>
@@ -1171,11 +1171,10 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                             : [...formData.paymentMethods, method];
                                         setFormData({ ...formData, paymentMethods: newMethods });
                                     }}
-                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                                        formData.paymentMethods.includes(method)
+                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.paymentMethods.includes(method)
                                             ? 'bg-green-100 text-green-700 border border-green-300'
                                             : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                                    }`}
+                                        }`}
                                 >
                                     {method}
                                 </button>
@@ -1196,11 +1195,10 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                             : [...formData.languages, lang];
                                         setFormData({ ...formData, languages: newLangs });
                                     }}
-                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                                        formData.languages.includes(lang)
+                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.languages.includes(lang)
                                             ? 'bg-purple-100 text-purple-700 border border-purple-300'
                                             : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                                    }`}
+                                        }`}
                                 >
                                     {lang}
                                 </button>

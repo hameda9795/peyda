@@ -3,15 +3,26 @@
 import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
+import { getCurrentUser } from '@/app/actions'
+
 const prisma = new PrismaClient({
     datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL
 })
 
 // Helper to get business by ID or return first published
 async function getBusiness(businessId?: string) {
-    if (businessId) {
+    let targetId = businessId;
+
+    if (!targetId) {
+        const user = await getCurrentUser();
+        if (user?.businessId) {
+            targetId = user.businessId;
+        }
+    }
+
+    if (targetId) {
         return await prisma.business.findUnique({
-            where: { id: businessId },
+            where: { id: targetId },
             include: {
                 subCategory: {
                     include: { category: true }
@@ -24,34 +35,10 @@ async function getBusiness(businessId?: string) {
             }
         })
     }
+
     return await prisma.business.findFirst({
-        where: { status: 'published' },
-        select: {
-            id: true,
-            name: true,
-            slug: true,
-            city: true,
-            provinceSlug: true,
-            province: true,
-            neighborhood: true,
-            shortDescription: true,
-            longDescription: true,
-            phone: true,
-            email: true,
-            website: true,
-            logo: true,
-            coverImage: true,
-            services: true,
-            rating: true,
-            reviewCount: true,
-            // SEO fields
-            seoTitle: true,
-            seoDescription: true,
-            seoKeywords: true,
-            seoLocalText: true,
-            structuredData: true,
-            seoStatus: true,
-            lastSeoUpdate: true,
+        where: { publishStatus: 'PUBLISHED' },
+        include: {
             subCategory: {
                 include: { category: true }
             },
@@ -945,8 +932,8 @@ export async function getSEOScore(businessId?: string) {
         // Local keywords in content
         const cityName = business.city || ''
         const hasLocalKeywords = checkKeywordInText(business.longDescription, cityName) ||
-                                  checkKeywordInText(business.shortDescription, cityName) ||
-                                  checkKeywordInText(business.seoLocalText, cityName)
+            checkKeywordInText(business.shortDescription, cityName) ||
+            checkKeywordInText(business.seoLocalText, cityName)
 
         let localKeywordsScore = 0
         let localKeywordsStatus: SEOItemStatus = 'fail'

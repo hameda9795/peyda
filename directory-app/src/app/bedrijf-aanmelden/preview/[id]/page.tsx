@@ -169,7 +169,7 @@ export default function PreviewPage() {
                             <div className="flex items-center gap-4 text-white/80 text-sm">
                                 <span className="flex items-center gap-1">
                                     <MapPin className="w-4 h-4" />
-                                    {formData.neighborhood}, Utrecht
+                                    {formData.neighborhood}, {formData.city}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -493,7 +493,7 @@ export default function PreviewPage() {
                             {generatedContent?.seo?.title}
                         </div>
                         <div className="text-green-700 text-sm mt-1">
-                            utrechtbusiness.nl › bedrijf › {formData.name?.toLowerCase().replace(/\s+/g, '-')}
+                            peyda.nl › bedrijf › {formData.name?.toLowerCase().replace(/\s+/g, '-')}
                         </div>
                         <p className="text-slate-600 text-sm mt-2">
                             {generatedContent?.seo?.metaDescription}

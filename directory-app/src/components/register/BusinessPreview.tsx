@@ -7,7 +7,7 @@ import { BusinessFormData } from '@/lib/types/business-form';
 import { BusinessHero } from "@/components/business/BusinessHero";
 import { BusinessInfoSidebar } from "@/components/business/BusinessInfoSidebar";
 import { BusinessContent } from "@/components/business/BusinessContent";
-import { ArrowLeft, Check, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, Sparkles } from 'lucide-react';
 
 interface BusinessPreviewProps {
     formData: BusinessFormData;
@@ -148,11 +148,6 @@ export function BusinessPreview({ formData, aiData, onBack, onConfirm, isSubmitt
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="hidden md:flex items-center text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100 mr-2">
-                        <AlertTriangle className="w-3 h-3 mr-1.5" />
-                        Dit is een voorbeeld. Sommige elementen kunnen afwijken.
-                    </div>
-
                     {error && (
                         <div className="text-xs text-red-600 font-medium bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 max-w-[200px] truncate" title={error}>
                             {error}
