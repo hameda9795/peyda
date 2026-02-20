@@ -9,6 +9,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { Business } from "@/lib/types";
 import { NETHERLANDS_PROVINCES } from "@/lib/netherlands-data";
+import { supabase } from "@/lib/supabase";
 
 // Helper to find province by city name
 const findProvinceByCity = (cityName: string) => {
@@ -56,22 +57,23 @@ async function saveFile(file: File | null, folder: string): Promise<string | nul
     if (!file) return null;
 
     try {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const path = `${folder}/${fileName}`;
 
-        // Create unique filename
-        const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
-        const relativePath = `/uploads/${folder}/${filename}`;
-        const absoluteDir = join(process.cwd(), "public", "uploads", folder);
-        const absolutePath = join(absoluteDir, filename);
+        const { data, error } = await supabase.storage
+            .from('uploads')
+            .upload(path, file);
 
-        // Ensure directory exists
-        await mkdir(absoluteDir, { recursive: true });
+        if (error) {
+            console.error('Supabase upload error:', error);
+            return null;
+        }
 
-        // Write file
-        await writeFile(absolutePath, buffer);
+        const { data: { publicUrl } } = supabase.storage
+            .from('uploads')
+            .getPublicUrl(path);
 
-        return relativePath;
+        return publicUrl;
     } catch (error) {
         console.error(`Error saving file ${file.name}:`, error);
         return null;
