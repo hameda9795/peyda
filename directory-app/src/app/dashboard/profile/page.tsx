@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, use } from "react";
-import { Save, Upload, X, Instagram, Facebook, Linkedin, Globe, Plus, Trash2 } from "lucide-react";
-import { updateProfile as updateProfileAction, updateOpeningHours, generateSeoData, publishBusiness } from "../actions";
+import { Save, Upload, X, Instagram, Facebook, Linkedin, Globe, Plus, Trash2, CheckCircle2, AlertCircle, Loader2, Info } from "lucide-react";
+import { updateProfile as updateProfileAction, generateSeoData, publishBusiness } from "../actions";
 import { SeoStatusWidget } from "@/components/dashboard/SeoStatusWidget";
 import { supabase } from "@/lib/supabase";
 
@@ -74,9 +74,14 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
     const [formData, setFormData] = useState(defaultFormData);
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [success, setSuccess] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
     const [publishing, setPublishing] = useState(false);
     const [images, setImages] = useState<Array<{ id: string; url: string; altText: string }>>([]);
+
+    const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 4000);
+    };
     const businessId = params.businessId;
     const fileInputRef = useRef<HTMLInputElement>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
@@ -90,6 +95,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
     const [logoAltText, setLogoAltText] = useState<string>("");
     const [coverAltText, setCoverAltText] = useState<string>("");
     const [faqList, setFaqList] = useState<FAQ[]>([]);
+    const [activeTab, setActiveTab] = useState<'algemeen' | 'media' | 'diensten' | 'extra'>('algemeen');
 
     // SEO State
     const [publishStatus, setPublishStatus] = useState<'DRAFT' | 'PUBLISHED' | null>(null);
@@ -112,16 +118,16 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             if (result.success) {
                 setSeoStatus('COMPLETED');
                 setSeoLastUpdate(new Date());
-                // Refresh the page after successful generation
-                window.location.reload();
+                showToast('SEO succesvol gegenereerd', 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 setSeoStatus('FAILED');
-                alert('SEO generatie mislukt: ' + (result.error || 'Onbekende fout'));
+                showToast('SEO generatie mislukt: ' + (result.error || 'Onbekende fout'), 'error');
             }
         } catch (error) {
             console.error('Error generating SEO:', error);
             setSeoStatus('FAILED');
-            alert('Er is een fout opgetreden bij het genereren van SEO');
+            showToast('Er is een fout opgetreden bij het genereren van SEO', 'error');
         } finally {
             setIsGeneratingSeo(false);
         }
@@ -167,11 +173,14 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
                     // Load gallery images with alt-texts
                     if (data.images?.gallery && Array.isArray(data.images.gallery)) {
-                        setImages(data.images.gallery.map((img: any, index: number) => ({
-                            id: `img_${index}`,
-                            url: img.url,
-                            altText: img.altText || ""
-                        })));
+                        setImages(data.images.gallery.map((img: unknown, index: number) => {
+                            const imageObj = img as { url: string; altText?: string };
+                            return {
+                                id: `img_${index}`,
+                                url: imageObj.url || "",
+                                altText: imageObj.altText || ""
+                            };
+                        }));
                     }
 
                     // Load logo and cover image
@@ -362,13 +371,14 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             const result = await publishBusiness(businessId);
             if (result.success) {
                 setPublishStatus('PUBLISHED');
+                showToast('Bedrijf succesvol gepubliceerd!', 'success');
                 window.dispatchEvent(new Event('auth-change'));
             } else {
-                alert(result.error || 'Failed to publish business');
+                showToast(result.error || 'Geen publicatie mogelijk', 'error');
             }
         } catch (error) {
             console.error('Error publishing:', error);
-            alert('Er is iets misgegaan bij het publiceren');
+            showToast('Er is iets misgegaan bij het publiceren', 'error');
         } finally {
             setPublishing(false);
         }
@@ -376,7 +386,6 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
     const handleSave = async () => {
         setSaving(true);
-        setSuccess(false);
 
         try {
             const form = new FormData();
@@ -460,14 +469,13 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             if (result.success) {
                 // Always save gallery (even if empty to handle deletions)
                 await saveGallery();
-                setSuccess(true);
-                setTimeout(() => setSuccess(false), 3000);
+                showToast('Wijzigingen zijn succesvol opgeslagen!', 'success');
             } else {
-                alert(result.error || 'Er is iets misgegaan');
+                showToast(result.error || 'Er is iets misgegaan', 'error');
             }
         } catch (error) {
             console.error('Error saving:', error);
-            alert('Er is iets misgegaan bij het opslaan');
+            showToast('Er is iets misgegaan bij het opslaan', 'error');
         } finally {
             setSaving(false);
         }
@@ -529,766 +537,870 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
                         >
-                            <Save className="w-5 h-5" />
+                            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                             {saving ? "Opslaan..." : "Wijzigingen Opslaan"}
                         </button>
                     </div>
                 </div>
-                {success && (
-                    <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-lg">
-                        ✅ Wijzigingen zijn succesvol opgeslagen!
-                    </div>
-                )}
             </div>
 
-            {/* SEO Status Widget */}
-            <SeoStatusWidget
-                status={seoStatus}
-                lastUpdate={seoLastUpdate}
-                onGenerate={handleGenerateSeo}
-                onRegenerate={handleGenerateSeo}
-                isGenerating={isGeneratingSeo}
-            />
+            {/* Tabs Navigation */}
+            <div className="bg-white p-2 rounded-xl flex items-center justify-between border border-slate-200 shadow-sm sticky top-4 z-10 transition-all">
+                <nav className="flex items-center space-x-2 w-full overflow-x-auto no-scrollbar">
+                    {[
+                        { id: 'algemeen', label: 'Info & Locatie' },
+                        { id: 'diensten', label: 'Diensten & Tijden' },
+                        { id: 'media', label: 'Media & Socials' },
+                        { id: 'extra', label: 'SEO & Extra' },
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as 'algemeen' | 'media' | 'diensten' | 'extra')}
+                            className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex-none flex items-center gap-2 ${activeTab === tab.id ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </nav>
+            </div>
 
-            {/* SEO Edit Section */}
-            {seoStatus === 'COMPLETED' && (
-                <div className="bg-white rounded-xl p-6 border border-slate-200">
-                    <h2 className="text-lg font-bold text-slate-800 mb-4">AI Gegenereerde SEO</h2>
-                    <p className="text-sm text-slate-600 mb-4">
-                        Dit is automatisch gegenereerd door AI. U kunt het handmatig aanpassen.
-                    </p>
+            {activeTab === 'extra' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* SEO Status Widget */}
+                    <SeoStatusWidget
+                        status={seoStatus}
+                        lastUpdate={seoLastUpdate}
+                        onGenerate={handleGenerateSeo}
+                        onRegenerate={handleGenerateSeo}
+                        isGenerating={isGeneratingSeo}
+                    />
 
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                SEO Titel (max 60 tekens)
-                            </label>
-                            <input
-                                type="text"
-                                value={seoData.title}
-                                onChange={(e) => setSeoData({ ...seoData, title: e.target.value.slice(0, 60) })}
-                                maxLength={60}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                            <div className="text-xs text-slate-500 mt-1 text-left">
-                                {seoData.title.length}/60 tekens
+                    {/* SEO Edit Section */}
+                    {seoStatus === 'COMPLETED' && (
+                        <div className="bg-white rounded-xl p-6 border border-slate-200">
+                            <h2 className="text-lg font-bold text-slate-800 mb-4">AI Gegenereerde SEO</h2>
+                            <p className="text-sm text-slate-600 mb-4">
+                                Dit is automatisch gegenereerd door AI. U kunt het handmatig aanpassen.
+                            </p>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        SEO Titel (max 60 tekens)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={seoData.title}
+                                        onChange={(e) => setSeoData({ ...seoData, title: e.target.value.slice(0, 60) })}
+                                        maxLength={60}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                    <div className="text-xs text-slate-500 mt-1 text-left">
+                                        {seoData.title.length}/60 tekens
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        Meta Beschrijving (max 160 tekens)
+                                    </label>
+                                    <textarea
+                                        value={seoData.description}
+                                        onChange={(e) => setSeoData({ ...seoData, description: e.target.value.slice(0, 160) })}
+                                        maxLength={160}
+                                        rows={3}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                    <div className="text-xs text-slate-500 mt-1 text-left">
+                                        {seoData.description.length}/160 tekens
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        SEO Keywords (gescheiden door komma)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={seoData.keywords.join(', ')}
+                                        onChange={(e) => setSeoData({
+                                            ...seoData,
+                                            keywords: e.target.value.split(',').map(k => k.trim()).filter(k => k)
+                                        })}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="keyword1, keyword2, keyword3"
+                                    />
+                                    <div className="text-xs text-slate-500 mt-1 text-left">
+                                        {seoData.keywords.length} keywords
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    )}
+                </div>
+            )}
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Meta Beschrijving (max 160 tekens)
-                            </label>
-                            <textarea
-                                value={seoData.description}
-                                onChange={(e) => setSeoData({ ...seoData, description: e.target.value.slice(0, 160) })}
-                                maxLength={160}
-                                rows={3}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                            <div className="text-xs text-slate-500 mt-1 text-left">
-                                {seoData.description.length}/160 tekens
+            {activeTab === 'algemeen' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Basic Information */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4">Basis Informatie</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Bedrijfsnaam *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
                             </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                SEO Keywords (gescheiden door komma)
-                            </label>
-                            <input
-                                type="text"
-                                value={seoData.keywords.join(', ')}
-                                onChange={(e) => setSeoData({
-                                    ...seoData,
-                                    keywords: e.target.value.split(',').map(k => k.trim()).filter(k => k)
-                                })}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="keyword1, keyword2, keyword3"
-                            />
-                            <div className="text-xs text-slate-500 mt-1 text-left">
-                                {seoData.keywords.length} keywords
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Telefoonnummer *
+                                </label>
+                                <input
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    E-mailadres
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+                                                ? 'border-red-300 bg-red-50'
+                                                : formData.email
+                                                    ? 'border-green-300 bg-green-50'
+                                                    : 'border-slate-300'
+                                            }`}
+                                    />
+                                    {formData.email && (
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            {/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? (
+                                                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                            ) : (
+                                                <AlertCircle className="w-4 h-4 text-red-500" />
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Website
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="url"
+                                        value={formData.website}
+                                        onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${formData.website && !formData.website.startsWith('http')
+                                                ? 'border-red-300 bg-red-50'
+                                                : formData.website
+                                                    ? 'border-green-300 bg-green-50'
+                                                    : 'border-slate-300'
+                                            }`}
+                                    />
+                                    {formData.website && (
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            {formData.website.startsWith('http') ? (
+                                                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                            ) : (
+                                                <AlertCircle className="w-4 h-4 text-red-500" />
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Basic Information */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 mb-4">Basis Informatie</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Bedrijfsnaam *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Telefoonnummer *
-                        </label>
-                        <input
-                            type="tel"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            E-mailadres
-                        </label>
-                        <input
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Website
-                        </label>
-                        <input
-                            type="url"
-                            value={formData.website}
-                            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Logo & Cover Image */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 mb-4">Logo & Cover Afbeelding</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Logo */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Logo
-                        </label>
-                        <input
-                            type="file"
-                            ref={logoInputRef}
-                            onChange={handleLogoUpload}
-                            accept="image/*"
-                            className="hidden"
-                        />
-                        <div
-                            onClick={() => logoInputRef.current?.click()}
-                            className="border-2 border-dashed border-slate-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors flex flex-col items-center justify-center min-h-[160px]"
-                        >
-                            {logoPreview || existingLogo ? (
-                                <img
-                                    src={logoPreview || existingLogo}
-                                    alt="Logo preview"
-                                    className="max-h-32 max-w-full object-contain"
-                                />
-                            ) : (
-                                <>
-                                    <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                                    <span className="text-sm text-slate-600">Klik om logo te uploaden</span>
-                                </>
-                            )}
-                        </div>
-                        {(logoPreview || existingLogo) && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setLogoPreview("");
-                                    setLogoAltText("");
-                                    setFormData({ ...formData, logo: null });
-                                }}
-                                className="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
-                            >
-                                <X className="w-4 h-4" /> Verwijderen
-                            </button>
-                        )}
-                        {/* Logo Alt Text */}
-                        {(logoPreview || existingLogo) && (
-                            <div className="mt-3">
-                                <label className="block text-xs font-medium text-slate-600 mb-1">
-                                    Alt-tekst (SEO)
+            {activeTab === 'media' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Logo & Cover Image */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4">Logo & Cover Afbeelding</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Logo */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Logo
                                 </label>
                                 <input
-                                    type="text"
-                                    value={logoAltText}
-                                    onChange={(e) => setLogoAltText(e.target.value)}
-                                    placeholder="Beschrijvende alt-tekst voor SEO..."
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    type="file"
+                                    ref={logoInputRef}
+                                    onChange={handleLogoUpload}
+                                    accept="image/*"
+                                    className="hidden"
                                 />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Cover Image */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Cover Afbeelding
-                        </label>
-                        <input
-                            type="file"
-                            ref={coverInputRef}
-                            onChange={handleCoverUpload}
-                            accept="image/*"
-                            className="hidden"
-                        />
-                        <div
-                            onClick={() => coverInputRef.current?.click()}
-                            className="border-2 border-dashed border-slate-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors flex flex-col items-center justify-center min-h-[160px]"
-                        >
-                            {coverPreview || existingCover ? (
-                                <img
-                                    src={coverPreview || existingCover}
-                                    alt="Cover preview"
-                                    className="max-h-32 max-w-full object-cover rounded-lg"
-                                />
-                            ) : (
-                                <>
-                                    <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                                    <span className="text-sm text-slate-600">Klik om cover te uploaden</span>
-                                </>
-                            )}
-                        </div>
-                        {(coverPreview || existingCover) && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setCoverPreview("");
-                                    setCoverAltText("");
-                                    setFormData({ ...formData, coverImage: null });
-                                }}
-                                className="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
-                            >
-                                <X className="w-4 h-4" /> Verwijderen
-                            </button>
-                        )}
-                        {/* Cover Alt Text */}
-                        {(coverPreview || existingCover) && (
-                            <div className="mt-3">
-                                <label className="block text-xs font-medium text-slate-600 mb-1">
-                                    Alt-tekst (SEO)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={coverAltText}
-                                    onChange={(e) => setCoverAltText(e.target.value)}
-                                    placeholder="Beschrijvende alt-tekst voor SEO..."
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                />
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* FAQ Section */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 className="text-lg font-bold text-slate-800">Veelgestelde Vragen (FAQ)</h2>
-                        <p className="text-sm text-slate-600">Veelgestelde vragen helpen klanten en verbeteren SEO</p>
-                    </div>
-                    <button
-                        onClick={addFaq}
-                        className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
-                    >
-                        <Plus className="w-4 h-4" /> Vraag toevoegen
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    {faqList.length === 0 ? (
-                        <div className="text-center py-8 text-slate-500">
-                            <p>Nog geen vragen toegevoegd</p>
-                            <button
-                                onClick={addFaq}
-                                className="mt-2 text-blue-600 hover:text-blue-700 text-sm"
-                            >
-                                + Voeg je eerste vraag toe
-                            </button>
-                        </div>
-                    ) : (
-                        faqList.map((faq, index) => (
-                            <div key={index} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex-1 space-y-3">
+                                <div
+                                    onClick={() => logoInputRef.current?.click()}
+                                    className="border-2 border-dashed border-slate-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors flex flex-col items-center justify-center min-h-[160px]"
+                                >
+                                    {logoPreview || existingLogo ? (
+                                        <img
+                                            src={logoPreview || existingLogo}
+                                            alt="Logo preview"
+                                            className="max-h-32 max-w-full object-contain"
+                                        />
+                                    ) : (
+                                        <>
+                                            <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                                            <span className="text-sm text-slate-600">Klik om logo te uploaden</span>
+                                        </>
+                                    )}
+                                </div>
+                                {(logoPreview || existingLogo) && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setLogoPreview("");
+                                            setLogoAltText("");
+                                            setFormData({ ...formData, logo: null });
+                                        }}
+                                        className="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+                                    >
+                                        <X className="w-4 h-4" /> Verwijderen
+                                    </button>
+                                )}
+                                {/* Logo Alt Text */}
+                                {(logoPreview || existingLogo) && (
+                                    <div className="mt-3">
+                                        <label className="block text-xs font-medium text-slate-600 mb-1">
+                                            Alt-tekst (SEO)
+                                        </label>
                                         <input
                                             type="text"
-                                            placeholder="Vraag (bijv. Wat zijn jullie openingstijden?)"
-                                            value={faq.question}
-                                            onChange={(e) => updateFaq(index, "question", e.target.value)}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium"
-                                        />
-                                        <textarea
-                                            placeholder="Antwoord"
-                                            value={faq.answer}
-                                            onChange={(e) => updateFaq(index, "answer", e.target.value)}
-                                            rows={2}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                                            value={logoAltText}
+                                            onChange={(e) => setLogoAltText(e.target.value)}
+                                            placeholder="Beschrijvende alt-tekst voor SEO..."
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
-                                    <button
-                                        onClick={() => removeFaq(index)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                )}
+                            </div>
+
+                            {/* Cover Image */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Cover Afbeelding
+                                </label>
+                                <input
+                                    type="file"
+                                    ref={coverInputRef}
+                                    onChange={handleCoverUpload}
+                                    accept="image/*"
+                                    className="hidden"
+                                />
+                                <div
+                                    onClick={() => coverInputRef.current?.click()}
+                                    className="border-2 border-dashed border-slate-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors flex flex-col items-center justify-center min-h-[160px]"
+                                >
+                                    {coverPreview || existingCover ? (
+                                        <img
+                                            src={coverPreview || existingCover}
+                                            alt="Cover preview"
+                                            className="max-h-32 max-w-full object-cover rounded-lg"
+                                        />
+                                    ) : (
+                                        <>
+                                            <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                                            <span className="text-sm text-slate-600">Klik om cover te uploaden</span>
+                                        </>
+                                    )}
                                 </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-
-            {/* Address */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 mb-4">Adresgegevens</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Straat en huisnummer *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.street}
-                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Postcode *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.postalCode}
-                            onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Stad *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.city}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Wijk/Buurt
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.neighborhood}
-                            onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Provincie
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.province}
-                            onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Opening Hours */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 mb-4">Openingstijden</h2>
-                <div className="space-y-3">
-                    {formData.openingHours.map((day, index) => (
-                        <div key={day.day} className="flex items-center gap-4">
-                            <div className="w-32">
-                                <span className="text-sm font-medium text-slate-700">{day.day}</span>
-                            </div>
-                            {day.closed ? (
-                                <div className="flex-1 flex items-center gap-4">
-                                    <span className="text-sm text-slate-500">Gesloten</span>
+                                {(coverPreview || existingCover) && (
                                     <button
-                                        onClick={() => {
-                                            const newHours = [...formData.openingHours];
-                                            newHours[index].closed = false;
-                                            setFormData({ ...formData, openingHours: newHours });
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setCoverPreview("");
+                                            setCoverAltText("");
+                                            setFormData({ ...formData, coverImage: null });
                                         }}
-                                        className="text-sm text-blue-600 hover:text-blue-700"
+                                        className="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
                                     >
-                                        Open maken
+                                        <X className="w-4 h-4" /> Verwijderen
+                                    </button>
+                                )}
+                                {/* Cover Alt Text */}
+                                {(coverPreview || existingCover) && (
+                                    <div className="mt-3">
+                                        <label className="block text-xs font-medium text-slate-600 mb-1">
+                                            Alt-tekst (SEO)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={coverAltText}
+                                            onChange={(e) => setCoverAltText(e.target.value)}
+                                            placeholder="Beschrijvende alt-tekst voor SEO..."
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'extra' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* FAQ Section */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Veelgestelde Vragen (FAQ)</h2>
+                                <p className="text-sm text-slate-600">Veelgestelde vragen helpen klanten en verbeteren SEO</p>
+                            </div>
+                            <button
+                                onClick={addFaq}
+                                className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
+                            >
+                                <Plus className="w-4 h-4" /> Vraag toevoegen
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            {faqList.length === 0 ? (
+                                <div className="text-center py-8 text-slate-500">
+                                    <p>Nog geen vragen toegevoegd</p>
+                                    <button
+                                        onClick={addFaq}
+                                        className="mt-2 text-blue-600 hover:text-blue-700 text-sm"
+                                    >
+                                        + Voeg je eerste vraag toe
                                     </button>
                                 </div>
                             ) : (
-                                <div className="flex-1 flex items-center gap-4">
-                                    <input
-                                        type="time"
-                                        value={day.open}
-                                        onChange={(e) => {
-                                            const newHours = [...formData.openingHours];
-                                            newHours[index].open = e.target.value;
-                                            setFormData({ ...formData, openingHours: newHours });
-                                        }}
-                                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                                    />
-                                    <span className="text-slate-500">tot</span>
-                                    <input
-                                        type="time"
-                                        value={day.close}
-                                        onChange={(e) => {
-                                            const newHours = [...formData.openingHours];
-                                            newHours[index].close = e.target.value;
-                                            setFormData({ ...formData, openingHours: newHours });
-                                        }}
-                                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                                    />
-                                    <button
-                                        onClick={() => {
-                                            const newHours = [...formData.openingHours];
-                                            newHours[index].closed = true;
-                                            setFormData({ ...formData, openingHours: newHours });
-                                        }}
-                                        className="text-sm text-red-600 hover:text-red-700"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                faqList.map((faq, index) => (
+                                    <div key={index} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex-1 space-y-3">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Vraag (bijv. Wat zijn jullie openingstijden?)"
+                                                    value={faq.question}
+                                                    onChange={(e) => updateFaq(index, "question", e.target.value)}
+                                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium"
+                                                />
+                                                <textarea
+                                                    placeholder="Antwoord"
+                                                    value={faq.answer}
+                                                    onChange={(e) => updateFaq(index, "answer", e.target.value)}
+                                                    rows={2}
+                                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => removeFaq(index)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
                             )}
                         </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Photos */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 className="text-lg font-bold text-slate-800">Foto&apos;s</h2>
-                        <p className="text-sm text-slate-600">
-                            Bedrijven met 5+ foto&apos;s krijgen 2x meer kliks.
-                        </p>
                     </div>
                 </div>
+            )}
 
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                />
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="aspect-square border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-blue-400 hover:bg-blue-50 transition-colors"
-                    >
-                        <Upload className="w-8 h-8 text-slate-400" />
-                        <span className="text-sm text-slate-600">Upload foto</span>
-                    </button>
-
-                    {images.map((image) => (
-                        <div key={image.id} className="aspect-square bg-slate-100 rounded-lg relative group overflow-hidden">
-                            <img
-                                src={image.url}
-                                alt={image.altText || "Bedrijfsfoto"}
-                                className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <button
-                                    onClick={() => {
-                                        setImages(images.filter(img => img.id !== image.id));
-                                    }}
-                                    className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600"
-                                >
-                                    <Trash2 className="w-3 h-3" />
-                                    Delete
-                                </button>
+            {activeTab === 'algemeen' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Address */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4">Adresgegevens</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Straat en huisnummer *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.street}
+                                    onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
                             </div>
-                            {image.altText && (
-                                <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Postcode *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.postalCode}
+                                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Stad *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.city}
+                                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Wijk/Buurt
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.neighborhood}
+                                    onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Provincie
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.province}
+                                    onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'diensten' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Opening Hours */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4">Openingstijden</h2>
+                        <div className="space-y-3">
+                            {formData.openingHours.map((day, index) => (
+                                <div key={day.day} className="flex items-center gap-4">
+                                    <div className="w-32">
+                                        <span className="text-sm font-medium text-slate-700">{day.day}</span>
+                                    </div>
+                                    {day.closed ? (
+                                        <div className="flex-1 flex items-center justify-between gap-4">
+                                            <span className="text-sm font-medium text-red-500 bg-red-50 px-3 py-1 rounded-full">Gesloten</span>
+                                            <button
+                                                onClick={() => {
+                                                    const newHours = [...formData.openingHours];
+                                                    newHours[index].closed = false;
+                                                    setFormData({ ...formData, openingHours: newHours });
+                                                }}
+                                                className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-slate-200 hover:bg-slate-300"
+                                            >
+                                                <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1 shadow-sm" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex-1 flex items-center gap-3">
+                                            <input
+                                                type="time"
+                                                value={day.open}
+                                                onChange={(e) => {
+                                                    const newHours = [...formData.openingHours];
+                                                    newHours[index].open = e.target.value;
+                                                    setFormData({ ...formData, openingHours: newHours });
+                                                }}
+                                                className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm bg-slate-50 focus:bg-white transition-colors"
+                                            />
+                                            <span className="text-slate-400 text-sm">tot</span>
+                                            <input
+                                                type="time"
+                                                value={day.close}
+                                                onChange={(e) => {
+                                                    const newHours = [...formData.openingHours];
+                                                    newHours[index].close = e.target.value;
+                                                    setFormData({ ...formData, openingHours: newHours });
+                                                }}
+                                                className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm bg-slate-50 focus:bg-white transition-colors"
+                                            />
+                                            <div className="flex-1 flex justify-end">
+                                                <button
+                                                    onClick={() => {
+                                                        const newHours = [...formData.openingHours];
+                                                        newHours[index].closed = true;
+                                                        setFormData({ ...formData, openingHours: newHours });
+                                                    }}
+                                                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-blue-600 hover:bg-blue-700"
+                                                >
+                                                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6 shadow-sm" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'media' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Photos */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Foto&apos;s</h2>
+                                <p className="text-sm text-slate-600">
+                                    Bedrijven met 5+ foto&apos;s krijgen 2x meer kliks.
+                                </p>
+                            </div>
+                        </div>
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageUpload}
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                        />
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="aspect-square border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                            >
+                                <Upload className="w-8 h-8 text-slate-400" />
+                                <span className="text-sm text-slate-600">Upload foto</span>
+                            </button>
+
+                            {images.map((image) => (
+                                <div key={image.id} className="aspect-square bg-slate-100 rounded-lg relative group overflow-hidden">
+                                    <img
+                                        src={image.url}
+                                        alt={image.altText || "Bedrijfsfoto"}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setImages(images.filter(img => img.id !== image.id));
+                                            }}
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                            Delete
+                                        </button>
+                                    </div>
+                                    {image.altText && (
+                                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                                            <input
+                                                type="text"
+                                                value={image.altText}
+                                                onChange={(e) => updateImageAltText(image.id, e.target.value)}
+                                                className="w-full bg-transparent text-white text-xs placeholder:text-slate-400 border-none focus:ring-0 p-0"
+                                                placeholder="Alt-tekst..."
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'diensten' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Services */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Diensten & Producten</h2>
+                                <p className="text-sm text-slate-600">Wat biedt uw bedrijf aan?</p>
+                            </div>
+                            <button
+                                onClick={() => setFormData({
+                                    ...formData,
+                                    services: [...formData.services, { name: "", description: "", price: "" }]
+                                })}
+                                className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
+                            >
+                                <Plus className="w-4 h-4" /> Dienst toevoegen
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            {formData.services.map((service, index) => (
+                                <div key={index} className="flex gap-3 items-start">
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Naam (bijv. Reparatie)"
+                                            value={service.name}
+                                            onChange={(e) => {
+                                                const newServices = [...formData.services];
+                                                newServices[index].name = e.target.value;
+                                                setFormData({ ...formData, services: newServices });
+                                            }}
+                                            className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Beschrijving"
+                                            value={service.description || ""}
+                                            onChange={(e) => {
+                                                const newServices = [...formData.services];
+                                                newServices[index].description = e.target.value;
+                                                setFormData({ ...formData, services: newServices });
+                                            }}
+                                            className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Prijs (bijv. €50)"
+                                            value={service.price || ""}
+                                            onChange={(e) => {
+                                                const newServices = [...formData.services];
+                                                newServices[index].price = e.target.value;
+                                                setFormData({ ...formData, services: newServices });
+                                            }}
+                                            className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                                        />
+                                    </div>
+                                    {formData.services.length > 1 && (
+                                        <button
+                                            onClick={() => {
+                                                const newServices = formData.services.filter((_, i) => i !== index);
+                                                setFormData({ ...formData, services: newServices });
+                                            }}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'media' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Social Media */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4">Social Media</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                                    <Instagram className="w-4 h-4 text-pink-500" /> Instagram
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="@uwbedrijf"
+                                    value={formData.instagram}
+                                    onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                                    <Facebook className="w-4 h-4 text-blue-600" /> Facebook
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="facebook.com/uwbedrijf"
+                                    value={formData.facebook}
+                                    onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                                    <Linkedin className="w-4 h-4 text-blue-700" /> LinkedIn
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="linkedin.com/company/..."
+                                    value={formData.linkedin}
+                                    onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'extra' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                    {/* Amenities & Extra Info */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4">Extra Informatie</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Amenities */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Faciliteiten</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {AMENITIES_OPTIONS.map((amenity) => (
+                                        <button
+                                            key={amenity}
+                                            onClick={() => {
+                                                const newAmenities = formData.amenities.includes(amenity)
+                                                    ? formData.amenities.filter(a => a !== amenity)
+                                                    : [...formData.amenities, amenity];
+                                                setFormData({ ...formData, amenities: newAmenities });
+                                            }}
+                                            className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.amenities.includes(amenity)
+                                                ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                                                : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                                                }`}
+                                        >
+                                            {amenity}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Payment Methods */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Betaalmethoden</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {PAYMENT_METHODS.map((method) => (
+                                        <button
+                                            key={method}
+                                            onClick={() => {
+                                                const newMethods = formData.paymentMethods.includes(method)
+                                                    ? formData.paymentMethods.filter(m => m !== method)
+                                                    : [...formData.paymentMethods, method];
+                                                setFormData({ ...formData, paymentMethods: newMethods });
+                                            }}
+                                            className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.paymentMethods.includes(method)
+                                                ? 'bg-green-100 text-green-700 border border-green-300'
+                                                : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                                                }`}
+                                        >
+                                            {method}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Languages */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Talen</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {LANGUAGES.map((lang) => (
+                                        <button
+                                            key={lang}
+                                            onClick={() => {
+                                                const newLangs = formData.languages.includes(lang)
+                                                    ? formData.languages.filter(l => l !== lang)
+                                                    : [...formData.languages, lang];
+                                                setFormData({ ...formData, languages: newLangs });
+                                            }}
+                                            className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.languages.includes(lang)
+                                                ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                                                : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                                                }`}
+                                        >
+                                            {lang}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* KVK & Founded Year */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">KVK-nummer</label>
                                     <input
                                         type="text"
-                                        value={image.altText}
-                                        onChange={(e) => updateImageAltText(image.id, e.target.value)}
-                                        className="w-full bg-transparent text-white text-xs placeholder:text-slate-400 border-none focus:ring-0 p-0"
-                                        placeholder="Alt-tekst..."
+                                        placeholder="12345678"
+                                        value={formData.kvkNumber}
+                                        onChange={(e) => setFormData({ ...formData, kvkNumber: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg"
                                     />
                                 </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Opgericht in</label>
+                                    <input
+                                        type="text"
+                                        placeholder="2020"
+                                        value={formData.foundedYear}
+                                        onChange={(e) => setFormData({ ...formData, foundedYear: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                                    />
+                                </div>
+                            </div>
 
-            {/* Services */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 className="text-lg font-bold text-slate-800">Diensten & Producten</h2>
-                        <p className="text-sm text-slate-600">Wat biedt uw bedrijf aan?</p>
-                    </div>
-                    <button
-                        onClick={() => setFormData({
-                            ...formData,
-                            services: [...formData.services, { name: "", description: "", price: "" }]
-                        })}
-                        className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
-                    >
-                        <Plus className="w-4 h-4" /> Dienst toevoegen
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    {formData.services.map((service, index) => (
-                        <div key={index} className="flex gap-3 items-start">
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {/* Service Area */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Werkgebied</label>
                                 <input
                                     type="text"
-                                    placeholder="Naam (bijv. Reparatie)"
-                                    value={service.name}
-                                    onChange={(e) => {
-                                        const newServices = [...formData.services];
-                                        newServices[index].name = e.target.value;
-                                        setFormData({ ...formData, services: newServices });
-                                    }}
-                                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Beschrijving"
-                                    value={service.description || ""}
-                                    onChange={(e) => {
-                                        const newServices = [...formData.services];
-                                        newServices[index].description = e.target.value;
-                                        setFormData({ ...formData, services: newServices });
-                                    }}
-                                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Prijs (bijv. €50)"
-                                    value={service.price || ""}
-                                    onChange={(e) => {
-                                        const newServices = [...formData.services];
-                                        newServices[index].price = e.target.value;
-                                        setFormData({ ...formData, services: newServices });
-                                    }}
-                                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                                    placeholder="bijv. Heel Nederland of Amsterdam en omgeving"
+                                    value={formData.serviceArea}
+                                    onChange={(e) => setFormData({ ...formData, serviceArea: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg"
                                 />
                             </div>
-                            {formData.services.length > 1 && (
-                                <button
-                                    onClick={() => {
-                                        const newServices = formData.services.filter((_, i) => i !== index);
-                                        setFormData({ ...formData, services: newServices });
-                                    }}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
 
-            {/* Social Media */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 mb-4">Social Media</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                            <Instagram className="w-4 h-4 text-pink-500" /> Instagram
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="@uwbedrijf"
-                            value={formData.instagram}
-                            onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-                        />
-                    </div>
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                            <Facebook className="w-4 h-4 text-blue-600" /> Facebook
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="facebook.com/uwbedrijf"
-                            value={formData.facebook}
-                            onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-                        />
-                    </div>
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                            <Linkedin className="w-4 h-4 text-blue-700" /> LinkedIn
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="linkedin.com/company/..."
-                            value={formData.linkedin}
-                            onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-                        />
+                            {/* Booking URL */}
+                            <div className="md:col-span-2">
+                                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                                    <Globe className="w-4 h-4" /> Boekingslink (optioneel)
+                                </label>
+                                <input
+                                    type="url"
+                                    placeholder="https://booking.uwbedrijf.nl"
+                                    value={formData.bookingUrl}
+                                    onChange={(e) => setFormData({ ...formData, bookingUrl: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Amenities & Extra Info */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 mb-4">Extra Informatie</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Amenities */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Faciliteiten</label>
-                        <div className="flex flex-wrap gap-2">
-                            {AMENITIES_OPTIONS.map((amenity) => (
-                                <button
-                                    key={amenity}
-                                    onClick={() => {
-                                        const newAmenities = formData.amenities.includes(amenity)
-                                            ? formData.amenities.filter(a => a !== amenity)
-                                            : [...formData.amenities, amenity];
-                                        setFormData({ ...formData, amenities: newAmenities });
-                                    }}
-                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.amenities.includes(amenity)
-                                        ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                                        : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                                        }`}
-                                >
-                                    {amenity}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Payment Methods */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Betaalmethoden</label>
-                        <div className="flex flex-wrap gap-2">
-                            {PAYMENT_METHODS.map((method) => (
-                                <button
-                                    key={method}
-                                    onClick={() => {
-                                        const newMethods = formData.paymentMethods.includes(method)
-                                            ? formData.paymentMethods.filter(m => m !== method)
-                                            : [...formData.paymentMethods, method];
-                                        setFormData({ ...formData, paymentMethods: newMethods });
-                                    }}
-                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.paymentMethods.includes(method)
-                                        ? 'bg-green-100 text-green-700 border border-green-300'
-                                        : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                                        }`}
-                                >
-                                    {method}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Languages */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Talen</label>
-                        <div className="flex flex-wrap gap-2">
-                            {LANGUAGES.map((lang) => (
-                                <button
-                                    key={lang}
-                                    onClick={() => {
-                                        const newLangs = formData.languages.includes(lang)
-                                            ? formData.languages.filter(l => l !== lang)
-                                            : [...formData.languages, lang];
-                                        setFormData({ ...formData, languages: newLangs });
-                                    }}
-                                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${formData.languages.includes(lang)
-                                        ? 'bg-purple-100 text-purple-700 border border-purple-300'
-                                        : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                                        }`}
-                                >
-                                    {lang}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* KVK & Founded Year */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">KVK-nummer</label>
-                            <input
-                                type="text"
-                                placeholder="12345678"
-                                value={formData.kvkNumber}
-                                onChange={(e) => setFormData({ ...formData, kvkNumber: e.target.value })}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Opgericht in</label>
-                            <input
-                                type="text"
-                                placeholder="2020"
-                                value={formData.foundedYear}
-                                onChange={(e) => setFormData({ ...formData, foundedYear: e.target.value })}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Service Area */}
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Werkgebied</label>
-                        <input
-                            type="text"
-                            placeholder="bijv. Heel Nederland of Amsterdam en omgeving"
-                            value={formData.serviceArea}
-                            onChange={(e) => setFormData({ ...formData, serviceArea: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-                        />
-                    </div>
-
-                    {/* Booking URL */}
-                    <div className="md:col-span-2">
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                            <Globe className="w-4 h-4" /> Boekingslink (optioneel)
-                        </label>
-                        <input
-                            type="url"
-                            placeholder="https://booking.uwbedrijf.nl"
-                            value={formData.bookingUrl}
-                            onChange={(e) => setFormData({ ...formData, bookingUrl: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-                        />
-                    </div>
-                </div>
-            </div>
+            )}
 
             {/* Save Button Bottom */}
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-4 border-t border-slate-200 mt-8">
                 <button
                     onClick={handleSave}
                     disabled={saving}
                     className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
                 >
-                    <Save className="w-5 h-5" />
+                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                     {saving ? "Opslaan..." : "Wijzigingen Opslaan"}
                 </button>
             </div>
+
+            {/* Toast Notification */}
+            {toast && (
+                <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border ${toast.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+                        toast.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+                            'bg-blue-50 border-blue-200 text-blue-800'
+                        }`}>
+                        {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-600" />}
+                        {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600" />}
+                        {toast.type === 'info' && <Info className="w-5 h-5 text-blue-600" />}
+                        <p className="text-sm font-medium">{toast.message}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

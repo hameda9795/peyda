@@ -8,12 +8,14 @@ import { ChevronDown, ArrowRight, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type BusinessCategory } from "@/lib/types";
 import { getCategoryIcon } from "./category-icons";
+import { getSubcategoryImage } from "@/lib/subcategory-images";
 
 interface MegaMenuProps {
     categories: BusinessCategory[];
+    isTransparent?: boolean;
 }
 
-export function MegaMenu({ categories }: MegaMenuProps) {
+export function MegaMenu({ categories, isTransparent }: MegaMenuProps) {
     const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
     const [isOpen, setIsOpen] = React.useState(false);
     const pathname = usePathname();
@@ -64,15 +66,17 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                 className={cn(
                     "flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-all duration-300",
                     isOpen
-                        ? "text-zinc-900 bg-zinc-100 rounded-full"
-                        : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 rounded-full"
+                        ? "text-zinc-900 bg-white/90 rounded-full"
+                        : isTransparent
+                            ? "text-white/90 hover:text-white hover:bg-white/10 rounded-full"
+                            : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 rounded-full"
                 )}
             >
                 Categorieën
                 <ChevronDown
                     className={cn(
-                        "h-4 w-4 transition-transform duration-300 text-zinc-400",
-                        isOpen && "rotate-180 text-zinc-900"
+                        "h-4 w-4 transition-transform duration-300",
+                        isOpen ? "rotate-180 text-zinc-900" : isTransparent ? "text-white/60" : "text-zinc-400"
                     )}
                 />
             </button>
@@ -190,8 +194,6 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                         </h4>
                                                         <div className="grid grid-cols-2 gap-3">
                                                             {currentCategory.subcategories.map((sub: any, idx) => {
-                                                                // Dynamically import to avoid circular dependencies if any, but since it's a lib func it's fine
-                                                                const { getSubcategoryImage } = require('@/lib/subcategory-images');
                                                                 const subName = typeof sub === 'string' ? sub : sub.name;
                                                                 const subSlug = typeof sub === 'string'
                                                                     ? sub.toLowerCase().replace(/\s+/g, '-')

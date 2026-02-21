@@ -64,6 +64,8 @@ export async function getBusinessData(businessId?: string) {
             name: business.name,
             slug: business.slug,
             city: business.city,
+            neighborhood: business.neighborhood || '',
+            provinceSlug: business.provinceSlug || 'utrecht',
             category: business.subCategory?.category?.name || '',
             subcategory: business.subCategory?.name || '',
             rating: business.rating,
@@ -328,7 +330,7 @@ export async function updateProfile(formData: FormData, businessId?: string) {
 
         let logoUrl = business.logo
         let coverImageUrl = business.coverImage
-        let uploadErrors: string[] = []
+        const uploadErrors: string[] = []
 
         if (uploadedLogoFile && (typeof uploadedLogoFile === 'string' || uploadedLogoFile.size > 0)) {
             console.log('Uploading logo...');

@@ -4,7 +4,7 @@ import { Search, MapPin } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
-export function SearchBar() {
+export function SearchBar({ isTransparent }: { isTransparent?: boolean }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [query, setQuery] = useState("");
@@ -23,18 +23,18 @@ export function SearchBar() {
     };
 
     return (
-        <form onSubmit={handleSearch} className="hidden lg:flex items-center bg-zinc-100/50 border border-zinc-200 rounded-full px-4 py-2 w-64 md:w-80 focus-within:ring-2 focus-within:ring-indigo-100 transition-all shadow-sm">
-            <Search className="h-4 w-4 text-zinc-400 mr-2 shrink-0" />
+        <form onSubmit={handleSearch} className={`hidden lg:flex items-center border rounded-full px-4 py-2 w-64 md:w-80 transition-all shadow-sm ${isTransparent ? 'bg-white/10 border-white/20 focus-within:ring-2 focus-within:ring-white/30 backdrop-blur-md' : 'bg-zinc-100/50 border-zinc-200 focus-within:ring-2 focus-within:ring-indigo-100'}`}>
+            <Search className={`h-4 w-4 mr-2 shrink-0 ${isTransparent ? 'text-white/60' : 'text-zinc-400'}`} />
             <input
                 type="text"
                 placeholder="Zoek bedrijven, diensten..."
-                className="bg-transparent border-none outline-none text-sm text-zinc-900 placeholder:text-zinc-500 w-full"
+                className={`bg-transparent border-none outline-none text-sm w-full ${isTransparent ? 'text-white placeholder:text-white/60' : 'text-zinc-900 placeholder:text-zinc-500'}`}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />
             {/* Visual separator and fake MapPin for location context (future feature) */}
-            <div className="h-4 w-px bg-zinc-300 mx-2 shrink-0" />
-            <MapPin className="h-4 w-4 text-zinc-400 shrink-0" />
+            <div className={`h-4 w-px mx-2 shrink-0 ${isTransparent ? 'bg-white/20' : 'bg-zinc-300'}`} />
+            <MapPin className={`h-4 w-4 shrink-0 ${isTransparent ? 'text-white/50' : 'text-zinc-400'}`} />
         </form>
     );
 }

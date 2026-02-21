@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { OpenAI } from 'openai'
 
-// AI-generated alt-text service
-// In production, integrate with OpenAI Vision, Google Cloud Vision, or similar
+// Initialize OpenAI client
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+})
+
 export async function POST(request: NextRequest) {
     try {
         const { imageUrl, businessName, imageType } = await request.json()
@@ -10,70 +14,77 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Image URL is required' }, { status: 400 })
         }
 
-        // Simulated AI response - In production, use actual AI API
-        // Example integration with OpenAI Vision:
-        // const response = await openai.chat.completions.create({
-        //     model: "gpt-4o",
-        //     messages: [
-        //         {
-        //             role: "user",
-        //             content: [
-        //                 { type: "text", text: "Generate a concise Dutch alt-text for this image for a business listing. Keep it under 125 characters." },
-        //                 { type: "image_url", image_url: { url: imageUrl } }
-        //             ]
-        //         }
-        //     ]
-        // })
+        const businessContext = businessName ? `voor het bedrijf ${businessName}` : 'voor dit bedrijf'
+        const typeContext = imageType || 'bedrijfsfoto'
 
-        const businessContext = businessName ? `voor ${businessName}` : 'dit bedrijf'
-        const typeContext = imageType || 'bedrijf'
+        try {
+            // First try real AI Vision if the URL is accessible (must be public)
+            if (imageUrl.startsWith('http') && process.env.OPENAI_API_KEY) {
+                const response = await openai.chat.completions.create({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `Je bent een SEO expert. Schrijf een beknopte, beschrijvende SEO 'alt-tekst' (max 100 tekens) in het Nederlands voor deze afbeelding. Deze afbeelding is een ${typeContext} ${businessContext}. Gebruik geen introductie, geef alleen de alt-tekst zelf terug.`
+                                },
+                                {
+                                    type: "image_url",
+                                    image_url: { url: imageUrl }
+                                }
+                            ]
+                        }
+                    ],
+                    max_tokens: 50
+                })
 
-        // Simulated AI-generated alt-texts based on common business types
+                const aiGeneratedText = response.choices[0]?.message?.content?.trim() || ''
+
+                if (aiGeneratedText) {
+                    return NextResponse.json({
+                        success: true,
+                        altText: aiGeneratedText.replace(/['"]/g, ''), // Clean any quotes
+                        isRealAi: true
+                    })
+                }
+            }
+        } catch (aiError) {
+            console.warn('Real AI Vision failed or URL not acceptable, falling back to smart defaults:', aiError)
+        }
+
+        // Fallback to smart simulated alt-texts if AI fails
         const sampleAltTexts: Record<string, string[]> = {
             restaurant: [
                 `Sfeerimpressie van ${businessContext}`,
                 `Interieur van ${businessContext}`,
                 `Onze gerechten worden met zorg bereid`,
-                `Gezellige sfeer in ${businessContext}`,
-                `Keuken van ${businessContext}`
             ],
             winkel: [
-                `Ons assortiment in ${businessContext}`,
-                `Producten van ${businessContext}`,
+                `Ons assortiment ${businessContext}`,
                 `Binnenwerk van ${businessContext}`,
-                `Service en kwaliteit bij ${businessContext}`,
-                `Ontdek onze collectie`
-            ],
-            dienstverlening: [
-                `Professionele dienstverlening door ${businessContext}`,
-                `Ons team staat voor u klaar`,
-                `Werkzaamheden van ${businessContext}`,
-                `Kwaliteit en expertise bij ${businessContext}`,
-                `Klanttevredenheid bij ${businessContext}`
             ],
             default: [
-                `${businessContext} - ${typeContext}`,
-                `Overzicht van ${businessContext}`,
-                `Foto van ${businessContext}`,
-                `${businessContext} in actie`,
+                `${typeContext} van ${businessContext}`,
                 `Professionele presentatie van ${businessContext}`
+            ],
+            logo: [
+                `Officiële logo van ${businessContext}`
+            ],
+            cover: [
+                `Overzichtsfoto van ${businessContext}`
             ]
         }
 
         const category = imageType?.toLowerCase() || 'default'
         const altTexts = sampleAltTexts[category] || sampleAltTexts.default
-
-        // Simulate AI processing time
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        // Return suggested alt-text (in production, this would come from actual AI)
         const suggestedAltText = altTexts[Math.floor(Math.random() * altTexts.length)]
 
         return NextResponse.json({
             success: true,
             altText: suggestedAltText,
-            suggestions: altTexts,
-            tip: "Pas de alt-tekst aan voor betere SEO"
+            isRealAi: false
         })
     } catch (error) {
         console.error('Error generating alt-text:', error)

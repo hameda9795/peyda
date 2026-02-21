@@ -1,7 +1,7 @@
 import { Eye, Phone, Globe, MapPin, Star, TrendingUp, Award, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getBusinessData, getReviewsData, getAnalyticsData } from "./actions";
+import { getBusinessData, getReviewsData, getAnalyticsData, getSEOScore } from "./actions";
 import { getCurrentUser } from "@/app/actions";
 
 // Mock data for fallback
@@ -9,7 +9,10 @@ const mockBusinessData = {
     name: "Voorbeeld Bedrijf",
     slug: "voorbeeld-bedrijf",
     city: "Amsterdam",
+    neighborhood: "Centrum",
+    provinceSlug: "noord-holland",
     category: "Restaurant",
+    subcategory: "Italiaans",
     rating: 4.5,
     reviewCount: 12,
     stats: {
@@ -65,7 +68,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         name: businessData.name,
         slug: businessData.slug,
         city: businessData.city,
+        neighborhood: businessData.neighborhood,
+        provinceSlug: businessData.provinceSlug,
         category: businessData.category,
+        subcategory: businessData.subcategory,
         rating: businessData.rating,
         reviewCount: businessData.reviewCount,
         stats: analyticsData?.stats || businessData.stats,
@@ -74,7 +80,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     } : mockBusinessData;
 
     const { name, stats, weeklyChange, recentReviews, rating, reviewCount } = data as typeof mockBusinessData;
-    const seoScore = 72;
+
+    // Fetch actual SEO Data
+    const seoScoreData = await getSEOScore(userBusinessId);
+    const seoScore = seoScoreData?.overallScore || 0;
+
+    // Helper for URL building
+    const sanitize = (text: string) => text ? text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : '';
+    const dynProv = sanitize(data.provinceSlug || 'nederland');
+    const dynCity = sanitize(data.city || 'stad');
+    const dynHood = sanitize(data.neighborhood || 'centrum');
+    const dynCat = sanitize(data.category || 'bedrijf');
+    const dynSubcat = sanitize(data.subcategory || 'algemeen');
+    const liveProfileUrl = `/${dynProv}/${dynCity}/${dynHood}/${dynCat}/${dynSubcat}/${data.slug}`;
 
     return (
         <div className="space-y-6">
@@ -262,11 +280,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star
                                                         key={i}
-                                                        className={`w-4 h-4 ${
-                                                            i < review.rating
-                                                                ? 'text-yellow-400 fill-current'
-                                                                : 'text-slate-300'
-                                                        }`}
+                                                        className={`w-4 h-4 ${i < review.rating
+                                                            ? 'text-yellow-400 fill-current'
+                                                            : 'text-slate-300'
+                                                            }`}
                                                     />
                                                 ))}
                                             </div>
@@ -319,7 +336,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         </div>
                     </Link>
                     <a
-                        href={`/nederland/restaurant/${data.slug}`}
+                        href={liveProfileUrl}
                         target="_blank"
                         className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
                     >

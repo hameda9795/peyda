@@ -88,9 +88,9 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
                             {totalBusinesses > 0 ? `${totalBusinesses.toLocaleString('nl-NL')}+` : "15.000+"} bedrijven en diensten in Nederland
                         </div>
 
-                        <h1 className="atlas-title display-font">
+                        <h1 className="text-[1.85rem] sm:text-4xl md:text-5xl lg:text-[3.75rem] font-bold leading-[1.2] sm:leading-[1.1] mb-5 text-white display-font tracking-tight">
                             Vind lokale bedrijven die passen bij jouw buurt
-                            <span> en ontdek het beste aanbod.</span>
+                            <span className="text-white/70 block sm:inline"> en ontdek het beste aanbod.</span>
                         </h1>
 
                         <p className="atlas-subtitle">
@@ -98,31 +98,43 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
                             opties en neem direct contact op via het lokale atlas van Nederland.
                         </p>
 
-                        <div className="search-container">
+                        <div className="search-container relative max-w-[650px] z-20">
                             <div className="search-glow"></div>
-                            <div className="search-bar">
-                                <Search className="ml-3 h-5 w-5 text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                                    placeholder="Zoek op bedrijf, product of dienst..."
-                                />
-                                <button onClick={handleSearch} className="search-btn">
+                            <div className="relative p-2 sm:p-2 bg-white/95 backdrop-blur-xl rounded-[1.2rem] sm:rounded-full shadow-2xl border border-white/30 flex flex-col sm:flex-row gap-2 transition-transform hover:scale-[1.01] duration-300">
+                                <div className="flex items-center flex-1 px-3 sm:px-4">
+                                    <Search className="h-5 w-5 text-zinc-400 shrink-0" />
+                                    <input
+                                        type="text"
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                        placeholder="Zoek op bedrijf, product of dienst..."
+                                        className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-zinc-900 placeholder:text-zinc-400 py-3.5 sm:py-3 px-3 text-[15px] sm:text-[1.05rem] h-14 sm:h-12"
+                                    />
+                                </div>
+                                <button onClick={handleSearch} className="w-full sm:w-auto mt-1 sm:mt-0 bg-[#E07A3F] text-[#111827] hover:bg-[#C76933] font-bold py-3.5 sm:py-0 sm:h-[48px] px-8 rounded-[1rem] sm:rounded-full transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 shrink-0">
                                     Zoeken
-                                    <ArrowRight className="h-4 w-4" />
+                                    <ArrowRight className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>
 
-                        <div className="mt-6 flex flex-wrap items-center gap-3">
-                            <span className="text-white/60 text-sm">Populair:</span>
+                        <div className="mt-6 flex items-center gap-3 overflow-x-auto pb-4 sm:pb-0 scrollbar-hide snap-x relative mask-gradient" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                            <style jsx>{`
+                                .mask-gradient {
+                                    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+                                    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+                                }
+                                .scrollbar-hide::-webkit-scrollbar {
+                                    display: none;
+                                }
+                            `}</style>
+                            <span className="text-white/70 text-sm font-medium whitespace-nowrap shrink-0 snap-start">Populair:</span>
                             {["Restaurants", "Kappers", "Loodgieters", "Advocaten"].map((item) => (
                                 <button
                                     key={item}
                                     onClick={() => router.push(`/search?q=${item.toLowerCase()}`)}
-                                    className="px-3 py-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full text-white/90 text-sm transition-all"
+                                    className="px-4 py-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white/90 text-sm font-medium transition-all whitespace-nowrap shrink-0 snap-start"
                                 >
                                     {item}
                                 </button>

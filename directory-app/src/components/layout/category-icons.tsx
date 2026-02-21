@@ -74,12 +74,17 @@ export const categoryIcons: Record<string, LucideIcon> = {
 };
 
 export const getCategoryIcon = (slugOrName: string): LucideIcon => {
-    // Try precise match
+    // 1. Precise match
     if (categoryIcons[slugOrName]) return categoryIcons[slugOrName];
 
-    // Try removing ' in Utrecht' suffix for name matching
-    const cleanName = slugOrName.replace(' in Utrecht', '');
+    // 2. Name match (clean up location suffix)
+    const cleanName = slugOrName.replace(/\s+in\s+[a-zA-Z-\s]+$/, '');
     if (categoryIcons[cleanName]) return categoryIcons[cleanName];
+
+    // 3. Robust slug match (e.g. from "/utrecht/eten-drinken" or "/nederland/eten-drinken" -> "eten-drinken")
+    const slugParts = slugOrName.split('/').filter(Boolean);
+    const baseCat = slugParts[slugParts.length - 1];
+    if (baseCat && categoryIcons[`/utrecht/${baseCat}`]) return categoryIcons[`/utrecht/${baseCat}`];
 
     // Default icon
     return Building2;

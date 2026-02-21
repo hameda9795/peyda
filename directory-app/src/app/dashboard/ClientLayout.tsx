@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, Store, MessageSquare, TrendingUp, Settings, X, LogOut } from "lucide-react";
+import { LayoutDashboard, Store, MessageSquare, TrendingUp, X, LogOut } from "lucide-react";
 
 export default function DashboardLayout({
     children,
@@ -26,7 +26,6 @@ export default function DashboardLayout({
         { href: getLink("/dashboard/profile"), icon: Store, label: "Profiel Bewerken" },
         { href: getLink("/dashboard/reviews"), icon: MessageSquare, label: "Beoordelingen" },
         { href: getLink("/dashboard/seo"), icon: TrendingUp, label: "SEO Score" },
-        { href: getLink("/dashboard/settings"), icon: Settings, label: "Instellingen" },
     ];
 
     return (

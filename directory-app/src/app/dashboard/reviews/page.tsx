@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useSearchParams } from "next/navigation";
 import { Star, Send, Copy, Check, MessageSquare, AlertCircle } from "lucide-react";
-import { respondToReview } from "../actions";
+import { respondToReview, getBusinessData } from "../actions";
 
 const mockReviews = [
     {
@@ -55,10 +55,9 @@ export default function ReviewsPage({ searchParams }: { searchParams: Promise<{ 
         avgRating: 4.5,
         pendingResponses: mockReviews.filter(r => !r.hasResponse).length
     });
+    const [reviewLink, setReviewLink] = useState("https://peyda.nl/bedrijf-nederland");
     // Use either the resolved params or searchParams hook
     const businessId = params.businessId || searchParamsHook?.get("businessId") || undefined;
-
-    const reviewLink = "https://peyda.nl/review/voorbeeld-restaurant";
 
     // Fetch real data
     useEffect(() => {
@@ -75,6 +74,20 @@ export default function ReviewsPage({ searchParams }: { searchParams: Promise<{ 
                         date: new Date(r.date).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })
                     })));
                     setStats(data.stats);
+                }
+
+                // Fetch business data to get the slug and category for the review link
+                const bData = await getBusinessData(businessId);
+                if (bData && bData.slug) {
+                    const sanitize = (text: string) => text ? text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : '';
+
+                    const prov = sanitize(bData.provinceSlug || 'nederland');
+                    const city = sanitize(bData.city || 'stad');
+                    const hood = sanitize(bData.neighborhood || 'centrum');
+                    const cat = sanitize(bData.category || 'bedrijf');
+                    const subcat = sanitize(bData.subcategory || 'algemeen');
+
+                    setReviewLink(`https://peyda.nl/${prov}/${city}/${hood}/${cat}/${subcat}/${bData.slug}`);
                 }
             } catch (error) {
                 console.log('Using mock data');
@@ -180,12 +193,10 @@ export default function ReviewsPage({ searchParams }: { searchParams: Promise<{ 
 
                 <div className="bg-white rounded-xl p-6 border border-slate-200">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            stats.pendingResponses > 0 ? 'bg-red-100' : 'bg-green-100'
-                        }`}>
-                            <AlertCircle className={`w-5 h-5 ${
-                                stats.pendingResponses > 0 ? 'text-red-600' : 'text-green-600'
-                            }`} />
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stats.pendingResponses > 0 ? 'bg-red-100' : 'bg-green-100'
+                            }`}>
+                            <AlertCircle className={`w-5 h-5 ${stats.pendingResponses > 0 ? 'text-red-600' : 'text-green-600'
+                                }`} />
                         </div>
                         <div>
                             <p className="text-2xl font-bold text-slate-800">{stats.pendingResponses}</p>
@@ -255,11 +266,10 @@ export default function ReviewsPage({ searchParams }: { searchParams: Promise<{ 
                                         {[...Array(5)].map((_, i) => (
                                             <Star
                                                 key={i}
-                                                className={`w-4 h-4 ${
-                                                    i < review.rating
-                                                        ? 'text-yellow-400 fill-current'
-                                                        : 'text-slate-300'
-                                                }`}
+                                                className={`w-4 h-4 ${i < review.rating
+                                                    ? 'text-yellow-400 fill-current'
+                                                    : 'text-slate-300'
+                                                    }`}
                                             />
                                         ))}
                                     </div>

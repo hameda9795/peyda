@@ -38,13 +38,29 @@ interface CategoryScrollSectionProps {
     businessCount?: number;
 }
 
-// Placeholder images
-const PLACEHOLDER_IMAGES = [
-    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&h=300&fit=crop",
-];
+// Helper for premium placeholder generation
+const getPremiumPlaceholder = (id: string, name: string) => {
+    const gradients = [
+        "bg-gradient-to-br from-[#0B2A3C] via-[#1A455E] to-[#2A9D8F]",
+        "bg-gradient-to-bl from-[#E07A3F] via-[#C55A1D] to-[#8A3A0B]",
+        "bg-gradient-to-tr from-[#2A9D8F] via-[#1E7D71] to-[#0F4740]",
+        "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-700 via-zinc-900 to-black",
+        "bg-gradient-to-br from-[#4A5568] via-[#2D3748] to-[#1A202C]",
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    const index = Math.abs(hash) % gradients.length;
+
+    const initials = name
+        .split(' ')
+        .map(n => n[0])
+        .filter(c => /[A-Za-z0-9]/.test(c))
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+
+    return { gradientClass: gradients[index], initials };
+};
 
 const isSafeImage = (src: string) =>
     src.startsWith("/") ||
@@ -187,7 +203,7 @@ function CategoryCard({
     fallbackCategorySlug?: string;
     accentColor: string;
 }) {
-    const coverImage = business.images?.cover || PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
+    const coverImage = business.images?.cover;
     const reviewCount = business.reviewCount || 0;
     const hasReviews = reviewCount > 0;
     const rating = hasReviews && business.rating ? business.rating : null;
@@ -201,14 +217,16 @@ function CategoryCard({
 
     const href = `/${provinceSlug}/${citySlug}/${neighborhoodSlug}/${categorySlug}/${subcategorySlug}/${businessSlug}`;
 
+    const placeholder = getPremiumPlaceholder(business.id, business.name);
+
     return (
         <Link
             href={href}
             className="group flex-shrink-0"
         >
             <div className="relative w-[160px] aspect-[4/5] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                {/* Background Image */}
-                {isSafeImage(coverImage) ? (
+                {/* Background Image or Premium Placeholder */}
+                {coverImage && isSafeImage(coverImage) ? (
                     <Image
                         src={coverImage}
                         alt={business.name}
@@ -216,7 +234,7 @@ function CategoryCard({
                         sizes="160px"
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                ) : (
+                ) : coverImage ? (
                     <img
                         src={coverImage}
                         alt={business.name}
@@ -224,6 +242,12 @@ function CategoryCard({
                         decoding="async"
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
+                ) : (
+                    <div className={`absolute inset-0 w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110 ${placeholder.gradientClass}`}>
+                        {/* Minimalist pattern overlay for texture */}
+                        <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwb2x5Z29uIHBvaW50cz0iMCwwIDgsMCA4LDggMCw4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] pointer-events-none" />
+                        <span className="text-white/30 font-bold text-5xl display-font tracking-widest mix-blend-overlay group-hover:scale-110 transition-transform duration-500">{placeholder.initials}</span>
+                    </div>
                 )}
 
                 {/* Gradient Overlay */}
@@ -349,7 +373,7 @@ export function PopularBusinessesSection({ businesses }: PopularSectionProps) {
 }
 
 function PopularCard({ business, rank }: { business: Business; rank: number }) {
-    const coverImage = business.images?.cover || PLACEHOLDER_IMAGES[rank % PLACEHOLDER_IMAGES.length];
+    const coverImage = business.images?.cover;
     const reviewCount = business.reviewCount || 0;
     const hasReviews = reviewCount > 0;
     const rating = hasReviews && business.rating ? business.rating : null;
@@ -364,6 +388,8 @@ function PopularCard({ business, rank }: { business: Business; rank: number }) {
 
     const href = `/${provinceSlug}/${citySlug}/${neighborhoodSlug}/${categorySlug}/${subcategorySlug}/${businessSlug}`;
 
+    const placeholder = getPremiumPlaceholder(business.id, business.name);
+
     return (
         <Link
             href={href}
@@ -371,8 +397,8 @@ function PopularCard({ business, rank }: { business: Business; rank: number }) {
         >
             {/* Card - Same aspect ratio as city cards (4/5) */}
             <div className="relative w-[160px] aspect-[4/5] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                {/* Background Image */}
-                {isSafeImage(coverImage) ? (
+                {/* Background Image or Premium Placeholder */}
+                {coverImage && isSafeImage(coverImage) ? (
                     <Image
                         src={coverImage}
                         alt={business.name}
@@ -380,7 +406,7 @@ function PopularCard({ business, rank }: { business: Business; rank: number }) {
                         sizes="160px"
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                ) : (
+                ) : coverImage ? (
                     <img
                         src={coverImage}
                         alt={business.name}
@@ -388,6 +414,11 @@ function PopularCard({ business, rank }: { business: Business; rank: number }) {
                         decoding="async"
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
+                ) : (
+                    <div className={`absolute inset-0 w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110 ${placeholder.gradientClass}`}>
+                        <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwb2x5Z29uIHBvaW50cz0iMCwwIDgsMCA4LDggMCw4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] pointer-events-none" />
+                        <span className="text-white/30 font-bold text-5xl display-font tracking-widest mix-blend-overlay group-hover:scale-110 transition-transform duration-500">{placeholder.initials}</span>
+                    </div>
                 )}
 
                 {/* Gradient Overlay */}
@@ -396,8 +427,8 @@ function PopularCard({ business, rank }: { business: Business; rank: number }) {
                 {/* Rank Badge */}
                 {rank <= 3 && (
                     <div className={`absolute top-2 left-2 w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold ${rank === 1 ? 'bg-amber-500' :
-                            rank === 2 ? 'bg-gray-400' :
-                                'bg-amber-700'
+                        rank === 2 ? 'bg-gray-400' :
+                            'bg-amber-700'
                         }`}>
                         {rank === 1 ? <Award className="w-4 h-4" /> : rank}
                     </div>

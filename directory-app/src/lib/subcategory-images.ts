@@ -1,323 +1,407 @@
+// Curated set of extremely reliable, verified 100% working Unsplash images to prevent 404 "generic man" place-holders.
+const I = {
+    // Eten & Drinken
+    restaurant: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600&auto=format&fit=crop",
+    cafe: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600&auto=format&fit=crop",
+    bakery: "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop",
+    pizza: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop",
+    vegan: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop",
 
-// Verified High-Reliability Images
-const IMAGES = {
-    food: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600&auto=format&fit=crop", // Restaurant generic
-    cafe: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600&auto=format&fit=crop", // Coffee
-    shop: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop", // Shop generic
-    beauty: "https://images.unsplash.com/photo-1560066984-12186d30b93c?q=80&w=600&auto=format&fit=crop", // Salon
-    health: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=600&auto=format&fit=crop", // Doctor
-    sport: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop", // Gym
-    construction: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=600&auto=format&fit=crop", // Tools
-    cleaning: "https://images.unsplash.com/photo-1581578731117-104f2a412727?q=80&w=600&auto=format&fit=crop", // Cleaning
-    auto: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=600&auto=format&fit=crop", // Car
-    tech: "https://images.unsplash.com/photo-1517430816045-df4b7de8db2b?q=80&w=600&auto=format&fit=crop", // Laptop
-    business: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop", // Office
-    kids: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=600&auto=format&fit=crop", // Kids
-    pets: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=600&auto=format&fit=crop", // Dog
-    events: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=600&auto=format&fit=crop", // Party
-    housing: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600&auto=format&fit=crop", // House keys
-    logistic: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=600&auto=format&fit=crop", // Boxes
-    print: "https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?q=80&w=600&auto=format&fit=crop", // Print
+    // Winkels
+    shop1: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop",
+    shop2: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=600&auto=format&fit=crop",
+    shoes: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop",
+    clothes: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=600&auto=format&fit=crop",
+
+    // Beauty
+    salon1: "https://images.unsplash.com/photo-1560066984-12186d30b93c?q=80&w=600&auto=format&fit=crop",
+    hair1: "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop",
+    barber: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=600&auto=format&fit=crop",
+    nails: "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=600&auto=format&fit=crop",
+    spa: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop",
+
+    // Gezondheid & Zorg
+    doctor: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=600&auto=format&fit=crop",
+    dentist: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=600&auto=format&fit=crop",
+    physio: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=600&auto=format&fit=crop",
+    pharmacy: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=600&auto=format&fit=crop",
+
+    // Sport
+    gym1: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop",
+    yoga: "https://images.unsplash.com/photo-1599447421405-075115d6e300?q=80&w=600&auto=format&fit=crop",
+    swim: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=80&w=600&auto=format&fit=crop",
+
+    // Klussen & Bouw
+    tools: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=600&auto=format&fit=crop",
+    paint: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop",
+    plumber: "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?q=80&w=600&auto=format&fit=crop",
+    electric: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600&auto=format&fit=crop",
+    architect: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=600&auto=format&fit=crop",
+
+    // Schoonmaak
+    clean1: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=600&auto=format&fit=crop",
+    clean2: "https://images.unsplash.com/photo-1584820927498-cafe8c1c969b?q=80&w=600&auto=format&fit=crop",
+    windows: "https://images.unsplash.com/photo-1628151015968-3a4429e9efee?q=80&w=600&auto=format&fit=crop",
+
+    // Auto's & Fietsen
+    car1: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=600&auto=format&fit=crop",
+    tires: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?q=80&w=600&auto=format&fit=crop",
+    wash: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=600&auto=format&fit=crop",
+    taxi: "https://images.unsplash.com/photo-1512402927289-543168868ba8?q=80&w=600&auto=format&fit=crop",
+    bike1: "https://images.unsplash.com/photo-1532298229144-0ec0c57e3356?q=80&w=600&auto=format&fit=crop",
+    bike2: "https://images.unsplash.com/photo-1571333250630-f0230c320b6d?q=80&w=600&auto=format&fit=crop",
+
+    // Tech & IT
+    laptop: "https://images.unsplash.com/photo-1517430816045-df4b7de8db2b?q=80&w=600&auto=format&fit=crop",
+    code: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop",
+    print: "https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?q=80&w=600&auto=format&fit=crop",
+
+    // Zakelijk
+    office1: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop",
+    meeting: "https://images.unsplash.com/photo-1512758117926-00445a6c3210?q=80&w=600&auto=format&fit=crop",
+    law: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=600&auto=format&fit=crop",
+    finance: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=600&auto=format&fit=crop",
+
+    // Onderwijs & Kinderen
+    edu1: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=600&auto=format&fit=crop",
+    kids1: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=600&auto=format&fit=crop",
+    kids2: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=600&auto=format&fit=crop",
+
+    // Huisdieren
+    dog: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=600&auto=format&fit=crop",
+    vet: "https://images.unsplash.com/photo-1599443015574-be5fe8a05783?q=80&w=600&auto=format&fit=crop",
+
+    // Wonen & Vastgoed
+    house1: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600&auto=format&fit=crop",
+    interior1: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=600&auto=format&fit=crop",
+    hotel: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop",
+
+    // Evenementen & Cultuur
+    party: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=600&auto=format&fit=crop",
+    wedding: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=600&auto=format&fit=crop",
+    music: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=600&auto=format&fit=crop",
+    flowers: "https://images.unsplash.com/photo-1525258946800-98cf74d15872?q=80&w=600&auto=format&fit=crop",
+
+    // Logistiek
+    boxes: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=600&auto=format&fit=crop",
 };
 
 export const subcategoryImages: Record<string, string> = {
     // Eten & Drinken
-    "/utrecht/eten-drinken/restaurants": IMAGES.food,
-    "/utrecht/eten-drinken/afhaal & bezorging": "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop", // Pizza
-    "/utrecht/eten-drinken/cafés": IMAGES.cafe,
-    "/utrecht/eten-drinken/bakkerij": "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/eten-drinken/patisserie": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/eten-drinken/catering": IMAGES.food,
-    "/utrecht/eten-drinken/lunchroom": IMAGES.cafe,
-    "/utrecht/eten-drinken/bars & lounges": IMAGES.cafe,
-    "/utrecht/eten-drinken/wereldkeukens (iraans, turks, italiaans, etc.)": IMAGES.food,
-    "/utrecht/eten-drinken/vegan/vegetarisch": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/eten-drinken/halal": IMAGES.food,
+    "eten-drinken/restaurants": I.restaurant,
+    "eten-drinken/afhaal & bezorging": I.pizza,
+    "eten-drinken/cafés": I.cafe,
+    "eten-drinken/bakkerij": I.bakery,
+    "eten-drinken/patisserie": I.bakery,
+    "eten-drinken/catering": I.restaurant,
+    "eten-drinken/lunchroom": I.cafe,
+    "eten-drinken/bars & lounges": I.cafe,
+    "eten-drinken/wereldkeukens (iraans, turks, italiaans, etc.)": I.restaurant,
+    "eten-drinken/vegan/vegetarisch": I.vegan,
+    "eten-drinken/halal": I.restaurant,
 
     // Winkels
-    "/utrecht/winkels/supermarkt": "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/winkels/slager": "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/winkels/groenteboer": "https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/winkels/kledingwinkel": IMAGES.shop,
-    "/utrecht/winkels/schoenenwinkel": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/winkels/drogist & cosmetica": IMAGES.shop,
-    "/utrecht/winkels/telefoon & computerwinkel": IMAGES.tech,
-    "/utrecht/winkels/huishoudelijk": IMAGES.shop,
-    "/utrecht/winkels/meubelwinkel": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/winkels/speelgoed": IMAGES.kids,
-    "/utrecht/winkels/boekhandel & kantoorartikelen": IMAGES.shop,
-    "/utrecht/winkels/bloemist": "https://images.unsplash.com/photo-1596726650634-11883556af36?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/winkels/dierenwinkel": IMAGES.pets,
-    "/utrecht/winkels/fietswinkel": "https://images.unsplash.com/photo-1532298229144-0ec0c57e3356?q=80&w=600&auto=format&fit=crop",
+    "winkels/supermarkt": I.shop2,
+    "winkels/slager": I.shop1,
+    "winkels/groenteboer": I.shop1,
+    "winkels/kledingwinkel": I.clothes,
+    "winkels/schoenenwinkel": I.shoes,
+    "winkels/drogist & cosmetica": "https://images.unsplash.com/photo-1596462502278-27bf85033e5a?q=80&w=800&auto=format&fit=crop",
+    "winkels/telefoon & computerwinkel": I.laptop,
+    "winkels/huishoudelijk": I.interior1,
+    "winkels/meubelwinkel": I.interior1,
+    "winkels/speelgoed": I.kids1,
+    "winkels/boekhandel & kantoorartikelen": I.shop1,
+    "winkels/bloemist": I.flowers,
+    "winkels/dierenwinkel": I.dog,
+    "winkels/fietswinkel": I.bike1,
 
     // Beauty
-    "/utrecht/beauty/kapper dames": "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/beauty/kapper heren/barbershop": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/beauty/schoonheidssalon": IMAGES.beauty,
-    "/utrecht/beauty/nagelstudio": "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/beauty/wimpers & wenkbrauwen": IMAGES.beauty,
-    "/utrecht/beauty/huidkliniek": IMAGES.beauty,
-    "/utrecht/beauty/waxen/epileren": IMAGES.beauty,
-    "/utrecht/beauty/bruidsmake-up": IMAGES.beauty,
-    "/utrecht/beauty/pmu (permanente make-up)": IMAGES.beauty,
-    "/utrecht/beauty/zonnestudio": IMAGES.beauty,
+    "beauty/kapper dames": "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800&auto=format&fit=crop",
+    "beauty/kapper heren/barbershop": I.barber,
+    "beauty/schoonheidssalon": I.salon1,
+    "beauty/nagelstudio": I.nails,
+    "beauty/wimpers & wenkbrauwen": I.salon1,
+    "beauty/huidkliniek": I.salon1,
+    "beauty/waxen/epileren": I.spa,
+    "beauty/bruidsmake-up": I.salon1,
+    "beauty/pmu (permanente make-up)": I.salon1,
+    "beauty/zonnestudio": I.spa,
 
     // Gezondheid
-    "/utrecht/gezondheid/huisarts": IMAGES.health,
-    "/utrecht/gezondheid/tandarts": "https://images.unsplash.com/photo-1445527697940-617d00387222?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/gezondheid/fysiotherapie": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/gezondheid/psycholoog": IMAGES.health,
-    "/utrecht/gezondheid/diëtist": IMAGES.health,
-    "/utrecht/gezondheid/apotheek": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/gezondheid/kliniek": IMAGES.health,
-    "/utrecht/gezondheid/acupunctuur": IMAGES.health,
-    "/utrecht/gezondheid/therapeutische massage": IMAGES.beauty,
-    "/utrecht/gezondheid/logopedie": IMAGES.health,
+    "gezondheid/huisarts": I.doctor,
+    "gezondheid/tandarts": I.dentist,
+    "gezondheid/fysiotherapie": I.physio,
+    "gezondheid/psycholoog": I.doctor,
+    "gezondheid/diëtist": I.doctor,
+    "gezondheid/apotheek": I.pharmacy,
+    "gezondheid/kliniek": I.doctor,
+    "gezondheid/acupunctuur": I.spa,
+    "gezondheid/therapeutische massage": I.spa,
+    "gezondheid/logopedie": I.doctor,
 
     // Sport
-    "/utrecht/sport/sportschool": IMAGES.sport,
-    "/utrecht/sport/personal trainer": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/sport/yoga": "https://images.unsplash.com/photo-1599447421405-075115d6e300?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/sport/pilates": IMAGES.sport,
-    "/utrecht/sport/vechtsport": IMAGES.sport,
-    "/utrecht/sport/zwemmen": "https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/sport/sportvereniging": IMAGES.sport,
-    "/utrecht/sport/spinning/fietsen": "https://images.unsplash.com/photo-1534853867591-1331d663e373?q=80&w=600&auto=format&fit=crop",
+    "sport/sportschool": I.gym1,
+    "sport/personal trainer": I.gym1,
+    "sport/yoga": I.yoga,
+    "sport/pilates": I.yoga,
+    "sport/vechtsport": I.gym1,
+    "sport/zwemmen": I.swim,
+    "sport/sportvereniging": I.gym1,
+    "sport/spinning/fietsen": I.bike1,
 
     // Klussen
-    "/utrecht/klussen/loodgieter": "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/klussen/elektricien": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/klussen/cv/verwarming": IMAGES.construction,
-    "/utrecht/klussen/airco": IMAGES.construction,
-    "/utrecht/klussen/timmerman": IMAGES.construction,
-    "/utrecht/klussen/schilder": "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/klussen/stukadoor": IMAGES.construction,
-    "/utrecht/klussen/vloeren": IMAGES.construction,
-    "/utrecht/klussen/glaszetter": IMAGES.construction,
-    "/utrecht/klussen/slotenmaker": "https://images.unsplash.com/photo-1558227691-41ea78d1f631?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/klussen/dakdekker": IMAGES.construction,
-    "/utrecht/klussen/isolatie": IMAGES.construction,
-    "/utrecht/klussen/allround klusbedrijf": IMAGES.construction,
+    "klussen/loodgieter": I.plumber,
+    "klussen/elektricien": I.electric,
+    "klussen/cv/verwarming": I.tools,
+    "klussen/airco": I.tools,
+    "klussen/timmerman": I.tools,
+    "klussen/schilder": I.paint,
+    "klussen/stukadoor": I.tools,
+    "klussen/vloeren": I.interior1,
+    "klussen/glaszetter": I.tools,
+    "klussen/slotenmaker": I.tools,
+    "klussen/dakdekker": I.tools,
+    "klussen/isolatie": I.tools,
+    "klussen/allround klusbedrijf": I.tools,
 
     // Bouw
-    "/utrecht/bouw-renovatie/aannemer": IMAGES.construction,
-    "/utrecht/bouw-renovatie/woningrenovatie": IMAGES.construction,
-    "/utrecht/bouw-renovatie/keuken": "https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/bouw-renovatie/badkamer": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/bouw-renovatie/gevel": IMAGES.construction,
-    "/utrecht/bouw-renovatie/steigerbouw": IMAGES.construction,
-    "/utrecht/bouw-renovatie/architect": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/bouw-renovatie/ingenieur/advies": IMAGES.construction,
-    "/utrecht/bouw-renovatie/vergunningen": IMAGES.business,
+    "bouw-renovatie/aannemer": I.architect,
+    "bouw-renovatie/woningrenovatie": "https://images.unsplash.com/photo-1505691938895-1758d7bef51a?q=80&w=800&auto=format&fit=crop",
+    "bouw-renovatie/keuken": "https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=800&auto=format&fit=crop",
+    "bouw-renovatie/badkamer": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?q=80&w=800&auto=format&fit=crop",
+    "bouw-renovatie/gevel": I.tools,
+    "bouw-renovatie/steigerbouw": I.tools,
+    "bouw-renovatie/architect": I.architect,
+    "bouw-renovatie/ingenieur/advies": I.architect,
+    "bouw-renovatie/vergunningen": I.meeting,
 
     // Schoonmaak
-    "/utrecht/schoonmaak/schoonmaakbedrijf": IMAGES.cleaning,
-    "/utrecht/schoonmaak/huishoudelijke hulp": IMAGES.cleaning,
-    "/utrecht/schoonmaak/glazenwasser": IMAGES.cleaning,
-    "/utrecht/schoonmaak/kantoor schoonmaak": IMAGES.cleaning,
-    "/utrecht/schoonmaak/tapijt- & meubelreiniging": IMAGES.cleaning,
-    "/utrecht/schoonmaak/ongediertebestrijding": IMAGES.cleaning,
-    "/utrecht/schoonmaak/afval & opruimservice": IMAGES.cleaning,
+    "schoonmaak/schoonmaakbedrijf": I.clean1,
+    "schoonmaak/huishoudelijke hulp": I.clean2,
+    "schoonmaak/glazenwasser": I.windows,
+    "schoonmaak/kantoor schoonmaak": I.clean1,
+    "schoonmaak/tapijt- & meubelreiniging": I.clean2,
+    "schoonmaak/ongediertebestrijding": I.clean1,
+    "schoonmaak/afval & opruimservice": I.clean2,
 
     // Auto
-    "/utrecht/auto-vervoer/autogarage": IMAGES.auto,
-    "/utrecht/auto-vervoer/apk": IMAGES.auto,
-    "/utrecht/auto-vervoer/bandenservice": "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/auto-vervoer/carwash": "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/auto-vervoer/schadeherstel": IMAGES.auto,
-    "/utrecht/auto-vervoer/autoverhuur": IMAGES.auto,
-    "/utrecht/auto-vervoer/taxi": "https://images.unsplash.com/photo-1512402927289-543168868ba8?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/auto-vervoer/pechhulp": IMAGES.auto,
-    "/utrecht/auto-vervoer/parkeren": IMAGES.auto,
+    "auto-vervoer/autogarage": "https://images.unsplash.com/photo-1625047509168-a7026f36de04?q=80&w=800&auto=format&fit=crop",
+    "auto-vervoer/apk": I.car1,
+    "auto-vervoer/bandenservice": I.tires,
+    "auto-vervoer/carwash": I.wash,
+    "auto-vervoer/schadeherstel": I.car1,
+    "auto-vervoer/autoverhuur": I.car1,
+    "auto-vervoer/taxi": I.taxi,
+    "auto-vervoer/pechhulp": I.car1,
+    "auto-vervoer/parkeren": I.car1,
 
     // Fiets
-    "/utrecht/fiets/fietsenmaker": "https://images.unsplash.com/photo-1571333250630-f0230c320b6d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/fiets/e-bike service": "https://images.unsplash.com/photo-1571333250630-f0230c320b6d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/fiets/onderhoud & reparatie": "https://images.unsplash.com/photo-1571333250630-f0230c320b6d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/fiets/accessoires": "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/fiets/accu/oplader": "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/fiets/fietssloten": "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/fiets/mobiele service": "https://images.unsplash.com/photo-1571333250630-f0230c320b6d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/fiets/scooter (reparatie/onderhoud)": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=600&auto=format&fit=crop",
+    "fiets/fietsenmaker": I.bike2,
+    "fiets/e-bike service": I.bike2,
+    "fiets/onderhoud & reparatie": I.bike2,
+    "fiets/accessoires": I.bike1,
+    "fiets/accu/oplader": I.bike1,
+    "fiets/fietssloten": I.bike1,
+    "fiets/mobiele service": I.bike2,
+    "fiets/scooter (reparatie/onderhoud)": I.bike2,
 
     // IT
-    "/utrecht/it-tech/telefoonreparatie": IMAGES.tech,
-    "/utrecht/it-tech/laptopreparatie": IMAGES.tech,
-    "/utrecht/it-tech/computerhulp": IMAGES.tech,
-    "/utrecht/it-tech/netwerk & wi‑fi": IMAGES.tech,
-    "/utrecht/it-tech/cybersecurity": IMAGES.tech,
-    "/utrecht/it-tech/webdesign": IMAGES.tech,
-    "/utrecht/it-tech/softwareontwikkeling": IMAGES.tech,
-    "/utrecht/it-tech/it-support": IMAGES.tech,
-    "/utrecht/it-tech/cloud & data": IMAGES.tech,
-    "/utrecht/it-tech/printerservice": IMAGES.tech,
+    "it-tech/telefoonreparatie": I.laptop,
+    "it-tech/laptopreparatie": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?q=80&w=800&auto=format&fit=crop",
+    "it-tech/computerhulp": I.laptop,
+    "it-tech/netwerk & wi‑fi": I.laptop,
+    "it-tech/cybersecurity": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
+    "it-tech/webdesign": I.code,
+    "it-tech/softwareontwikkeling": I.code,
+    "it-tech/it-support": I.laptop,
+    "it-tech/cloud & data": I.code,
+    "it-tech/printerservice": I.print,
 
     // Zakelijk
-    "/utrecht/zakelijk/accountant": IMAGES.business,
-    "/utrecht/zakelijk/boekhouder": IMAGES.business,
-    "/utrecht/zakelijk/belastingadvies": IMAGES.business,
-    "/utrecht/zakelijk/verzekeringen": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/zakelijk/bedrijfsadvies": IMAGES.business,
-    "/utrecht/zakelijk/hr": IMAGES.business,
-    "/utrecht/zakelijk/marketing/seo": IMAGES.business,
-    "/utrecht/zakelijk/juridisch": "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/zakelijk/notaris": "https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/zakelijk/officiële vertaling": IMAGES.business,
+    "zakelijk/accountant": I.finance,
+    "zakelijk/boekhouder": I.finance,
+    "zakelijk/belastingadvies": I.finance,
+    "zakelijk/verzekeringen": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop",
+    "zakelijk/bedrijfsadvies": I.meeting,
+    "zakelijk/hr": I.meeting,
+    "zakelijk/marketing/seo": I.code,
+    "zakelijk/juridisch": I.law,
+    "zakelijk/notaris": I.law,
+    "zakelijk/officiële vertaling": I.meeting,
 
     // Onderwijs
-    "/utrecht/onderwijs/taalcursus": "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/onderwijs/bijles": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/onderwijs/muziekles": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/onderwijs/rijschool": "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/onderwijs/it-cursus": "https://images.unsplash.com/photo-1555099962-4199c345e5dd?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/onderwijs/coaching": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/onderwijs/kinderactiviteiten": IMAGES.kids,
-    "/utrecht/onderwijs/examentraining": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop",
+    "onderwijs/taalcursus": I.edu1,
+    "onderwijs/bijles": I.edu1,
+    "onderwijs/muziekles": I.music,
+    "onderwijs/rijschool": I.car1,
+    "onderwijs/it-cursus": I.code,
+    "onderwijs/coaching": I.meeting,
+    "onderwijs/kinderactiviteiten": I.kids1,
+    "onderwijs/examentraining": I.edu1,
 
     // Kind
-    "/utrecht/kind-gezin/kinderopvang": IMAGES.kids,
-    "/utrecht/kind-gezin/gastouder": IMAGES.kids,
-    "/utrecht/kind-gezin/babysitter": IMAGES.kids,
-    "/utrecht/kind-gezin/kindercoach": IMAGES.kids,
-    "/utrecht/kind-gezin/speelgroepen": IMAGES.kids,
-    "/utrecht/kind-gezin/kinderfeestjes": IMAGES.kids,
-    "/utrecht/kind-gezin/gezinscoaching": IMAGES.kids,
+    "kind-gezin/kinderopvang": I.kids2,
+    "kind-gezin/gastouder": I.kids1,
+    "kind-gezin/babysitter": I.kids2,
+    "kind-gezin/kindercoach": I.kids1,
+    "kind-gezin/speelgroepen": I.kids2,
+    "kind-gezin/kinderfeestjes": I.kids1,
+    "kind-gezin/gezinscoaching": I.kids1,
 
     // Huisdieren
-    "/utrecht/huisdieren/dierenarts": IMAGES.pets,
-    "/utrecht/huisdieren/trimsalon": IMAGES.pets,
-    "/utrecht/huisdieren/dierenpension": IMAGES.pets,
-    "/utrecht/huisdieren/hondentraining": IMAGES.pets,
-    "/utrecht/huisdieren/dierenwinkel": IMAGES.pets,
-    "/utrecht/huisdieren/vaccinatie & zorg": IMAGES.pets,
+    "huisdieren/dierenarts": I.vet,
+    "huisdieren/trimsalon": I.dog,
+    "huisdieren/dierenpension": I.dog,
+    "huisdieren/hondentraining": I.dog,
+    "huisdieren/dierenwinkel": I.dog,
+    "huisdieren/vaccinatie & zorg": I.vet,
 
     // Wonen
-    "/utrecht/wonen/makelaar": IMAGES.housing,
-    "/utrecht/wonen/huur & koop": IMAGES.housing,
-    "/utrecht/wonen/vastgoedbeheer": IMAGES.housing,
-    "/utrecht/wonen/hypotheekadvies": IMAGES.housing,
-    "/utrecht/wonen/taxatie": IMAGES.housing,
-    "/utrecht/wonen/interieuradvies": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=600&auto=format&fit=crop",
+    "wonen/makelaar": I.house1,
+    "wonen/huur & koop": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop",
+    "wonen/vastgoedbeheer": I.house1,
+    "wonen/hypotheekadvies": I.finance,
+    "wonen/taxatie": I.house1,
+    "wonen/interieuradvies": I.interior1,
 
     // Overnachten
-    "/utrecht/overnachten/hotel": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/overnachten/hostel": "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/overnachten/b&b": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/overnachten/short-stay": IMAGES.housing,
-    "/utrecht/overnachten/appartementverhuur": IMAGES.housing,
+    "overnachten/hotel": I.hotel,
+    "overnachten/hostel": I.hotel,
+    "overnachten/b&b": I.house1,
+    "overnachten/short-stay": I.house1,
+    "overnachten/appartementverhuur": I.house1,
 
     // Uitgaan
-    "/utrecht/uitgaan/musea": "https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/uitgaan/attracties": "https://images.unsplash.com/photo-1543832923-44667a44c804?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/uitgaan/city tours": "https://images.unsplash.com/photo-1588667876887-f2735d468249?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/uitgaan/bioscoop": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/uitgaan/evenementen": IMAGES.events,
-    "/utrecht/uitgaan/escape room": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/uitgaan/activiteiten": IMAGES.events,
+    "uitgaan/musea": "https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?q=80&w=800&auto=format&fit=crop",
+    "uitgaan/attracties": "https://images.unsplash.com/photo-1543832923-44667a44c804?q=80&w=800&auto=format&fit=crop",
+    "uitgaan/city tours": "https://images.unsplash.com/photo-1588667876887-f2735d468249?q=80&w=800&auto=format&fit=crop",
+    "uitgaan/bioscoop": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=800&auto=format&fit=crop",
+    "uitgaan/evenementen": I.party,
+    "uitgaan/escape room": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800&auto=format&fit=crop",
+    "uitgaan/activiteiten": I.party,
 
     // Bruiloft
-    "/utrecht/bruiloft-events/trouwlocatie": IMAGES.events,
-    "/utrecht/bruiloft-events/dj": IMAGES.events,
-    "/utrecht/bruiloft-events/foto & video": IMAGES.events,
-    "/utrecht/bruiloft-events/bloemen": "https://images.unsplash.com/photo-1525258946800-98cf74d15872?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/bruiloft-events/bruidsmode": "https://images.unsplash.com/photo-1594552072238-b8a33785b261?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/bruiloft-events/catering": IMAGES.food,
-    "/utrecht/bruiloft-events/taarten": "https://images.unsplash.com/photo-1535254973040-607b474cb50d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/bruiloft-events/eventplanner": IMAGES.events,
+    "bruiloft-events/trouwlocatie": I.wedding,
+    "bruiloft-events/dj": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop",
+    "bruiloft-events/foto & video": "https://images.unsplash.com/photo-1518135714426-c18f5ffb6f4d?q=80&w=800&auto=format&fit=crop",
+    "bruiloft-events/bloemen": I.flowers,
+    "bruiloft-events/bruidsmode": "https://images.unsplash.com/photo-1594552072238-b8a33785b261?q=80&w=800&auto=format&fit=crop",
+    "bruiloft-events/catering": I.restaurant,
+    "bruiloft-events/taarten": "https://images.unsplash.com/photo-1535254973040-607b474cb50d?q=80&w=800&auto=format&fit=crop",
+    "bruiloft-events/eventplanner": I.meeting,
 
     // Cultuur
-    "/utrecht/cultuur/galerie": "https://images.unsplash.com/photo-1573588546598-a59e933e46c6?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/cultuur/kunstlessen": "https://images.unsplash.com/photo-1460661631741-dfa21d8d21c9?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/cultuur/theater": "https://images.unsplash.com/photo-1503095392269-275ff084081c?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/cultuur/muziek": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/cultuur/opnamestudio": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/cultuur/print & design": IMAGES.print,
+    "cultuur/galerie": "https://images.unsplash.com/photo-1573588546598-a59e933e46c6?q=80&w=800&auto=format&fit=crop",
+    "cultuur/kunstlessen": "https://images.unsplash.com/photo-1460661631741-dfa21d8d21c9?q=80&w=800&auto=format&fit=crop",
+    "cultuur/theater": "https://images.unsplash.com/photo-1503095392269-275ff084081c?q=80&w=800&auto=format&fit=crop",
+    "cultuur/muziek": I.music,
+    "cultuur/opnamestudio": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=800&auto=format&fit=crop",
+    "cultuur/print & design": I.print,
 
     // Interieur
-    "/utrecht/interieur/raamdecoratie": "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/interieur/verlichting": "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/interieur/verf & behang": "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/interieur/meubels": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/interieur/keukens": "https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/interieur/slaapkamer": "https://images.unsplash.com/photo-1505693416388-50808aae611d?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/interieur/decoratie": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=600&auto=format&fit=crop",
+    "interieur/raamdecoratie": "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+    "interieur/verlichting": "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?q=80&w=800&auto=format&fit=crop",
+    "interieur/verf & behang": I.paint,
+    "interieur/meubels": I.interior1,
+    "interieur/keukens": "https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=800&auto=format&fit=crop",
+    "interieur/slaapkamer": "https://images.unsplash.com/photo-1505693416388-50808aae611d?q=80&w=800&auto=format&fit=crop",
+    "interieur/decoratie": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=800&auto=format&fit=crop",
 
     // Logistiek
-    "/utrecht/logistiek/koerierdienst": IMAGES.logistic,
-    "/utrecht/logistiek/verhuisbedrijf": IMAGES.logistic,
-    "/utrecht/logistiek/transport": IMAGES.logistic,
-    "/utrecht/logistiek/opslag/warehouse": IMAGES.logistic,
-    "/utrecht/logistiek/verpakken": IMAGES.logistic,
+    "logistiek/koerierdienst": I.boxes,
+    "logistiek/verhuisbedrijf": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
+    "logistiek/transport": "https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=800&auto=format&fit=crop",
+    "logistiek/opslag/warehouse": "https://images.unsplash.com/photo-1553413002-9a2fce91eabc?q=80&w=800&auto=format&fit=crop",
+    "logistiek/verpakken": "https://images.unsplash.com/photo-1605645396655-ceeeff0a76be?q=80&w=800&auto=format&fit=crop",
 
     // Juridisch
-    "/utrecht/juridisch/advocaat": IMAGES.business,
-    "/utrecht/juridisch/juridisch advies": IMAGES.business,
-    "/utrecht/juridisch/mediation": IMAGES.business,
-    "/utrecht/juridisch/immigratie": IMAGES.business,
-    "/utrecht/juridisch/bedrijfsregistratie": IMAGES.business,
-    "/utrecht/juridisch/administratiekantoor": IMAGES.business,
+    "juridisch/advocaat": I.law,
+    "juridisch/juridisch advies": I.law,
+    "juridisch/mediation": I.meeting,
+    "juridisch/immigratie": I.law,
+    "juridisch/bedrijfsregistratie": I.office1,
+    "juridisch/administratiekantoor": I.finance,
 
     // Financieel
-    "/utrecht/financieel/financieel adviseur": IMAGES.business,
-    "/utrecht/financieel/hypotheek": IMAGES.housing,
-    "/utrecht/financieel/leningen": IMAGES.business,
-    "/utrecht/financieel/verzekeringskantoor": IMAGES.business,
-    "/utrecht/financieel/schuldhulp": IMAGES.business,
-    "/utrecht/financieel/budgetcoaching": IMAGES.business,
+    "financieel/financieel adviseur": I.finance,
+    "financieel/hypotheek": I.house1,
+    "financieel/leningen": I.finance,
+    "financieel/verzekeringskantoor": I.office1,
+    "financieel/schuldhulp": I.finance,
+    "financieel/budgetcoaching": I.finance,
 
     // Druk
-    "/utrecht/druk-reclame/drukkerij": IMAGES.print,
-    "/utrecht/druk-reclame/sign/letters": IMAGES.print,
-    "/utrecht/druk-reclame/digital print": IMAGES.print,
-    "/utrecht/druk-reclame/visitekaartjes": IMAGES.print,
-    "/utrecht/druk-reclame/promotieartikelen": IMAGES.print,
-    "/utrecht/druk-reclame/grafisch ontwerp": IMAGES.print,
+    "druk-reclame/drukkerij": I.print,
+    "druk-reclame/sign/letters": "https://images.unsplash.com/photo-1561069934-cee410bca926?q=80&w=800&auto=format&fit=crop",
+    "druk-reclame/digital print": I.print,
+    "druk-reclame/visitekaartjes": "https://images.unsplash.com/photo-1586339949916-3e9ed620dce0?q=80&w=800&auto=format&fit=crop",
+    "druk-reclame/promotieartikelen": "https://images.unsplash.com/photo-1603513492128-ba7bc9b3e143?q=80&w=800&auto=format&fit=crop",
+    "druk-reclame/grafisch ontwerp": "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800&auto=format&fit=crop",
 
     // Productie
-    "/utrecht/productie/houtbewerking": "https://images.unsplash.com/photo-1601614946401-49727dc0f1ee?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/productie/metaalbewerking": IMAGES.construction,
-    "/utrecht/productie/maatwerk": IMAGES.construction,
-    "/utrecht/productie/industriële reparatie": IMAGES.construction,
-    "/utrecht/productie/kunstwerkplaats": IMAGES.construction,
+    "productie/houtbewerking": "https://images.unsplash.com/photo-1601614946401-49727dc0f1ee?q=80&w=800&auto=format&fit=crop",
+    "productie/metaalbewerking": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=800&auto=format&fit=crop",
+    "productie/maatwerk": I.tools,
+    "productie/industriële reparatie": "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=800&auto=format&fit=crop",
+    "productie/kunstwerkplaats": "https://images.unsplash.com/photo-1460661631741-dfa21d8d21c9?q=80&w=800&auto=format&fit=crop",
 
     // Duurzaam
-    "/utrecht/duurzaam/zonnepanelen": "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/duurzaam/isolatie": IMAGES.construction,
-    "/utrecht/duurzaam/warmtepomp": "https://images.unsplash.com/photo-1510563800743-aed236490d08?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/duurzaam/energieadvies": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/duurzaam/laadpaal ev": "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=600&auto=format&fit=crop",
+    "duurzaam/zonnepanelen": "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=800&auto=format&fit=crop",
+    "duurzaam/isolatie": "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+    "duurzaam/warmtepomp": "https://images.unsplash.com/photo-1510563800743-aed236490d08?q=80&w=800&auto=format&fit=crop",
+    "duurzaam/energieadvies": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=800&auto=format&fit=crop",
+    "duurzaam/laadpaal ev": "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=800&auto=format&fit=crop",
 
     // Lokaal
-    "/utrecht/lokaal/lokale producten": "https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/lokaal/buurtmarkten": "https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/lokaal/tuinieren": "https://images.unsplash.com/photo-1416879525881-1d639e5d3436?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/lokaal/gemeenschapsprojecten": "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=600&auto=format&fit=crop",
+    "lokaal/lokale producten": "https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=800&auto=format&fit=crop",
+    "lokaal/buurtmarkten": "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=800&auto=format&fit=crop",
+    "lokaal/tuinieren": "https://images.unsplash.com/photo-1416879525881-1d639e5d3436?q=80&w=800&auto=format&fit=crop",
+    "lokaal/gemeenschapsprojecten": "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=800&auto=format&fit=crop",
 
     // Gemeenschap
-    "/utrecht/gemeenschap/verenigingen": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/gemeenschap/stichtingen": "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/gemeenschap/vrijwilligerswerk": "https://images.unsplash.com/photo-1559027615-cd1803d36cd0?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/gemeenschap/buurtcentra": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/gemeenschap/religieuze centra": "https://images.unsplash.com/photo-1548625361-b8d46dbb321a?q=80&w=600&auto=format&fit=crop",
+    "gemeenschap/verenigingen": I.party,
+    "gemeenschap/stichtingen": I.meeting,
+    "gemeenschap/vrijwilligerswerk": "https://images.unsplash.com/photo-1559027615-cd1803d36cd0?q=80&w=800&auto=format&fit=crop",
+    "gemeenschap/buurtcentra": I.office1,
+    "gemeenschap/religieuze centra": "https://images.unsplash.com/photo-1548625361-b8d46dbb321a?q=80&w=800&auto=format&fit=crop",
 
     // Diensten
-    "/utrecht/diensten/gemeente-informatie": IMAGES.business,
-    "/utrecht/diensten/bibliotheken": "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=600&auto=format&fit=crop",
-    "/utrecht/diensten/publieke loketten": IMAGES.business,
-    "/utrecht/diensten/consumentenadvies": IMAGES.business,
+    "diensten/gemeente-informatie": I.office1,
+    "diensten/bibliotheken": "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=800&auto=format&fit=crop",
+    "diensten/publieke loketten": I.meeting,
+    "diensten/consumentenadvies": I.meeting,
 };
 
-export const getSubcategoryImage = (categorySlug: string, subcategoryName: string): string => {
-    // Normalize keys
-    const cleanCategory = categorySlug.replace(/\/$/, '').toLowerCase();
-    const cleanSub = subcategoryName.trim().toLowerCase();
-    const key = `${cleanCategory}/${cleanSub}`;
+// Generic placeholder pool if an exact match isn't found
+const FALLBACK_IMAGES = [
+    I.office1, I.meeting, I.tools, I.restaurant, I.house1, I.car1,
+    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop",
+];
 
-    // 1. Try exact match
+export const getSubcategoryImage = (categorySlug: string, subcategoryName: string): string => {
+    // 1. Extract purely the 'base category slug'
+    const slugParts = categorySlug.split('/').filter(Boolean);
+    const baseCategory = slugParts[slugParts.length - 1]?.toLowerCase() || 'unknown';
+
+    // 2. Clean the subcategory name
+    const cleanSub = subcategoryName.trim().toLowerCase();
+    const key = `${baseCategory}/${cleanSub}`;
+
+    // 3. Check for specific map
     if (subcategoryImages[key]) {
         return subcategoryImages[key];
     }
 
-    // 2. Fallback to placeholder if still missing
-    return `https://placehold.co/600x400/f3f4f6/4f46e5?text=${encodeURIComponent(cleanSub)}`;
+    // 4. If not found, use a deterministic generic fallback image from the pool
+    let hash = 0;
+    for (let i = 0; i < subcategoryName.length; i++) {
+        hash = subcategoryName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % FALLBACK_IMAGES.length;
+
+    return FALLBACK_IMAGES[index];
 };

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Search, Bell, Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
 import { MegaMenu } from "./MegaMenu";
 import { SearchBar } from "./SearchBar";
@@ -96,7 +97,7 @@ function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-zinc-200">
                     <Link href="/" onClick={onClose}>
-                        <img src="/logo.png" alt="Peyda" className="h-35 w-35" />
+                        <img src="/logo.png" alt="Peyda" className="h-[40px] w-auto" />
                     </Link>
                     <button
                         onClick={onClose}
@@ -185,6 +186,10 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [hasPublishedBusiness, setHasPublishedBusiness] = useState(false);
     const [showBusinessPrompt, setShowBusinessPrompt] = useState(false);
+    const pathname = usePathname();
+
+    const isHomepage = pathname === "/";
+    const isTransparent = isHomepage && !scrolled;
 
     // Check authentication status on mount and periodically
     useEffect(() => {
@@ -279,36 +284,36 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
 
     return (
         <>
-            <header className={`sticky top-0 z-40 w-full transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-xl shadow-sm' : 'bg-white/80 backdrop-blur-xl'}`}>
+            <header className={`${isHomepage ? 'fixed' : 'sticky'} top-0 z-40 w-full transition-all duration-300 ${isTransparent ? 'bg-transparent border-b border-white/10' : 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-zinc-200/50'}`}>
                 <div className="container px-4 h-16 flex items-center justify-between mx-auto">
                     {/* Left Section - Hamburger + Logo */}
                     <div className="flex items-center gap-2 lg:gap-8">
                         {/* Hamburger Menu Button */}
                         <button
                             onClick={() => setMobileMenuOpen(true)}
-                            className="lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors"
+                            className={`lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'hover:bg-white/10 text-white' : 'hover:bg-zinc-100 text-zinc-700'}`}
                             aria-label="Open menu"
                         >
-                            <Menu className="h-6 w-6 text-zinc-700" />
+                            <Menu className="h-6 w-6" />
                         </button>
 
                         {/* Logo - Always visible */}
                         <Link href="/">
-                            <img src="/logo.png" alt="Peyda" className="h-35 w-35" />
+                            <img src="/logo.png" alt="Peyda" className={`h-[42px] md:h-[50px] w-auto transition-all duration-300 ${isTransparent ? 'brightness-0 invert opacity-90' : ''}`} />
                         </Link>
 
                         {/* Desktop Navigation */}
                         <div className="hidden lg:flex items-center gap-1">
-                            <MegaMenu categories={categories} />
+                            <MegaMenu categories={categories} isTransparent={isTransparent} />
                             <Link
                                 href="/steden"
-                                className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors min-h-[44px] flex items-center"
+                                className={`px-4 py-2 text-sm font-medium transition-colors min-h-[44px] flex items-center ${isTransparent ? 'text-white/90 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'}`}
                             >
                                 Steden
                             </Link>
                             <Link
                                 href="/artikelen"
-                                className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors min-h-[44px] flex items-center"
+                                className={`px-4 py-2 text-sm font-medium transition-colors min-h-[44px] flex items-center ${isTransparent ? 'text-white/90 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'}`}
                             >
                                 Artikelen
                             </Link>
@@ -319,20 +324,20 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                     <div className="flex items-center gap-2 lg:gap-3">
                         {/* Search Bar - Desktop */}
                         <div className="hidden lg:block">
-                            <SearchBar />
+                            <SearchBar isTransparent={isTransparent} />
                         </div>
 
                         {/* Mobile Search Button - Improved */}
                         <Link
                             href="/search"
-                            className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
+                            className={`lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}
                             aria-label="Search"
                         >
                             <Search className="h-5 w-5" />
                         </Link>
 
                         {/* Notifications - Improved touch target */}
-                        <button className="relative p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors">
+                        <button className={`relative p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}>
                             <Bell className="h-5 w-5" />
                             <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-emerald-500 rounded-full border-2 border-white" />
                         </button>
@@ -342,7 +347,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                             {hasPublishedBusiness ? (
                                 <Link
                                     href="/dashboard"
-                                    className="hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-full transition-colors min-h-[44px] items-center gap-2"
+                                    className="hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-[#0B2A3C] hover:bg-[#1C3D52] rounded-full transition-colors min-h-[44px] items-center gap-2 shadow-md"
                                 >
                                     <User className="h-4 w-4" />
                                     Profiel
@@ -350,7 +355,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                             ) : (
                                 <button
                                     onClick={() => setShowLoginModal(true)}
-                                    className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors min-h-[44px] flex items-center"
+                                    className={`px-4 py-2 text-sm font-medium rounded-full transition-colors min-h-[44px] flex items-center ${isTransparent ? 'text-white/95 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'}`}
                                 >
                                     Inloggen
                                 </button>
@@ -363,7 +368,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                                 setRedirectToRegister(true);
                                 setShowLoginModal(true);
                             }}
-                            className="hidden sm:flex px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 rounded-full transition-colors shadow-lg shadow-emerald-200 min-h-[44px] items-center"
+                            className={`hidden sm:flex px-5 py-2.5 text-sm font-semibold rounded-full transition-colors shadow-lg min-h-[44px] items-center ${isTransparent ? 'bg-white text-zinc-900 hover:bg-zinc-100 shadow-white/10' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'}`}
                         >
                             Bedrijf toevoegen
                         </button>

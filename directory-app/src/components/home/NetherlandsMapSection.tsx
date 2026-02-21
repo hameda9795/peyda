@@ -135,14 +135,13 @@ export function NetherlandsMapSection({ provinces, topCities, totalBusinesses }:
                                 >
                                     <div className="relative w-[140px] sm:w-[160px] h-[100px] sm:h-[120px] rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                                         {/* Gradient overlay based on index */}
-                                        <div className={`absolute inset-0 opacity-80 bg-gradient-to-br ${
-                                            index === 0 ? 'from-violet-600 to-purple-700' :
+                                        <div className={`absolute inset-0 opacity-80 bg-gradient-to-br ${index === 0 ? 'from-violet-600 to-purple-700' :
                                             index === 1 ? 'from-emerald-600 to-teal-700' :
-                                            index === 2 ? 'from-amber-500 to-orange-600' :
-                                            index === 3 ? 'from-rose-500 to-pink-600' :
-                                            index === 4 ? 'from-blue-500 to-indigo-600' :
-                                            'from-cyan-500 to-teal-600'
-                                        }`} />
+                                                index === 2 ? 'from-amber-500 to-orange-600' :
+                                                    index === 3 ? 'from-rose-500 to-pink-600' :
+                                                        index === 4 ? 'from-blue-500 to-indigo-600' :
+                                                            'from-cyan-500 to-teal-600'
+                                            }`} />
 
                                         {/* Content */}
                                         <div className="absolute inset-0 p-3 sm:p-4 flex flex-col justify-between">
@@ -192,7 +191,6 @@ export function NetherlandsMapSection({ provinces, topCities, totalBusinesses }:
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             {sortedProvinces.map((province) => {
                                 const accent = PROVINCE_COLORS[province.slug] || '#10b981';
-                                const image = province.image || "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1200&auto=format&fit=crop";
                                 return (
                                     <Link
                                         key={province.slug}
@@ -202,15 +200,22 @@ export function NetherlandsMapSection({ provinces, topCities, totalBusinesses }:
                                         onMouseLeave={() => setActiveProvince(null)}
                                     >
                                         <div className="absolute inset-0">
-                                            <img
-                                                src={image}
-                                                alt={province.name}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            />
+                                            {province.image ? (
+                                                <img
+                                                    src={province.image}
+                                                    alt={province.name}
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full transition-transform duration-500 group-hover:scale-105" style={{ backgroundColor: accent }}>
+                                                    <div className="absolute inset-0 mix-blend-overlay opacity-40 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem00MCA0MGg0MHY0MEg0MHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')]" />
+                                                    <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-transparent to-white/20" />
+                                                </div>
+                                            )}
                                             <div
                                                 className="absolute inset-0"
                                                 style={{
-                                                    background: `linear-gradient(180deg, ${accent}33 0%, rgba(15,23,42,0.75) 70%, rgba(15,23,42,0.9) 100%)`
+                                                    background: `linear-gradient(180deg, ${accent}33 0%, rgba(15,23,42,0.75) 80%, rgba(15,23,42,0.95) 100%)`
                                                 }}
                                             />
                                         </div>
@@ -275,6 +280,6 @@ export function NetherlandsMapSection({ provinces, topCities, totalBusinesses }:
                     </div>
                 </div>
             </div>
-        </section>
+        </section >
     );
 }
