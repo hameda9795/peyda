@@ -19,10 +19,10 @@ export function BusinessContent({ business }: BusinessContentProps) {
                     {business.shortDescription}
                 </p>
 
-                <div className="flex flex-wrap gap-3 mb-8">
+                <div className="flex flex-wrap gap-2 sm:gap-3 mb-8">
                     {business.serviceArea && (
-                        <span className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-700 text-sm font-medium shadow-sm">
-                            Bezorging: {business.serviceArea}
+                        <span className="px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-700 text-xs sm:text-sm font-medium shadow-sm max-w-full">
+                            <span className="line-clamp-2">Bezorging: {business.serviceArea}</span>
                         </span>
                     )}
                     {business.foundedYear ? (
@@ -42,13 +42,13 @@ export function BusinessContent({ business }: BusinessContentProps) {
                     )}
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-10">
                     {business.highlights.map((highlight, idx) => (
-                        <div key={idx} className="flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="p-2 rounded-full bg-emerald-500 text-white shrink-0 shadow-sm">
-                                <Check className="w-4 h-4" />
+                        <div key={idx} className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="p-1.5 sm:p-2 rounded-full bg-emerald-500 text-white shrink-0 shadow-sm">
+                                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </div>
-                            <span className="text-slate-800 font-semibold text-base leading-relaxed">{highlight}</span>
+                            <span className="text-slate-800 font-semibold text-sm sm:text-base leading-relaxed">{highlight}</span>
                         </div>
                     ))}
                 </div>
@@ -62,15 +62,15 @@ export function BusinessContent({ business }: BusinessContentProps) {
                         if (!hasH2 && !hasH3) {
                             // No heading tags, show all content in one box
                             return (
-                                <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/30 rounded-2xl p-8 md:p-10 border border-slate-200 shadow-md">
+                                <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 border border-slate-200 shadow-md">
                                     <div
-                                        className="prose prose-lg prose-slate max-w-none
-                                        prose-headings:font-bold prose-headings:text-slate-900 prose-headings:mb-4 prose-headings:mt-6
-                                        prose-h2:text-2xl prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-3
-                                        prose-h3:text-xl prose-h3:text-slate-800
-                                        prose-p:text-slate-700 prose-p:leading-relaxed prose-p:mb-4
+                                        className="prose prose-base sm:prose-lg prose-slate max-w-none
+                                        prose-headings:font-bold prose-headings:text-slate-900 prose-headings:mb-3 sm:prose-headings:mb-4 prose-headings:mt-4 sm:prose-headings:mt-6
+                                        prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-2 sm:prose-h2:pb-3
+                                        prose-h3:text-lg sm:prose-h3:text-xl prose-h3:text-slate-800
+                                        prose-p:text-slate-700 prose-p:leading-relaxed prose-p:mb-3 sm:prose-p:mb-4
                                         prose-a:text-blue-600 prose-a:font-medium hover:prose-a:text-blue-700
-                                        prose-ul:my-4 prose-li:text-slate-700 prose-li:my-2
+                                        prose-ul:my-3 sm:prose-ul:my-4 prose-li:text-slate-700 prose-li:my-1 sm:prose-li:my-2
                                         prose-strong:text-slate-900 prose-strong:font-semibold"
                                         dangerouslySetInnerHTML={{ __html: business.longDescription }}
                                     />
@@ -125,9 +125,9 @@ export function BusinessContent({ business }: BusinessContentProps) {
                         });
 
                         return sections.map((section, idx) => (
-                            <div key={idx} className="bg-gradient-to-br from-white via-slate-50 to-blue-50/30 rounded-2xl p-8 md:p-10 border border-slate-200 shadow-md hover:shadow-lg transition-shadow">
+                            <div key={idx} className="bg-gradient-to-br from-white via-slate-50 to-blue-50/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 border border-slate-200 shadow-md hover:shadow-lg transition-shadow">
                                 <h2
-                                    className="text-2xl font-bold text-slate-900 mb-6 pb-4 border-b border-slate-300"
+                                    className="text-xl sm:text-2xl font-bold text-slate-900 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-300"
                                     dangerouslySetInnerHTML={{ __html: section.title }}
                                 />
                                 <div
@@ -148,10 +148,10 @@ export function BusinessContent({ business }: BusinessContentProps) {
 
             {/* Services Section */}
             <section>
-                <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8 flex items-center gap-2">
                     Diensten & Producten
                 </h2>
-                <div className="grid sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {business.services.map((service, idx) => (
                         <div key={idx} className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border border-slate-200 shadow-md hover:shadow-xl transition-all hover:-translate-y-1 duration-300">
                             <div className="flex justify-between items-start gap-4 mb-3">
@@ -172,8 +172,8 @@ export function BusinessContent({ business }: BusinessContentProps) {
 
             {/* Gallery Section */}
             <section>
-                <h2 className="text-3xl font-bold text-slate-900 mb-8">Galerij</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">Galerij</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                     {business.images.gallery.map((img: any, idx: number) => {
                         // Handle both string URLs and objects with url property
                         const imageUrl = typeof img === 'string' ? img : img?.url;
@@ -198,7 +198,7 @@ export function BusinessContent({ business }: BusinessContentProps) {
             {/* FAQ Accordion */}
             {business.faq && business.faq.length > 0 && (
                 <section>
-                    <h2 className="text-3xl font-bold text-slate-900 mb-8">Veelgestelde Vragen</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">Veelgestelde Vragen</h2>
                     <div className="space-y-4">
                         {business.faq.map((item, idx) => (
                             <details key={idx} className="group bg-gradient-to-br from-white to-slate-50 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md open:shadow-lg open:border-blue-300 transition-all">
@@ -217,8 +217,8 @@ export function BusinessContent({ business }: BusinessContentProps) {
 
             {/* Reviews Section */}
             <section>
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-3xl font-bold text-slate-900">Reviews</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Reviews</h2>
                     <button className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors">
                         Bekijk alle {business.reviews.count} reviews
                     </button>

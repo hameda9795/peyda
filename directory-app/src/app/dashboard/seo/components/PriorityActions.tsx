@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 interface SEOItem {
     name: string;
@@ -35,9 +35,9 @@ export function PriorityActions({ items, businessId }: PriorityActionsProps) {
 
     if (sorted.length === 0) {
         return (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 sm:p-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
                         <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -52,44 +52,44 @@ export function PriorityActions({ items, businessId }: PriorityActionsProps) {
     }
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
             {sorted.map((item, idx) => (
                 <div
                     key={idx}
-                    className={`flex items-center justify-between p-4 rounded-lg border ${
+                    className={`flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border ${
                         item.status === 'fail'
                             ? 'bg-red-50 border-red-200'
                             : 'bg-yellow-50 border-yellow-200'
                     }`}
                 >
-                    <div className="flex items-start gap-3">
-                        <AlertCircle className={`w-5 h-5 mt-0.5 ${
+                    {/* Content */}
+                    <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                        <AlertCircle className={`w-4 h-4 mt-0.5 shrink-0 ${
                             item.status === 'fail' ? 'text-red-500' : 'text-yellow-500'
                         }`} />
-                        <div>
-                            <p className="font-medium text-slate-800">{item.name}</p>
-                            <p className="text-sm text-slate-600">{item.message}</p>
-                            {item.suggestion && (
-                                <p className="text-xs text-slate-500 mt-1">{item.suggestion}</p>
-                            )}
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-slate-800 text-sm leading-tight">{item.name}</p>
+                            <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{item.message}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className={`text-sm font-semibold ${
+
+                    {/* Action */}
+                    <div className="flex items-center justify-between sm:justify-end gap-3 pl-7 sm:pl-0">
+                        <span className={`text-xs font-semibold ${
                             item.status === 'fail' ? 'text-red-600' : 'text-yellow-600'
                         }`}>
-                            +{item.maxScore - item.score}
+                            +{item.maxScore - item.score} pts
                         </span>
                         {item.actionUrl && (
                             <Link
                                 href={getLink(item.actionUrl)}
-                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                                     item.status === 'fail'
                                         ? 'bg-red-600 text-white hover:bg-red-700'
                                         : 'bg-yellow-500 text-white hover:bg-yellow-600'
                                 }`}
                             >
-                                Verbeter
+                                Fix
                             </Link>
                         )}
                     </div>

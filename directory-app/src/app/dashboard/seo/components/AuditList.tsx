@@ -38,11 +38,11 @@ export function AuditList({ categories, businessId }: AuditListProps) {
     const getStatusIcon = (status: string) => {
         switch (status) {
             case 'pass':
-                return <CheckCircle className="w-5 h-5 text-green-500" />;
+                return <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 shrink-0" />;
             case 'warning':
-                return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+                return <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 shrink-0" />;
             case 'fail':
-                return <XCircle className="w-5 h-5 text-red-500" />;
+                return <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 shrink-0" />;
             default:
                 return null;
         }
@@ -76,25 +76,25 @@ export function AuditList({ categories, businessId }: AuditListProps) {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
             {categories.map((category, catIdx) => {
                 const progress = (category.score / category.maxScore) * 100;
 
                 return (
                     <div key={catIdx} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                         {/* Category Header */}
-                        <div className="bg-slate-50 px-5 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <h3 className="font-semibold text-slate-800">{category.name}</h3>
+                        <div className="bg-slate-50 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 min-w-0">
+                                <h3 className="font-semibold text-slate-800 text-sm sm:text-base truncate">{category.name}</h3>
                                 <InfoIcon
                                     content={`Maximale score voor deze categorie: ${category.maxScore} punten`}
                                 />
                             </div>
-                            <div className="flex items-center gap-3">
-                                <span className={`text-xl font-bold ${getScoreColor(category.score, category.maxScore)}`}>
+                            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                                <span className={`text-lg sm:text-xl font-bold ${getScoreColor(category.score, category.maxScore)}`}>
                                     {category.score}/{category.maxScore}
                                 </span>
-                                <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                <div className="w-16 sm:w-24 h-2 bg-slate-200 rounded-full overflow-hidden hidden sm:block">
                                     <div
                                         className={`h-full ${getProgressColor(category.score, category.maxScore)} transition-all`}
                                         style={{ width: `${progress}%` }}
@@ -108,31 +108,30 @@ export function AuditList({ categories, businessId }: AuditListProps) {
                             {category.items.map((item, itemIdx) => (
                                 <div
                                     key={itemIdx}
-                                    className={`p-4 flex items-start justify-between gap-4 ${
+                                    className={`p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 ${
                                         item.status !== 'pass' ? getStatusBg(item.status) : ''
                                     }`}
                                 >
-                                    <div className="flex items-start gap-3 flex-1">
+                                    <div className="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
                                         {getStatusIcon(item.status)}
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-medium text-slate-800">{item.name}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <p className="font-medium text-slate-800 text-sm">{item.name}</p>
                                                 <InfoIcon content={item.suggestion} />
                                             </div>
-                                            <p className="text-sm text-slate-600 mt-0.5">{item.message}</p>
+                                            <p className="text-xs text-slate-600 mt-0.5">{item.message}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3 shrink-0">
-                                        <span className="text-sm text-slate-500">
+                                    <div className="flex items-center justify-between sm:justify-end gap-3 pl-6 sm:pl-0">
+                                        <span className="text-xs sm:text-sm text-slate-500">
                                             {item.score}/{item.maxScore}
                                         </span>
                                         {item.status !== 'pass' && item.actionUrl && (
                                             <Link
                                                 href={getLink(item.actionUrl)}
-                                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                                                className="flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors shrink-0"
                                             >
-                                                {item.actionLabel || 'Verbeter'}
-                                                <ArrowRight className="w-3 h-3" />
+                                                Fix
                                             </Link>
                                         )}
                                     </div>

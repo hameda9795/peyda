@@ -93,6 +93,17 @@ export default function DashboardLayout({
                         </div>
                     </aside>
 
+                    {/* Mobile Menu Button */}
+                    <div className="lg:hidden mb-2">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-medium shadow-sm text-xs"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                            Menu
+                        </button>
+                    </div>
+
                     {/* Main Content */}
                     <main className="flex-1 min-w-0">
                         {children}

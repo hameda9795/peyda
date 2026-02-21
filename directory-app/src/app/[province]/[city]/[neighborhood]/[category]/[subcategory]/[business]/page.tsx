@@ -353,44 +353,44 @@ export default async function BusinessPage({ params }: Props) {
 
             {/* Breadcrumb */}
             <div className="bg-white border-b border-slate-100">
-                <div className="container mx-auto px-4 py-3">
-                    <nav className="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
-                        <Link href="/" className="hover:text-slate-900">Home</Link>
-                        <span>/</span>
-                        <Link href={`/provincies/${province}`} className="hover:text-slate-900 capitalize">
+                <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
+                    <nav className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-slate-500 flex-wrap">
+                        <Link href="/" className="hover:text-slate-900 whitespace-nowrap">Home</Link>
+                        <span className="hidden sm:inline">/</span>
+                        <Link href={`/provincies/${province}`} className="hover:text-slate-900 capitalize hidden sm:inline whitespace-nowrap">
                             {decodedProvince}
                         </Link>
-                        <span>/</span>
-                        <Link href={`/steden/${city}`} className="hover:text-slate-900 capitalize">
+                        <span className="hidden sm:inline">/</span>
+                        <Link href={`/steden/${city}`} className="hover:text-slate-900 capitalize hidden md:inline whitespace-nowrap">
                             {decodedCity}
                         </Link>
-                        <span>/</span>
-                        <Link href={`/wijken/${city}/${neighborhood}`} className="hover:text-slate-900 capitalize">
+                        <span className="hidden md:inline">/</span>
+                        <Link href={`/wijken/${city}/${neighborhood}`} className="hover:text-slate-900 capitalize hidden lg:inline whitespace-nowrap">
                             {decodedNeighborhood.replace(/-/g, ' ')}
                         </Link>
-                        <span>/</span>
-                        <Link href={`/categorieen/${category}`} className="hover:text-slate-900 capitalize">
+                        <span className="hidden lg:inline">/</span>
+                        <Link href={`/categorieen/${category}`} className="hover:text-slate-900 capitalize whitespace-nowrap">
                             {decodedCategory.replace(/-/g, ' ')}
                         </Link>
                         <span>/</span>
-                        <span className="text-slate-900 font-medium">{business.name}</span>
+                        <span className="text-slate-900 font-medium truncate max-w-[120px] sm:max-w-[200px] md:max-w-xs">{business.name}</span>
                     </nav>
                 </div>
             </div>
 
             <BusinessHero business={business} />
 
-            <div className="container mx-auto px-4 -mt-8 relative z-20">
-                <div className="flex flex-col lg:flex-row gap-8">
+            <div className="container mx-auto px-3 sm:px-4 -mt-4 sm:-mt-6 md:-mt-8 relative z-20">
+                <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
 
                     {/* Main Content Column */}
-                    <main className="flex-1 bg-white rounded-xl shadow-xl p-6 md:p-10 border border-slate-100 min-h-[500px]">
+                    <main className="flex-1 bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8 lg:p-10 border border-slate-100 min-h-[300px] sm:min-h-[500px] order-2 lg:order-1">
                         <BusinessContent business={business} />
                     </main>
 
                     {/* Sticky Sidebar Column */}
-                    <aside className="lg:w-[380px] shrink-0 space-y-6">
-                        <div className="sticky top-24 space-y-6">
+                    <aside className="w-full lg:w-[340px] xl:w-[380px] shrink-0 space-y-4 sm:space-y-6 order-1 lg:order-2">
+                        <div className="lg:sticky lg:top-24 space-y-4 sm:space-y-6">
                             <BusinessInfoSidebar business={business} />
                         </div>
                     </aside>
@@ -408,9 +408,9 @@ export default async function BusinessPage({ params }: Props) {
             </div>
 
             {/* Footer Navigation */}
-            <div className="container mx-auto px-4 mt-16 text-center">
-                <h3 className="text-xl font-semibold text-slate-800 mb-4">NL Business Directory</h3>
-                <div className="flex justify-center gap-4 text-sm text-slate-500 flex-wrap">
+            <div className="container mx-auto px-3 sm:px-4 mt-10 sm:mt-16 text-center">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-800 mb-3 sm:mb-4">NL Business Directory</h3>
+                <div className="flex justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-500 flex-wrap">
                     <Link href="/" className="hover:text-blue-600">Home</Link>
                     <span>•</span>
                     <Link href={`/categorieen/${category}`} className="hover:text-blue-600">{business.category}</Link>

@@ -506,17 +506,17 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                         <button
                             onClick={handlePublish}
                             disabled={publishing}
-                            className="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                            className="mt-3 w-full px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
                         >
                             {publishing ? (
                                 <>
                                     <span className="animate-spin">⏳</span>
-                                    Publiceren...
+                                    <span>Publiceren...</span>
                                 </>
                             ) : (
                                 <>
                                     <span>🚀</span>
-                                    Nu Publiceren
+                                    <span>Nu Publiceren</span>
                                 </>
                             )}
                         </button>
@@ -525,42 +525,41 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             )}
 
             {/* Header */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-slate-200">
+                <div className="flex flex-col gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-800">Profiel Bewerken</h1>
-                        <p className="text-slate-600 mt-1">
-                            Update uw bedrijfsinformatie om meer klanten te bereiken
+                        <h1 className="text-lg sm:text-2xl font-bold text-slate-800">Profiel Bewerken</h1>
+                        <p className="text-sm text-slate-600 mt-1">
+                            Update uw bedrijfsinformatie
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleSave}
-                            disabled={saving}
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
-                        >
-                            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                            {saving ? "Opslaan..." : "Wijzigingen Opslaan"}
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-all text-sm"
+                    >
+                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        <span>{saving ? "Opslaan..." : "Wijzigingen Opslaan"}</span>
+                    </button>
                 </div>
             </div>
 
             {/* Tabs Navigation */}
-            <div className="bg-white p-2 rounded-xl flex items-center justify-between border border-slate-200 shadow-sm sticky top-4 z-10 transition-all">
-                <nav className="flex items-center space-x-2 w-full overflow-x-auto no-scrollbar">
+            <div className="bg-white p-1.5 sm:p-2 rounded-xl border border-slate-200 shadow-sm sticky top-4 z-10 transition-all">
+                <nav className="flex items-center gap-1 sm:gap-2 w-full">
                     {[
-                        { id: 'algemeen', label: 'Info & Locatie' },
-                        { id: 'diensten', label: 'Diensten & Tijden' },
-                        { id: 'media', label: 'Media & Socials' },
-                        { id: 'extra', label: 'SEO & Extra' },
+                        { id: 'algemeen', label: 'Info', fullLabel: 'Info & Locatie' },
+                        { id: 'diensten', label: 'Diensten', fullLabel: 'Diensten & Tijden' },
+                        { id: 'media', label: 'Media', fullLabel: 'Media & Socials' },
+                        { id: 'extra', label: 'SEO', fullLabel: 'SEO & Extra' },
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as 'algemeen' | 'media' | 'diensten' | 'extra')}
-                            className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex-none flex items-center gap-2 ${activeTab === tab.id ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
+                            className={`flex-1 px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-center whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
                         >
-                            {tab.label}
+                            <span className="sm:hidden">{tab.label}</span>
+                            <span className="hidden sm:inline">{tab.fullLabel}</span>
                         </button>
                     ))}
                 </nav>
@@ -772,9 +771,11 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                             setLogoAltText("");
                                             setFormData({ ...formData, logo: null });
                                         }}
-                                        className="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+                                        className="mt-2 text-xs sm:text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
                                     >
-                                        <X className="w-4 h-4" /> Verwijderen
+                                        <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                        <span className="hidden sm:inline">Verwijderen</span>
+                                        <span className="sm:hidden">Verwijder</span>
                                     </button>
                                 )}
                                 {/* Logo Alt Text */}
@@ -831,9 +832,11 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                             setCoverAltText("");
                                             setFormData({ ...formData, coverImage: null });
                                         }}
-                                        className="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+                                        className="mt-2 text-xs sm:text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
                                     >
-                                        <X className="w-4 h-4" /> Verwijderen
+                                        <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                        <span className="hidden sm:inline">Verwijderen</span>
+                                        <span className="sm:hidden">Verwijder</span>
                                     </button>
                                 )}
                                 {/* Cover Alt Text */}
@@ -868,9 +871,11 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                             </div>
                             <button
                                 onClick={addFaq}
-                                className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
+                                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 rounded-lg shrink-0"
                             >
-                                <Plus className="w-4 h-4" /> Vraag toevoegen
+                                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <span className="hidden sm:inline">Vraag toevoegen</span>
+                                <span className="sm:hidden">Toevoegen</span>
                             </button>
                         </div>
                         <div className="space-y-4">
@@ -906,9 +911,10 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
                                             </div>
                                             <button
                                                 onClick={() => removeFaq(index)}
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                                className="p-1.5 sm:p-2 text-red-500 hover:bg-red-50 rounded-lg shrink-0"
+                                                aria-label="Verwijderen"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                             </button>
                                         </div>
                                     </div>

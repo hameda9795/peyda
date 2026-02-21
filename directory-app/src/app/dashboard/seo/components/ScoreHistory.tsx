@@ -9,12 +9,12 @@ interface ScoreHistoryProps {
 export function ScoreHistory({ history }: ScoreHistoryProps) {
     if (!history || history.length === 0) {
         return (
-            <div className="bg-white border border-slate-200 rounded-xl p-5">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
                 <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-medium text-slate-700">Score Geschiedenis</h3>
+                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                    <h3 className="font-medium text-slate-700 text-sm sm:text-base">Score Geschiedenis</h3>
                 </div>
-                <p className="text-sm text-slate-500 text-center py-4">
+                <p className="text-xs sm:text-sm text-slate-500 text-center py-4">
                     Nog geen geschiedenis beschikbaar
                 </p>
             </div>
@@ -47,29 +47,29 @@ export function ScoreHistory({ history }: ScoreHistoryProps) {
         `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
     ).join(' ');
 
+    const scoreDiff = history[history.length - 1].score - history[0].score;
+
     return (
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-medium text-slate-700">Score Geschiedenis</h3>
+                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                    <h3 className="font-medium text-slate-700 text-sm sm:text-base">Score Geschiedenis</h3>
                 </div>
                 {history.length > 1 && (
-                    <div className="flex items-center gap-1 text-sm">
+                    <div className="flex items-center gap-1 text-xs sm:text-sm">
                         <span className={`font-semibold ${
-                            history[history.length - 1].score >= history[0].score
-                                ? 'text-green-600'
-                                : 'text-red-600'
+                            scoreDiff >= 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
-                            {history[history.length - 1].score >= history[0].score ? '+' : ''}
-                            {history[history.length - 1].score - history[0].score}
+                            {scoreDiff >= 0 ? '+' : ''}{scoreDiff}
                         </span>
-                        <span className="text-slate-500">laatste 30 dagen</span>
+                        <span className="text-slate-500 hidden sm:inline">laatste 30 dagen</span>
+                        <span className="text-slate-500 sm:hidden">30d</span>
                     </div>
                 )}
             </div>
 
-            <div className="relative h-32">
+            <div className="relative h-28 sm:h-32">
                 <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                     {/* Grid lines */}
                     {[0, 25, 50, 75, 100].map(y => (
@@ -107,7 +107,7 @@ export function ScoreHistory({ history }: ScoreHistoryProps) {
                             key={idx}
                             cx={p.x}
                             cy={p.y}
-                            r="3"
+                            r="2.5"
                             fill={getScoreColor(p.score)}
                             stroke="white"
                             strokeWidth="1"
@@ -125,14 +125,14 @@ export function ScoreHistory({ history }: ScoreHistoryProps) {
                 {/* Labels */}
                 <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-slate-500">
                     {history.map((h, idx) => (
-                        <span key={idx}>{formatDate(h.date)}</span>
+                        <span key={idx} className="truncate max-w-[60px] text-center">{formatDate(h.date)}</span>
                     ))}
                 </div>
             </div>
 
             <div className="flex justify-between mt-2 text-xs text-slate-400">
                 <span>0</span>
-                <span>50</span>
+                <span className="hidden sm:inline">50</span>
                 <span>100</span>
             </div>
         </div>

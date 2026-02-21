@@ -48,12 +48,12 @@ export function BusinessHero({ business }: BusinessHeroProps) {
             </div>
 
             {/* Content Container */}
-            <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-end pb-8 lg:pb-12 text-white">
-                <div className="flex flex-col md:flex-row items-end md:items-center gap-6 md:gap-8">
+            <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-end pb-4 sm:pb-8 lg:pb-12 text-white">
+                <div className="flex flex-col md:flex-row items-start md:items-end lg:items-center gap-4 md:gap-6 lg:gap-8 w-full">
 
                     {/* Logo (floating) */}
-                    <div className="relative -mb-4 md:mb-0 shrink-0">
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl border-4 border-white/10 bg-white shadow-2xl overflow-hidden relative">
+                    <div className="relative -mb-2 sm:-mb-4 md:mb-0 shrink-0 order-1">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl border-4 border-white/10 bg-white shadow-2xl overflow-hidden relative">
                             <Image
                                 src={business.images.logo || '/images/placeholder-logo.jpg'}
                                 alt={`${business.name} Logo`}
@@ -65,7 +65,7 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                     </div>
 
                     {/* Main Text Info */}
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 space-y-2 sm:space-y-3 w-full min-w-0 order-2 md:order-1">
                         <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-emerald-400">
                             <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm">
                                 {business.category}
@@ -77,11 +77,11 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                             )}
                         </div>
 
-                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white drop-shadow-sm">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white drop-shadow-sm break-words">
                             {business.name}
                         </h1>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-slate-300 text-sm md:text-base">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-slate-300 text-sm md:text-base">
                             <div className="flex items-center gap-1.5">
                                 <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                                 <span className="font-semibold text-white">{business.reviews.average}</span>
@@ -103,9 +103,9 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                         </div>
 
                         {/* Trust / proof row */}
-                        <div className="flex flex-wrap gap-2 text-xs md:text-sm text-slate-200 mt-2">
+                        <div className="flex flex-wrap gap-2 text-xs md:text-sm text-slate-200 mt-2 max-w-full">
                             {business.serviceArea && (
-                                <span className="px-2 py-1 rounded-full bg-white/10 border border-white/15">
+                                <span className="px-2 py-1 rounded-full bg-white/10 border border-white/15 line-clamp-2 sm:line-clamp-1 max-w-full">
                                     Bezorging: {business.serviceArea}
                                 </span>
                             )}
@@ -126,23 +126,24 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
+                    <div className="flex flex-wrap sm:flex-row md:flex-col gap-2 sm:gap-3 w-full md:w-auto mt-3 sm:mt-4 md:mt-0 order-3">
                         <Link
                             href={business.cta.link}
                             onClick={handleCtaClick}
-                            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3 rounded-lg font-semibold transition-all shadow-lg shadow-white/10"
+                            className="flex-1 sm:flex-initial md:flex-none flex items-center justify-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold transition-all shadow-lg shadow-white/10 text-sm sm:text-base whitespace-nowrap min-w-0"
                         >
-                            {business.cta.text}
+                            <span className="truncate">{business.cta.text}</span>
                         </Link>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-1 sm:flex-initial justify-end">
                             {business.contact.phone && (
                                 <a
                                     href={`tel:${business.contact.phone}`}
                                     onClick={handlePhoneClick}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-white backdrop-blur-sm transition-all"
+                                    className="flex-1 sm:flex-initial md:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-white backdrop-blur-sm transition-all min-w-[60px] sm:min-w-0"
+                                    aria-label="Bel"
                                 >
                                     <Phone className="w-5 h-5" />
-                                    <span className="md:hidden">Bel</span>
+                                    <span className="hidden sm:inline md:hidden lg:inline">Bel</span>
                                 </a>
                             )}
                             {whatsappLink && (
@@ -151,10 +152,11 @@ export function BusinessHero({ business }: BusinessHeroProps) {
                                     onClick={handleWhatsAppClick}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-white backdrop-blur-sm transition-all"
+                                    className="flex-1 sm:flex-initial md:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-white backdrop-blur-sm transition-all min-w-[60px] sm:min-w-0"
+                                    aria-label="WhatsApp"
                                 >
                                     <MessageCircle className="w-5 h-5" />
-                                    <span className="md:hidden">WhatsApp</span>
+                                    <span className="hidden sm:inline md:hidden lg:inline">WhatsApp</span>
                                 </a>
                             )}
                         </div>
