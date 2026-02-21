@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { getCategoryImage } from '../src/lib/category-images'
+import { getSubcategoryImage } from '../src/lib/subcategory-images'
 
 const prisma = new PrismaClient()
 
@@ -69,30 +71,42 @@ async function main() {
             const subcategories = parts[1].split(';').map(s => s.trim());
             const slug = parts[3];
 
-            // Create Category
+            // Get category image
+            const categoryImage = getCategoryImage(slug);
+
+            // Create Category with image
             const category = await prisma.category.upsert({
                 where: { slug },
-                update: { name },
+                update: { 
+                    name,
+                    image: categoryImage
+                },
                 create: {
                     name,
                     slug,
+                    image: categoryImage
                 }
             });
 
-            console.log(`Upserted category: ${name}`);
+            console.log(`Upserted category: ${name} with image`);
 
-            // Create Subcategories
+            // Create Subcategories with images
             for (const subName of subcategories) {
                 if (!subName) continue;
                 const subSlug = slug + '/' + subName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const subcategoryImage = getSubcategoryImage(slug, subName);
 
                 await prisma.subCategory.upsert({
                     where: { slug: subSlug },
-                    update: { name: subName },
+                    update: { 
+                        name: subName,
+                        image: subcategoryImage
+                    },
                     create: {
                         name: subName,
                         slug: subSlug,
-                        categoryId: category.id
+                        categoryId: category.id,
+                        image: subcategoryImage
                     }
                 });
             }

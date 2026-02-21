@@ -3,6 +3,7 @@
 import { db as prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getCategoryImage } from "@/lib/category-images";
 
 export async function getCategories() {
     try {
@@ -23,11 +24,24 @@ export async function getCategories() {
             },
         });
 
+        // Remove duplicates by name - keep only the first occurrence
+        const seenNames = new Set<string>();
+        const uniqueCategories = categories.filter((cat: any) => {
+            const normalizedName = cat.name.toLowerCase().replace(/ in utrecht| in nederland/g, '').trim();
+            if (seenNames.has(normalizedName)) {
+                console.warn(`Duplicate category found: ${cat.name} (${cat.slug})`);
+                return false;
+            }
+            seenNames.add(normalizedName);
+            return true;
+        });
+
         const { getSubcategoryImage } = require("@/lib/subcategory-images");
 
-        return categories.map(cat => ({
+        return uniqueCategories.map((cat: any) => ({
             ...cat,
-            subcategories: cat.subcategories.map(sub => ({
+            image: cat.image || getCategoryImage(cat.slug),
+            subcategories: cat.subcategories.map((sub: any) => ({
                 ...sub,
                 image: sub.image || getSubcategoryImage(cat.slug, sub.name)
             }))
@@ -249,6 +263,7 @@ export async function getCategoryBySlug(slug: string) {
         const { getSubcategoryImage } = require("@/lib/subcategory-images");
         return {
             ...category,
+            image: category.image || getCategoryImage(category.slug),
             subcategories: category.subcategories.map(sub => ({
                 ...sub,
                 image: sub.image || getSubcategoryImage(category.slug, sub.name)
