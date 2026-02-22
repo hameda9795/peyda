@@ -23,9 +23,13 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.supabase.co',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
     // Allow unoptimized images for user uploads
-    unoptimized: false,
+    unoptimized: true,
   },
   experimental: {
     serverActions: {

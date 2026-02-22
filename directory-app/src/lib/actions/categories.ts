@@ -29,7 +29,7 @@ export async function getCategories() {
         const uniqueCategories = categories.filter((cat: any) => {
             const normalizedName = cat.name.toLowerCase().replace(/ in utrecht| in nederland/g, '').trim();
             if (seenNames.has(normalizedName)) {
-                console.warn(`Duplicate category found: ${cat.name} (${cat.slug})`);
+                // Silently skip duplicates in production
                 return false;
             }
             seenNames.add(normalizedName);

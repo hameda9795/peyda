@@ -179,7 +179,7 @@ export function BusinessContent({ business }: BusinessContentProps) {
                         const imageUrl = typeof img === 'string' ? img : img?.url;
                         if (!imageUrl) return null;
                         return (
-                            <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300">
+                            <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300 bg-slate-100">
                                 <Image
                                     src={imageUrl}
                                     alt={img?.altText || `${business.name} ${business.address.city} ${business.address.neighborhood} foto ${idx + 1} - ${business.category}`}
@@ -187,6 +187,10 @@ export function BusinessContent({ business }: BusinessContentProps) {
                                     sizes="(max-width: 768px) 50vw, 25vw"
                                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                                     loading="lazy"
+                                    onError={(e) => {
+                                        // If image fails to load, show a fallback
+                                        (e.target as HTMLImageElement).src = '/images/placeholder-business.svg';
+                                    }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </div>
