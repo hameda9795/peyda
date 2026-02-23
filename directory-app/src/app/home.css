@@ -212,6 +212,12 @@
     overflow: hidden;
 }
 
+@media (max-width: 768px) {
+    .atlas-hero {
+        padding-top: 11rem;
+    }
+}
+
 .atlas-hero::before {
     content: '';
     position: absolute;
