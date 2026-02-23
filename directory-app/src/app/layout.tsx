@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Fraunces, Rubik_Glitch } from "next/font/google";
 import "./globals.css";
+import { getCategories } from "@/lib/actions/categories";
+import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/json-ld-schema";
+import { AuthModalProvider } from "@/providers/AuthModalProvider";
+import { ClientWrapper } from "@/components/layout/ClientWrapper";
 
 // Fallback font for logo (if Ransom font is not available)
 const rubikGlitch = Rubik_Glitch({
@@ -9,10 +13,6 @@ const rubikGlitch = Rubik_Glitch({
     variable: "--font-rubik-glitch",
     display: "swap",
 });
-import { AppShell } from "@/components/layout/AppShell";
-import { getCategories } from "@/lib/actions/categories";
-import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/json-ld-schema";
-import { AuthModalProvider } from "@/providers/AuthModalProvider";
 
 // ISR: Revalidate every 60 seconds for static generation with fresh data
 export const revalidate = 60;
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Peyda - De Bedrijvengids van Nederland",
         description: "Vind lokale bedrijven in heel Nederland.",
-        creator: "@peyda_nl", // hypothetical handle
+        creator: "@peyda_nl",
     },
     alternates: {
         canonical: BASE_URL,
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
             { url: "/favicon.svg", type: "image/svg+xml" },
         ],
     },
-    category: "directory", // Improved category
+    category: "directory",
 };
 
 export const viewport: Viewport = {
@@ -113,16 +113,16 @@ export default async function RootLayout({
 }>) {
     const categories: any = await getCategories();
     return (
-        <html lang="nl" className={`${sora.variable} ${fraunces.variable} light`} suppressHydrationWarning>
+        <html lang="nl" className={`${sora.variable} ${fraunces.variable} ${rubikGlitch.variable} light`} suppressHydrationWarning>
             <body className={sora.className} suppressHydrationWarning>
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: globalSchemas }}
                 />
                 <AuthModalProvider>
-                    <AppShell categories={categories}>
+                    <ClientWrapper categories={categories}>
                         {children}
-                    </AppShell>
+                    </ClientWrapper>
                 </AuthModalProvider>
             </body>
         </html>
