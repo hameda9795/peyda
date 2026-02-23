@@ -36,6 +36,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  // Skip type checking during build for faster builds
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  // ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

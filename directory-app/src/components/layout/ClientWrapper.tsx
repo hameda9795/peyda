@@ -1,18 +1,30 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import { Navbar } from "./Navbar";
 import { PremiumFooter } from "./PremiumFooter";
 import { SidebarProvider } from "@/providers/SidebarProvider";
+
+// Hook that safely gets pathname (returns '/' during SSR)
+function usePathnameSafe() {
+    return useSyncExternalStore(
+        () => () => {}, // no-op subscribe
+        () => {
+            if (typeof window === 'undefined') return '/';
+            return window.location.pathname;
+        },
+        () => '/' // SSR snapshot
+    );
+}
 
 interface ClientWrapperProps {
     children: React.ReactNode;
     categories?: any[];
 }
 
-// Client Component - handles pathname-dependent logic
+// Client Component - handles pathname-dependent logic safely
 export function ClientWrapper({ children, categories }: ClientWrapperProps) {
-    const pathname = usePathname();
+    const pathname = usePathnameSafe();
     
     const isAdmin = pathname?.startsWith("/admin");
     const isRegister = pathname?.startsWith("/bedrijf-aanmelden");

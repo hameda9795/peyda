@@ -1,14 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { Search, Bell, Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
 import { MegaMenu } from "./MegaMenu";
 import { SearchBar } from "./SearchBar";
 import LoginModal from "@/components/LoginModal";
 import { BusinessRegistrationPrompt } from "@/components/BusinessRegistrationPrompt";
 import { getCurrentUser } from "@/app/actions";
+
+// Hook that safely gets pathname (returns '/' during SSR)
+function usePathnameSafe() {
+    return useSyncExternalStore(
+        () => () => {}, // no-op subscribe
+        () => {
+            if (typeof window === 'undefined') return '/';
+            return window.location.pathname;
+        },
+        () => '/' // SSR snapshot
+    );
+}
 
 interface MobileMenuProps {
     isOpen: boolean;
@@ -51,7 +62,6 @@ function MobileAuthButton({ onClose }: { onClose: () => void }) {
         <button
             onClick={() => {
                 onClose();
-                // Use a custom event to trigger login modal from parent
                 window.dispatchEvent(new CustomEvent('show-login-modal'));
             }}
             className="w-full mb-4 py-3.5 text-center text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 rounded-full transition-colors shadow-lg shadow-indigo-200 min-h-[48px] flex items-center justify-center gap-2"
@@ -186,7 +196,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [hasPublishedBusiness, setHasPublishedBusiness] = useState(false);
     const [showBusinessPrompt, setShowBusinessPrompt] = useState(false);
-    const pathname = usePathname();
+    const pathname = usePathnameSafe();
 
     const isHomepage = pathname === "/";
     const isTransparent = isHomepage && !scrolled;
@@ -196,7 +206,6 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
         const checkAuth = async () => {
             try {
                 const user = await getCurrentUser();
-                // Only show profile icon if user has a PUBLISHED business
                 const isPublished = user?.business?.publishStatus === 'PUBLISHED';
                 setHasPublishedBusiness(isPublished);
             } catch (error) {
@@ -206,35 +215,21 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
         };
         checkAuth();
 
-        // Listen for auth changes (e.g., after business is published)
-        const handleAuthChange = () => {
-            checkAuth();
-        };
+        const handleAuthChange = () => checkAuth();
         window.addEventListener('auth-change', handleAuthChange);
-
-        // Listen for show login modal event from mobile menu
-        const handleShowLoginModal = () => {
-            setShowLoginModal(true);
-        };
+        const handleShowLoginModal = () => setShowLoginModal(true);
         window.addEventListener('show-login-modal', handleShowLoginModal);
 
-        // Check auth when tab becomes visible (user returns to page)
         const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                checkAuth();
-            }
+            if (document.visibilityState === 'visible') checkAuth();
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        // Periodic check every 3 seconds for the first 30 seconds after load
-        // This helps catch auth changes after publish
         let checkCount = 0;
         const intervalId = setInterval(() => {
             checkAuth();
             checkCount++;
-            if (checkCount >= 10) {
-                clearInterval(intervalId);
-            }
+            if (checkCount >= 10) clearInterval(intervalId);
         }, 3000);
 
         return () => {
@@ -246,35 +241,27 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
     }, []);
 
     const handleLoginSuccess = async () => {
-        // Check if user has a published business
         const user = await getCurrentUser();
-
         if (redirectToRegister) {
             window.location.href = '/bedrijf-aanmelden';
         } else if (user?.business?.publishStatus === 'PUBLISHED') {
             window.location.href = '/dashboard';
         } else {
-            // User logged in but no published business - show prompt
             setShowLoginModal(false);
             setShowBusinessPrompt(true);
         }
     };
 
     useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 10);
-        };
+        const handleScroll = () => setScrolled(window.scrollY > 10);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Close user menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            if (!target.closest('.user-menu')) {
-                setShowUserMenu(false);
-            }
+            if (!target.closest('.user-menu')) setShowUserMenu(false);
         };
         if (showUserMenu) {
             document.addEventListener('click', handleClickOutside);
@@ -327,7 +314,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                             <SearchBar isTransparent={isTransparent} />
                         </div>
 
-                        {/* Mobile Search Button - Improved */}
+                        {/* Mobile Search Button */}
                         <Link
                             href="/search"
                             className={`lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}
@@ -336,7 +323,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                             <Search className="h-5 w-5" />
                         </Link>
 
-                        {/* Notifications - Improved touch target */}
+                        {/* Notifications */}
                         <button className={`relative p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}>
                             <Bell className="h-5 w-5" />
                             <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-emerald-500 rounded-full border-2 border-white" />
@@ -399,4 +386,3 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
         </>
     );
 }
-

@@ -1,19 +1,26 @@
 "use client";
 
 import { Search, MapPin } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useSyncExternalStore } from "react";
 
-export function SearchBar({ isTransparent }: { isTransparent?: boolean }) {
+// Hook that safely gets search params (returns null during SSR)
+function useSearchParamSafe() {
+    return useSyncExternalStore(
+        () => () => {}, // no-op subscribe
+        () => {
+            if (typeof window === 'undefined') return '';
+            const params = new URLSearchParams(window.location.search);
+            return params.get("q") || '';
+        },
+        () => '' // SSR snapshot
+    );
+}
+
+function SearchBarContent({ isTransparent }: { isTransparent?: boolean }) {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const [query, setQuery] = useState("");
-
-    // Sync input with URL query param on load
-    useEffect(() => {
-        const q = searchParams.get("q");
-        if (q) setQuery(q);
-    }, [searchParams]);
+    const initialQuery = useSearchParamSafe();
+    const [query, setQuery] = useState(initialQuery);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,9 +39,12 @@ export function SearchBar({ isTransparent }: { isTransparent?: boolean }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />
-            {/* Visual separator and fake MapPin for location context (future feature) */}
             <div className={`h-4 w-px mx-2 shrink-0 ${isTransparent ? 'bg-white/20' : 'bg-zinc-300'}`} />
             <MapPin className={`h-4 w-4 shrink-0 ${isTransparent ? 'text-white/50' : 'text-zinc-400'}`} />
         </form>
     );
+}
+
+export function SearchBar({ isTransparent }: { isTransparent?: boolean }) {
+    return <SearchBarContent isTransparent={isTransparent} />;
 }
