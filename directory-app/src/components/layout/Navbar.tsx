@@ -271,7 +271,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
     return (
         <>
             <header className={`${isHomepage ? 'fixed' : 'sticky'} top-0 z-40 w-full transition-all duration-300 ${isTransparent ? 'bg-transparent border-b border-white/10' : 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-zinc-200/50'}`}>
-                <div className="container px-4 h-16 flex items-center justify-between mx-auto">
+                <div className="container px-4 h-16 flex items-center justify-between mx-auto relative">
                     {/* Left Section - Hamburger + Logo */}
                     <div className="flex items-center gap-2 lg:gap-8">
                         {/* Hamburger Menu Button */}
@@ -284,7 +284,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                         </button>
 
                         {/* Logo - Always visible */}
-                        <Link href="/">
+                        <Link href="/" className="lg:static absolute left-1/2 lg:translate-x-0 -translate-x-1/2">
                             <span className={`logo-text ${isTransparent ? 'logo-text-transparent' : ''}`}>peyda.nl</span>
                         </Link>
 

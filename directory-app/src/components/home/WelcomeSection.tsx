@@ -80,14 +80,6 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
             <div className="container mx-auto px-4 relative z-10">
                 <div className="atlas-hero-grid">
                     <div className="atlas-hero-left">
-                        <div className="atlas-badge">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
-                            </span>
-                            {totalBusinesses > 0 ? `${totalBusinesses.toLocaleString('nl-NL')}+` : "15.000+"} bedrijven en diensten in Nederland
-                        </div>
-
                         <h1 className="text-[1.85rem] sm:text-4xl md:text-5xl lg:text-[3.75rem] font-bold leading-[1.2] sm:leading-[1.1] mb-5 text-white display-font tracking-tight">
                             Vind lokale bedrijven die passen bij jouw buurt
                             <span className="text-white/70 block sm:inline"> en ontdek het beste aanbod.</span>
