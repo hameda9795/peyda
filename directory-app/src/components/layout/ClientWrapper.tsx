@@ -22,8 +22,22 @@ interface ClientWrapperProps {
     categories?: any[];
 }
 
+// Simple layout for 404 pages without any client-side navigation
+function SimpleLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="min-h-screen bg-white">
+            {children}
+        </div>
+    );
+}
+
 // Client Component - handles pathname-dependent logic safely
 export function ClientWrapper({ children, categories }: ClientWrapperProps) {
+    // During SSR, render simple layout to avoid hydration issues
+    if (typeof window === 'undefined') {
+        return <SimpleLayout>{children}</SimpleLayout>;
+    }
+
     const pathname = usePathnameSafe();
     
     const isAdmin = pathname?.startsWith("/admin");
