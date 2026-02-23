@@ -111,27 +111,7 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
                             </div>
                         </div>
 
-                        <div className="mt-6 flex items-center gap-3 overflow-x-auto pb-4 sm:pb-0 scrollbar-hide snap-x relative mask-gradient" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                            <style jsx>{`
-                                .mask-gradient {
-                                    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
-                                    mask-image: linear-gradient(to right, black 85%, transparent 100%);
-                                }
-                                .scrollbar-hide::-webkit-scrollbar {
-                                    display: none;
-                                }
-                            `}</style>
-                            <span className="text-white/70 text-sm font-medium whitespace-nowrap shrink-0 snap-start">Populair:</span>
-                            {["Restaurants", "Kappers", "Loodgieters", "Advocaten"].map((item) => (
-                                <button
-                                    key={item}
-                                    onClick={() => router.push(`/search?q=${item.toLowerCase()}`)}
-                                    className="px-4 py-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white/90 text-sm font-medium transition-all whitespace-nowrap shrink-0 snap-start"
-                                >
-                                    {item}
-                                </button>
-                            ))}
-                        </div>
+
 
                         <div className="atlas-trust-row">
                             <span className="atlas-trust-pill">Lokale SEO</span>
@@ -173,18 +153,18 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
                                     <TrendingUp className="h-4 w-4" />
                                 </Link>
                             </div>
-                            <div className="owner-metrics">
-                                <div className="owner-metric">
-                                    <strong>5 stappen</strong>
-                                    Aanmelden
+                            <div className="mt-6 grid grid-cols-3 gap-2 w-full">
+                                <div className="bg-white/10 border border-white/20 rounded-[0.75rem] p-3 text-center text-[0.8rem] text-white/70 whitespace-nowrap flex flex-col items-center justify-center min-w-0">
+                                    <strong className="block text-[1.1rem] text-white mb-0.5 font-bold truncate w-full">5 stappen</strong>
+                                    <span className="truncate w-full block">Aanmelden</span>
                                 </div>
-                                <div className="owner-metric">
-                                    <strong>24/7</strong>
-                                    Vindbaarheid
+                                <div className="bg-white/10 border border-white/20 rounded-[0.75rem] p-3 text-center text-[0.8rem] text-white/70 whitespace-nowrap flex flex-col items-center justify-center min-w-0">
+                                    <strong className="block text-[1.1rem] text-white mb-0.5 font-bold truncate w-full">24/7</strong>
+                                    <span className="truncate w-full block">Vindbaarheid</span>
                                 </div>
-                                <div className="owner-metric">
-                                    <strong>NL</strong>
-                                    Landelijk bereik
+                                <div className="bg-white/10 border border-white/20 rounded-[0.75rem] p-3 text-center text-[0.8rem] text-white/70 whitespace-nowrap flex flex-col items-center justify-center min-w-0">
+                                    <strong className="block text-[1.1rem] text-white mb-0.5 font-bold truncate w-full">NL</strong>
+                                    <span className="truncate w-full block">Landelijk bereik</span>
                                 </div>
                             </div>
                         </div>

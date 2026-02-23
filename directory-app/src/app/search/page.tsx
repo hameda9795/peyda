@@ -112,15 +112,43 @@ export default async function SearchPage({ searchParams }: Props) {
     return (
         <div className="min-h-screen bg-zinc-50 py-12">
             <div className="container mx-auto px-4">
-                <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-8 mb-8 text-center">
-                    <h1 className="text-2xl font-bold text-zinc-900 mb-2">
-                        {query ? `Zoekresultaten voor "${q}"` : "Zoeken"}
-                    </h1>
-                    <p className="text-zinc-500">
-                        {query
-                            ? `${results.length} resultaten gevonden`
-                            : "Voer een zoekterm in om bedrijven te vinden."}
-                    </p>
+                <div className="bg-white rounded-2xl shadow-xl shadow-indigo-100/20 border border-zinc-200 p-8 mb-8 text-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white opacity-80" />
+                    <div className="relative z-10">
+                        <h1 className="text-3xl font-bold text-zinc-900 mb-3 tracking-tight">
+                            {query ? `Zoekresultaten voor "${q}"` : "Vind wat je zoekt in Utrecht"}
+                        </h1>
+                        <p className="text-zinc-500 mb-8 max-w-xl mx-auto text-lg">
+                            {query
+                                ? `${results.length} resultaten gevonden voor jouw zoekopdracht.`
+                                : "Voer een zoekterm in om de beste lokale bedrijven te vinden."}
+                        </p>
+
+                        <form action="/search" method="GET" className="max-w-2xl mx-auto flex flex-col gap-4">
+                            <div className="relative group w-full">
+                                <div className="absolute -inset-[2px] bg-gradient-to-r from-indigo-500 via-emerald-400 to-indigo-500 rounded-2xl blur-[14px] opacity-20 group-hover:opacity-40 transition-all duration-500"></div>
+                                <div className="relative flex items-center bg-white border border-zinc-200 rounded-2xl p-1 shadow-xl shadow-indigo-100/30 transition-all duration-300 focus-within:border-indigo-300">
+                                    <div className="pl-4 pr-2 flex items-center justify-center">
+                                        <SearchIcon className="h-6 w-6 text-zinc-400 focus-within:text-indigo-500 transition-colors" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="q"
+                                        defaultValue={q || ""}
+                                        placeholder="Bijv. Restaurant, Kapper, Loodgieter..."
+                                        className="flex-1 bg-transparent border-none outline-none px-2 text-base md:text-lg text-zinc-900 placeholder:text-zinc-400 h-14 font-medium min-w-0"
+                                        autoFocus={!query}
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-zinc-900 text-white font-semibold text-base md:text-lg px-8 py-4 rounded-2xl hover:bg-indigo-600 active:scale-[0.98] transition-all duration-200 shadow-xl shadow-zinc-900/10 flex items-center justify-center gap-2"
+                            >
+                                <span>Zoeken</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 {results.length > 0 ? (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, useSyncExternalStore } from "react";
-import { Search, Bell, Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Search, Bell, Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ArrowRight } from "lucide-react";
 import { MegaMenu } from "./MegaMenu";
 import LoginModal from "@/components/LoginModal";
 import { BusinessRegistrationPrompt } from "@/components/BusinessRegistrationPrompt";
@@ -11,7 +11,7 @@ import { getCurrentUser } from "@/app/actions";
 // Hook that safely gets pathname (returns '/' during SSR)
 function usePathnameSafe() {
     return useSyncExternalStore(
-        () => () => {}, // no-op subscribe
+        () => () => { }, // no-op subscribe
         () => {
             if (typeof window === 'undefined') return '/';
             return window.location.pathname;
@@ -270,36 +270,37 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
 
     return (
         <>
-            <header className={`${isHomepage ? 'fixed' : 'sticky'} top-0 z-40 w-full transition-all duration-300 ${isTransparent ? 'bg-transparent border-b border-white/10' : 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-zinc-200/50'}`}>
-                <div className="container px-4 h-16 flex items-center justify-between mx-auto relative">
+            <header className={`${isHomepage ? 'fixed' : 'sticky'} top-0 z-50 w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isTransparent ? 'bg-transparent border-b border-white/10' : 'bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-zinc-200/30 dark:border-zinc-800/30 supports-[backdrop-filter]:bg-white/50'}`}>
+                <div className="container max-w-7xl px-4 md:px-6 h-20 flex items-center justify-between mx-auto relative">
                     {/* Left Section - Hamburger + Logo */}
                     <div className="flex items-center gap-2 lg:gap-8">
                         {/* Hamburger Menu Button */}
                         <button
                             onClick={() => setMobileMenuOpen(true)}
-                            className={`lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'hover:bg-white/10 text-white' : 'hover:bg-zinc-100 text-zinc-700'}`}
+                            className={`lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-2xl transition-all duration-300 ${isTransparent ? 'hover:bg-white/10 text-white' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:scale-105 active:scale-95'}`}
                             aria-label="Open menu"
                         >
                             <Menu className="h-6 w-6" />
                         </button>
 
                         {/* Logo - Always visible */}
-                        <Link href="/" className="lg:static absolute left-1/2 lg:translate-x-0 -translate-x-1/2">
-                            <span className={`logo-text ${isTransparent ? 'logo-text-transparent' : ''}`}>peyda.nl</span>
+                        <Link href="/" className="lg:static absolute left-1/2 lg:translate-x-0 -translate-x-1/2 flex items-center gap-2 group">
+                            <span className={`logo-text text-2xl lg:text-3xl tracking-tight transition-transform duration-500 group-hover:scale-105 ${isTransparent ? 'logo-text-transparent' : ''}`}>peyda.nl</span>
+                            <div className="hidden lg:flex px-2 py-0.5 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 border border-emerald-200/50 dark:border-emerald-800/50 text-xs font-semibold text-emerald-700 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0 duration-500">Live</div>
                         </Link>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden lg:flex items-center gap-1">
+                        <div className="hidden lg:flex items-center gap-2 xl:gap-4 ml-4">
                             <MegaMenu categories={categories} isTransparent={isTransparent} />
                             <Link
                                 href="/steden"
-                                className={`px-4 py-2 text-sm font-medium transition-colors min-h-[44px] flex items-center ${isTransparent ? 'text-white/90 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'}`}
+                                className={`px-4 py-2.5 text-sm font-semibold transition-all duration-300 rounded-full flex items-center hover:scale-105 ${isTransparent ? 'text-white/90 hover:text-white hover:bg-white/10' : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                             >
                                 Steden
                             </Link>
                             <Link
                                 href="/artikelen"
-                                className={`px-4 py-2 text-sm font-medium transition-colors min-h-[44px] flex items-center ${isTransparent ? 'text-white/90 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'}`}
+                                className={`px-4 py-2.5 text-sm font-semibold transition-all duration-300 rounded-full flex items-center hover:scale-105 ${isTransparent ? 'text-white/90 hover:text-white hover:bg-white/10' : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                             >
                                 Artikelen
                             </Link>
@@ -307,41 +308,38 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                     </div>
 
                     {/* Right Section */}
-                    <div className="flex items-center gap-2 lg:gap-3">
+                    <div className="flex items-center gap-3 lg:gap-4">
                         {/* Mobile Search Button */}
                         <Link
                             href="/search"
-                            className={`lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}
+                            className={`lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-2xl transition-all duration-300 ${isTransparent ? 'text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-105'}`}
                             aria-label="Search"
                         >
                             <Search className="h-5 w-5" />
                         </Link>
-
-                        {/* Notifications */}
-                        <button className={`relative p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isTransparent ? 'text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}>
-                            <Bell className="h-5 w-5" />
-                            <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-emerald-500 rounded-full border-2 border-white" />
-                        </button>
 
                         {/* User Button / Login - Desktop */}
                         <div className="relative user-menu hidden md:block">
                             {hasPublishedBusiness ? (
                                 <Link
                                     href="/dashboard"
-                                    className="flex px-4 py-2 text-sm font-medium text-white bg-[#0B2A3C] hover:bg-[#1C3D52] rounded-full transition-colors min-h-[44px] items-center gap-2 shadow-md"
+                                    className="flex px-5 py-2.5 text-sm font-semibold text-white bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 rounded-full transition-all duration-300 items-center gap-2 shadow-lg shadow-zinc-900/10 hover:shadow-zinc-900/20 hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     <User className="h-4 w-4" />
-                                    Profiel
+                                    <span>Profiel</span>
                                 </Link>
                             ) : (
                                 <button
                                     onClick={() => setShowLoginModal(true)}
-                                    className={`px-4 py-2 text-sm font-medium rounded-full transition-colors min-h-[44px] flex items-center ${isTransparent ? 'text-white/95 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'}`}
+                                    className={`px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-300 flex items-center hover:scale-105 active:scale-95 ${isTransparent ? 'text-white hover:bg-white/20' : 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                                 >
                                     Inloggen
                                 </button>
                             )}
                         </div>
+
+                        {/* Divider */}
+                        <div className={`hidden lg:block w-px h-6 mx-1 ${isTransparent ? 'bg-white/20' : 'bg-zinc-200 dark:bg-zinc-800'}`}></div>
 
                         {/* CTA Button - Desktop only */}
                         <button
@@ -349,9 +347,10 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                                 setRedirectToRegister(true);
                                 setShowLoginModal(true);
                             }}
-                            className={`hidden lg:flex px-5 py-2.5 text-sm font-semibold rounded-full transition-colors shadow-lg min-h-[44px] items-center ${isTransparent ? 'bg-white text-zinc-900 hover:bg-zinc-100 shadow-white/10' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'}`}
+                            className={`hidden lg:flex px-6 py-2.5 text-sm font-semibold rounded-full transition-all duration-300 items-center gap-2 hover:scale-[1.02] active:scale-[0.98] ${isTransparent ? 'bg-white text-zinc-900 hover:bg-zinc-100 shadow-xl shadow-white/10' : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30'}`}
                         >
-                            Bedrijf toevoegen
+                            <span>Bedrijf Toevoegen</span>
+                            <ArrowRight className="h-4 w-4" />
                         </button>
                     </div>
                 </div>
