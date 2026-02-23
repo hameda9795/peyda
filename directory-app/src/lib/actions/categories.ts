@@ -1,11 +1,67 @@
 "use server";
 
 import { db as prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCategoryImage } from "@/lib/category-images";
 
+// Cache categories for 5 minutes
+const getCachedCategories = unstable_cache(
+  async () => {
+    const categories = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: { subcategories: true },
+        },
+        subcategories: {
+          take: 100,
+          orderBy: {
+            name: 'asc'
+          }
+        }
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    // Remove duplicates by name - keep only the first occurrence
+    const seenNames = new Set<string>();
+    const uniqueCategories = categories.filter((cat: any) => {
+      const normalizedName = cat.name.toLowerCase().replace(/ in utrecht| in nederland/g, '').trim();
+      if (seenNames.has(normalizedName)) {
+        return false;
+      }
+      seenNames.add(normalizedName);
+      return true;
+    });
+
+    const { getSubcategoryImage } = require("@/lib/subcategory-images");
+
+    return uniqueCategories.map((cat: any) => ({
+      ...cat,
+      image: cat.image || getCategoryImage(cat.slug),
+      subcategories: cat.subcategories.map((sub: any) => ({
+        ...sub,
+        image: sub.image || getSubcategoryImage(cat.slug, sub.name)
+      }))
+    }));
+  },
+  ['categories-list'],
+  { revalidate: 300, tags: ['categories'] } // 5 minutes
+);
+
 export async function getCategories() {
+  try {
+    return await getCachedCategories();
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    throw new Error("Failed to fetch categories");
+  }
+}
+
+// Original function for internal use (without cache wrapper)
+async function getCategoriesInternal() {
     try {
         const categories = await prisma.category.findMany({
             include: {

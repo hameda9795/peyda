@@ -8,22 +8,22 @@ export default function manifest(): MetadataRoute.Manifest {
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#3b82f6',
+        theme_color: '#10b981',
         icons: [
             {
-                src: '/favicon.ico',
+                src: '/favicon.svg',
                 sizes: 'any',
-                type: 'image/x-icon',
+                type: 'image/svg+xml',
             },
             {
-                src: '/logo.png',
+                src: '/favicon.svg',
                 sizes: '192x192',
-                type: 'image/png',
+                type: 'image/svg+xml',
             },
             {
-                src: '/logo.png', // Assuming logo is large enough, otherwise replace with specific icon
+                src: '/favicon.svg',
                 sizes: '512x512',
-                type: 'image/png',
+                type: 'image/svg+xml',
             },
         ],
     };

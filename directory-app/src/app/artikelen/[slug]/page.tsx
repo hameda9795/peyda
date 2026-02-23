@@ -71,7 +71,7 @@ export default async function ArticlePage({ params }: Props) {
             "name": "NL Directory",
             "logo": {
                 "@type": "ImageObject",
-                "url": `${BASE_URL}/images/logo.png`
+                "url": `${BASE_URL}/favicon.svg`
             }
         },
         "mainEntityOfPage": {

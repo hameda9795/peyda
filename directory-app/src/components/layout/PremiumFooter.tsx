@@ -35,13 +35,7 @@ export function PremiumFooter() {
                     {/* Brand Column */}
                     <div className="lg:col-span-2">
                         <Link href="/" className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                                NL
-                            </div>
-                            <div>
-                                <span className="text-xl font-bold">Peyda</span>
-                                <span className="block text-sm text-gray-400">Nederland's #1 bedrijvengids</span>
-                            </div>
+                            <span className="logo-text text-white" style={{ background: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>peyda.nl</span>
                         </Link>
                         <p className="text-gray-400 mb-6 max-w-sm leading-relaxed">
                             De premium gids voor ondernemers en consumenten in heel Nederland.

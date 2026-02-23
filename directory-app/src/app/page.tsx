@@ -9,8 +9,11 @@ import { WelcomeSection } from "@/components/home/WelcomeSection";
 import { BusinessPassportSection } from "@/components/home/BusinessPassportSection";
 import { FaqSection } from "@/components/home/FaqSection";
 import { PremiumFooter } from "@/components/layout/PremiumFooter";
-import { getBusinessesByCategorySlug, getAllFeaturedBusinesses, getProvinceStats, getTopCitiesByBusinessCount, getTotalBusinessCount, getBusinessCountsByCity } from "@/lib/actions/business";
+import { getHomepageData, getAllFeaturedBusinesses, getProvinceStats, getTopCitiesByBusinessCount, getTotalBusinessCount, getBusinessCountsByCity } from "@/lib/actions/business";
 import { getCategories } from "@/lib/actions/categories";
+
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
 import { CATEGORY_ICONS } from "@/lib/netherlands-data";
 
 // Category icons mapping
@@ -78,35 +81,48 @@ function getCategoryGradient(index: number): string {
 }
 
 export default async function Home() {
-  // Fetch all categories from database
+  // Fetch all categories from database (cached)
   const allCategories = await getCategories();
 
-  // Fetch businesses for each category
-  const sectionData = await Promise.all(
-    allCategories.map(async (category: any, index: number) => {
-      const cleanSlug = getCleanSlug(category.slug);
-      const businesses = await getBusinessesByCategorySlug(cleanSlug, 10);
+  // Fetch all businesses for homepage in ONE query (optimized)
+  const allBusinesses = await getHomepageData(80); // 10 per category × 8 categories
 
-      // Clean the category name
-      const cleanName = category.name
-        .replace(' in Utrecht', '')
-        .replace(' in Nederland', '');
+  // Group businesses by category
+  const businessesByCategory = new Map();
+  allBusinesses.forEach((business: any) => {
+    const categorySlug = business.categorySlug;
+    if (!businessesByCategory.has(categorySlug)) {
+      businessesByCategory.set(categorySlug, []);
+    }
+    if (businessesByCategory.get(categorySlug).length < 10) {
+      businessesByCategory.get(categorySlug).push(business);
+    }
+  });
 
-      return {
-        slug: cleanSlug,
-        title: cleanName,
-        icon: getCategoryIcon(category.slug),
-        gradient: getCategoryGradient(index),
-        businesses,
-        subcategoryCount: category._count?.subcategories || 0
-      };
-    })
-  );
+  // Build section data
+  const sectionData = allCategories.map((category: any, index: number) => {
+    const cleanSlug = getCleanSlug(category.slug);
+    const businesses = businessesByCategory.get(cleanSlug) || [];
 
-  const sectionsWithBusinesses = sectionData.filter(s => s.businesses.length > 0);
+    // Clean the category name
+    const cleanName = category.name
+      .replace(' in Utrecht', '')
+      .replace(' in Nederland', '');
+
+    return {
+      slug: cleanSlug,
+      title: cleanName,
+      icon: getCategoryIcon(category.slug),
+      gradient: getCategoryGradient(index),
+      businesses,
+      subcategoryCount: category._count?.subcategories || 0
+    };
+  });
+
+  const sectionsWithBusinesses = sectionData.filter((s: any) => s.businesses.length > 0);
 
   const sectionsToShow = sectionsWithBusinesses
-    .sort((a, b) => b.businesses.length - a.businesses.length)
+    .sort((a: any, b: any) => b.businesses.length - a.businesses.length)
     .slice(0, 8);
 
   // Fetch popular/most reviewed businesses

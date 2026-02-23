@@ -48,7 +48,7 @@ export function generateOrganizationSchema() {
     "@type": "Organization",
     "name": "Peyda",
     "url": "https://peyda.nl",
-    "logo": "https://peyda.nl/logo.png",
+    "logo": "https://peyda.nl/favicon.svg",
     "sameAs": [
       "https://facebook.com/peyda.nl",
       "https://instagram.com/peyda.nl",

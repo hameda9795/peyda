@@ -2,7 +2,7 @@
 
 import { db as prisma } from "@/lib/db";
 import { getCurrentUser } from "@/app/actions";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { BusinessFormData } from "@/lib/types/business-form";
 import { writeFile, mkdir } from "fs/promises";
@@ -10,6 +10,250 @@ import { join } from "path";
 import { Business } from "@/lib/types";
 import { NETHERLANDS_PROVINCES } from "@/lib/netherlands-data";
 import { supabase } from "@/lib/supabase";
+
+// ==================== CACHED QUERIES ====================
+
+// Cache homepage data for 2 minutes
+const getCachedHomepageData = unstable_cache(
+  async (limit: number) => {
+    const businesses = await prisma.business.findMany({
+      where: {
+        status: 'approved',
+        publishStatus: 'PUBLISHED'
+      },
+      take: limit,
+      orderBy: [
+        { rating: 'desc' },
+        { reviewCount: 'desc' }
+      ],
+      include: {
+        subCategory: {
+          include: {
+            category: true
+          }
+        }
+      }
+    });
+
+    return businesses.map((b: any) => {
+      const locationData = findProvinceByCity(b.city || 'Utrecht');
+      return {
+        id: b.id,
+        name: b.name,
+        slug: b.slug,
+        category: b.subCategory.category.name.replace(' in Utrecht', '').replace(' in Nederland', ''),
+        categorySlug: normalizeSlug(b.subCategory.category.slug),
+        subcategorySlug: stripCategoryPrefix(
+          normalizeSlug(b.subCategory.slug),
+          normalizeSlug(b.subCategory.category.slug)
+        ),
+        subcategories: [b.subCategory.name],
+        shortDescription: b.shortDescription || '',
+        rating: b.reviewCount > 0 ? b.rating : null,
+        reviewCount: b.reviewCount || 0,
+        images: {
+          cover: b.coverImage || '',
+          logo: b.logo || ''
+        },
+        address: {
+          city: b.city || 'Nederland',
+          neighborhood: b.neighborhood || ''
+        },
+        provinceSlug: locationData?.province.slug || 'utrecht',
+        citySlug: locationData?.city.slug || createSlug(b.city || 'utrecht'),
+        neighborhoodSlug: createSlug(b.neighborhood || 'centrum')
+      };
+    });
+  },
+  ['homepage-businesses'],
+  { revalidate: 120, tags: ['businesses', 'homepage'] } // 2 minutes
+);
+
+// Cache featured businesses
+const getCachedFeaturedBusinesses = unstable_cache(
+  async (limit: number) => {
+    const businesses = await prisma.business.findMany({
+      where: {
+        status: 'approved',
+        publishStatus: 'PUBLISHED'
+      },
+      take: limit,
+      orderBy: [
+        { rating: 'desc' },
+        { reviewCount: 'desc' }
+      ],
+      include: {
+        subCategory: {
+          include: {
+            category: true
+          }
+        }
+      }
+    });
+
+    return businesses.map((b: any) => {
+      const locationData = findProvinceByCity(b.city || 'Utrecht');
+      return {
+        id: b.id,
+        name: b.name,
+        slug: b.slug,
+        category: b.subCategory.category.name.replace(' in Utrecht', '').replace(' in Nederland', ''),
+        categorySlug: normalizeSlug(b.subCategory.category.slug),
+        subcategorySlug: stripCategoryPrefix(
+          normalizeSlug(b.subCategory.slug),
+          normalizeSlug(b.subCategory.category.slug)
+        ),
+        subcategories: [b.subCategory.name],
+        shortDescription: b.shortDescription || '',
+        rating: b.reviewCount > 0 ? b.rating : null,
+        reviewCount: b.reviewCount || 0,
+        images: {
+          cover: b.coverImage || '',
+          logo: b.logo || ''
+        },
+        address: {
+          city: b.city || 'Nederland',
+          neighborhood: b.neighborhood || ''
+        },
+        provinceSlug: locationData?.province.slug || 'utrecht',
+        citySlug: locationData?.city.slug || createSlug(b.city || 'utrecht'),
+        neighborhoodSlug: createSlug(b.neighborhood || 'centrum')
+      };
+    });
+  },
+  ['featured-businesses'],
+  { revalidate: 180, tags: ['businesses', 'featured'] } // 3 minutes
+);
+
+// Cache province stats
+const getCachedProvinceStats = unstable_cache(
+  async () => {
+    // Get business counts directly by provinceSlug from database
+    const provinceCounts = await prisma.business.groupBy({
+      by: ['provinceSlug'],
+      where: {
+        status: 'approved',
+        publishStatus: 'PUBLISHED',
+        provinceSlug: { not: null }
+      },
+      _count: { id: true }
+    });
+
+    // Create a map of slug -> count
+    const countMap: Record<string, number> = {};
+    for (const pc of provinceCounts) {
+      if (pc.provinceSlug) {
+        countMap[pc.provinceSlug] = pc._count.id;
+      }
+    }
+
+    // Get top cities for each province
+    const topCitiesPerProvince = await prisma.business.groupBy({
+      by: ['provinceSlug', 'city'],
+      where: {
+        status: 'approved',
+        publishStatus: 'PUBLISHED',
+        provinceSlug: { not: null },
+      },
+      _count: { id: true },
+      orderBy: {
+        _count: { id: 'desc' }
+      }
+    });
+
+    // Group cities by province
+    const citiesByProvince: Record<string, string[]> = {};
+    for (const item of topCitiesPerProvince) {
+      if (item.provinceSlug && item.city) {
+        if (!citiesByProvince[item.provinceSlug]) {
+          citiesByProvince[item.provinceSlug] = [];
+        }
+        if (citiesByProvince[item.provinceSlug].length < 3) {
+          citiesByProvince[item.provinceSlug].push(item.city);
+        }
+      }
+    }
+
+    // Build province stats from NETHERLANDS_PROVINCES
+    return NETHERLANDS_PROVINCES.map(province => ({
+      name: province.name,
+      slug: province.slug,
+      icon: province.icon,
+      image: province.image,
+      cities: citiesByProvince[province.slug] || province.cities.slice(0, 3).map(c => c.name),
+      businessCount: countMap[province.slug] || 0
+    }));
+  },
+  ['province-stats'],
+  { revalidate: 300, tags: ['businesses', 'provinces'] } // 5 minutes
+);
+
+// Cache top cities
+const getCachedTopCities = unstable_cache(
+  async (limit: number) => {
+    const cityCounts = await prisma.business.groupBy({
+      by: ['city'],
+      where: {
+        status: 'approved',
+        publishStatus: 'PUBLISHED',
+      },
+      _count: { id: true },
+      orderBy: {
+        _count: { id: 'desc' }
+      },
+      take: limit
+    });
+
+    return cityCounts.map(c => {
+      // Find province for this city
+      let provinceName = 'Nederland';
+      let citySlug = createSlug(c.city || 'onbekend');
+
+      for (const province of NETHERLANDS_PROVINCES) {
+        const foundCity = province.cities.find(pc =>
+          pc.name.toLowerCase() === (c.city || '').toLowerCase()
+        );
+        if (foundCity) {
+          provinceName = province.name;
+          citySlug = foundCity.slug;
+          break;
+        }
+      }
+
+      return {
+        name: c.city || 'Onbekend',
+        slug: citySlug,
+        province: provinceName,
+        businessCount: c._count.id
+      };
+    });
+  },
+  ['top-cities'],
+  { revalidate: 300, tags: ['businesses', 'cities'] } // 5 minutes
+);
+
+// Cache total count
+const getCachedTotalCount = unstable_cache(
+  async () => {
+    return await prisma.business.count({
+      where: { status: 'approved', publishStatus: 'PUBLISHED' }
+    });
+  },
+  ['total-business-count'],
+  { revalidate: 300, tags: ['businesses'] } // 5 minutes
+);
+
+// ==================== EXPORT FUNCTIONS ====================
+
+// Optimized function for homepage - returns all businesses in one query
+export async function getHomepageData(limit: number = 80) {
+  try {
+    return await getCachedHomepageData(limit);
+  } catch (error) {
+    console.error("Failed to fetch homepage data:", error);
+    return [];
+  }
+}
 
 // Helper to find province by city name
 const findProvinceByCity = (cityName: string) => {
@@ -756,183 +1000,42 @@ export async function getBusinessCountsByCity() {
 
 // Get province stats with business counts
 export async function getProvinceStats() {
-    try {
-        // Get business counts directly by provinceSlug from database
-        const provinceCounts = await prisma.business.groupBy({
-            by: ['provinceSlug'],
-            where: {
-                status: 'approved',
-                publishStatus: 'PUBLISHED',
-                provinceSlug: { not: null }
-            },
-            _count: { id: true }
-        });
-
-        // Create a map of slug -> count
-        const countMap: Record<string, number> = {};
-        for (const pc of provinceCounts) {
-            if (pc.provinceSlug) {
-                countMap[pc.provinceSlug] = pc._count.id;
-            }
-        }
-
-        // Get top cities for each province
-        const topCitiesPerProvince = await prisma.business.groupBy({
-            by: ['provinceSlug', 'city'],
-            where: {
-                status: 'approved',
-                publishStatus: 'PUBLISHED',
-                provinceSlug: { not: null },
-            },
-            _count: { id: true },
-            orderBy: {
-                _count: { id: 'desc' }
-            }
-        });
-
-        // Group cities by province
-        const citiesByProvince: Record<string, string[]> = {};
-        for (const item of topCitiesPerProvince) {
-            if (item.provinceSlug && item.city) {
-                if (!citiesByProvince[item.provinceSlug]) {
-                    citiesByProvince[item.provinceSlug] = [];
-                }
-                if (citiesByProvince[item.provinceSlug].length < 3) {
-                    citiesByProvince[item.provinceSlug].push(item.city);
-                }
-            }
-        }
-
-        // Build province stats from NETHERLANDS_PROVINCES
-        const provinceStats = NETHERLANDS_PROVINCES.map(province => ({
-            name: province.name,
-            slug: province.slug,
-            icon: province.icon,
-            image: province.image,
-            cities: citiesByProvince[province.slug] || province.cities.slice(0, 3).map(c => c.name),
-            businessCount: countMap[province.slug] || 0
-        }));
-
-        return provinceStats;
-    } catch (error) {
-        console.error("Failed to fetch province stats:", error);
-        return [];
-    }
+  try {
+    return await getCachedProvinceStats();
+  } catch (error) {
+    console.error("Failed to fetch province stats:", error);
+    return [];
+  }
 }
 
 // Get top cities by business count
 export async function getTopCitiesByBusinessCount(limit: number = 6) {
-    try {
-        const cityCounts = await prisma.business.groupBy({
-            by: ['city'],
-            where: {
-                status: 'approved',
-                publishStatus: 'PUBLISHED',
-            },
-            _count: { id: true },
-            orderBy: {
-                _count: { id: 'desc' }
-            },
-            take: limit
-        });
-
-        return cityCounts.map(c => {
-            // Find province for this city
-            let provinceName = 'Nederland';
-            let citySlug = createSlug(c.city || 'onbekend');
-
-            for (const province of NETHERLANDS_PROVINCES) {
-                const foundCity = province.cities.find(pc =>
-                    pc.name.toLowerCase() === (c.city || '').toLowerCase()
-                );
-                if (foundCity) {
-                    provinceName = province.name;
-                    citySlug = foundCity.slug;
-                    break;
-                }
-            }
-
-            return {
-                name: c.city || 'Onbekend',
-                slug: citySlug,
-                province: provinceName,
-                businessCount: c._count.id
-            };
-        });
-    } catch (error) {
-        console.error("Failed to fetch top cities:", error);
-        return [];
-    }
+  try {
+    return await getCachedTopCities(limit);
+  } catch (error) {
+    console.error("Failed to fetch top cities:", error);
+    return [];
+  }
 }
 
 // Get total business count
 export async function getTotalBusinessCount() {
-    try {
-        const count = await prisma.business.count({
-            where: { status: 'approved', publishStatus: 'PUBLISHED' }
-        });
-        return count;
-    } catch (error) {
-        console.error("Failed to fetch total count:", error);
-        return 0;
-    }
+  try {
+    return await getCachedTotalCount();
+  } catch (error) {
+    console.error("Failed to fetch total count:", error);
+    return 0;
+  }
 }
 
 // Get all businesses for homepage (featured)
 export async function getAllFeaturedBusinesses(limit: number = 8) {
-    try {
-        const businesses = await prisma.business.findMany({
-            where: {
-                status: 'approved',
-                publishStatus: 'PUBLISHED'
-            },
-            take: limit,
-            orderBy: [
-                { rating: 'desc' },
-                { reviewCount: 'desc' }
-            ],
-            include: {
-                subCategory: {
-                    include: {
-                        category: true
-                    }
-                }
-            }
-        });
-
-        return businesses.map((b: any) => {
-            const locationData = findProvinceByCity(b.city || 'Utrecht');
-            return {
-                id: b.id,
-                name: b.name,
-                slug: b.slug,
-                category: b.subCategory.category.name.replace(' in Utrecht', '').replace(' in Nederland', ''),
-                categorySlug: normalizeSlug(b.subCategory.category.slug),
-                subcategorySlug: stripCategoryPrefix(
-                    normalizeSlug(b.subCategory.slug),
-                    normalizeSlug(b.subCategory.category.slug)
-                ),
-                subcategories: [b.subCategory.name],
-                shortDescription: b.shortDescription || '',
-                rating: b.reviewCount > 0 ? b.rating : null,
-                reviewCount: b.reviewCount || 0,
-                images: {
-                    cover: b.coverImage || '',
-                    logo: b.logo || ''
-                },
-                address: {
-                    city: b.city || 'Nederland',
-                    neighborhood: b.neighborhood || ''
-                },
-                provinceSlug: locationData?.province.slug || 'utrecht',
-                citySlug: locationData?.city.slug || createSlug(b.city || 'utrecht'),
-                neighborhoodSlug: createSlug(b.neighborhood || 'centrum')
-            };
-        });
-    } catch (error) {
-        console.error("Failed to fetch featured businesses:", error);
-        return [];
-    }
+  try {
+    return await getCachedFeaturedBusinesses(limit);
+  } catch (error) {
+    console.error("Failed to fetch featured businesses:", error);
+    return [];
+  }
 }
 
 // Get related businesses by slug (same subcategory or category, excluding current business)

@@ -206,7 +206,7 @@
 /* ===== Atlas Hero ===== */
 .atlas-hero {
     position: relative;
-    padding: 5rem 0 4.5rem;
+    padding: 7rem 0 4.5rem;
     background: linear-gradient(160deg, #08131C 0%, #0B2A3C 55%, #123649 100%);
     color: white;
     overflow: hidden;
@@ -1833,7 +1833,7 @@
     }
 
     .atlas-hero {
-        padding: 4rem 0 3.5rem;
+        padding: 6rem 0 3.5rem;
     }
 
     .atlas-hero-grid {

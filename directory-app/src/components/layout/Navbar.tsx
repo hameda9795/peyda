@@ -97,7 +97,7 @@ function MobileMenu({ isOpen, onClose, categories, onLoginClick, onRegisterClick
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-zinc-200">
                     <Link href="/" onClick={onClose}>
-                        <img src="/logo.png" alt="Peyda" className="h-[40px] w-auto" />
+                        <span className="logo-text">peyda.nl</span>
                     </Link>
                     <button
                         onClick={onClose}
@@ -299,7 +299,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
 
                         {/* Logo - Always visible */}
                         <Link href="/">
-                            <img src="/logo.png" alt="Peyda" className={`h-[42px] md:h-[50px] w-auto transition-all duration-300 ${isTransparent ? 'brightness-0 invert opacity-90' : ''}`} />
+                            <span className={`logo-text ${isTransparent ? 'logo-text-transparent' : ''}`}>peyda.nl</span>
                         </Link>
 
                         {/* Desktop Navigation */}
@@ -342,12 +342,12 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                             <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-emerald-500 rounded-full border-2 border-white" />
                         </button>
 
-                        {/* User Button / Login */}
-                        <div className="relative user-menu">
+                        {/* User Button / Login - Desktop */}
+                        <div className="relative user-menu hidden md:block">
                             {hasPublishedBusiness ? (
                                 <Link
                                     href="/dashboard"
-                                    className="hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-[#0B2A3C] hover:bg-[#1C3D52] rounded-full transition-colors min-h-[44px] items-center gap-2 shadow-md"
+                                    className="flex px-4 py-2 text-sm font-medium text-white bg-[#0B2A3C] hover:bg-[#1C3D52] rounded-full transition-colors min-h-[44px] items-center gap-2 shadow-md"
                                 >
                                     <User className="h-4 w-4" />
                                     Profiel
@@ -362,13 +362,13 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
                             )}
                         </div>
 
-                        {/* CTA Button - Improved */}
+                        {/* CTA Button - Desktop only */}
                         <button
                             onClick={() => {
                                 setRedirectToRegister(true);
                                 setShowLoginModal(true);
                             }}
-                            className={`hidden sm:flex px-5 py-2.5 text-sm font-semibold rounded-full transition-colors shadow-lg min-h-[44px] items-center ${isTransparent ? 'bg-white text-zinc-900 hover:bg-zinc-100 shadow-white/10' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'}`}
+                            className={`hidden lg:flex px-5 py-2.5 text-sm font-semibold rounded-full transition-colors shadow-lg min-h-[44px] items-center ${isTransparent ? 'bg-white text-zinc-900 hover:bg-zinc-100 shadow-white/10' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'}`}
                         >
                             Bedrijf toevoegen
                         </button>

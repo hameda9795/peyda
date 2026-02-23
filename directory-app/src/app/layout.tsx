@@ -1,13 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, Fraunces } from "next/font/google";
+import { Sora, Fraunces, Rubik_Glitch } from "next/font/google";
 import "./globals.css";
+
+// Fallback font for logo (if Ransom font is not available)
+const rubikGlitch = Rubik_Glitch({
+    subsets: ["latin"],
+    weight: "400",
+    variable: "--font-rubik-glitch",
+    display: "swap",
+});
 import { AppShell } from "@/components/layout/AppShell";
 import { getCategories } from "@/lib/actions/categories";
 import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/json-ld-schema";
 import { AuthModalProvider } from "@/providers/AuthModalProvider";
 
-// Force dynamic rendering to avoid database connection issues during build
-export const dynamic = 'force-dynamic';
+// ISR: Revalidate every 60 seconds for static generation with fresh data
+export const revalidate = 60;
 
 const sora = Sora({
     subsets: ["latin"],
@@ -78,15 +86,11 @@ export const metadata: Metadata = {
     },
     icons: {
         icon: [
-            { url: "/favicon.ico" },
-            { url: "/favicon-16.ico", sizes: "16x16", type: "image/x-icon" },
-            { url: "/favicon-32.ico", sizes: "32x32", type: "image/x-icon" },
-            { url: "/favicon-48.ico", sizes: "48x48", type: "image/x-icon" },
+            { url: "/favicon.svg", type: "image/svg+xml" },
         ],
-        shortcut: "/favicon-16.ico",
+        shortcut: "/favicon.svg",
         apple: [
-            { url: "/favicon-32.ico" },
-            { url: "/favicon-48.ico", sizes: "48x48" },
+            { url: "/favicon.svg", type: "image/svg+xml" },
         ],
     },
     category: "directory", // Improved category

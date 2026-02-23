@@ -23,12 +23,12 @@ export function SearchBar({ isTransparent }: { isTransparent?: boolean }) {
     };
 
     return (
-        <form onSubmit={handleSearch} className={`hidden lg:flex items-center border rounded-full px-4 py-2 w-64 md:w-80 transition-all shadow-sm ${isTransparent ? 'bg-white/10 border-white/20 focus-within:ring-2 focus-within:ring-white/30 backdrop-blur-md' : 'bg-zinc-100/50 border-zinc-200 focus-within:ring-2 focus-within:ring-indigo-100'}`}>
+        <form onSubmit={handleSearch} className={`hidden lg:flex items-center border rounded-full px-3 h-9 w-64 md:w-80 transition-all shadow-sm ${isTransparent ? 'bg-white/10 border-white/20 focus-within:ring-2 focus-within:ring-white/30 backdrop-blur-md' : 'bg-zinc-100/50 border-zinc-200 focus-within:ring-2 focus-within:ring-indigo-100'}`}>
             <Search className={`h-4 w-4 mr-2 shrink-0 ${isTransparent ? 'text-white/60' : 'text-zinc-400'}`} />
             <input
                 type="text"
                 placeholder="Zoek bedrijven, diensten..."
-                className={`bg-transparent border-none outline-none text-sm w-full ${isTransparent ? 'text-white placeholder:text-white/60' : 'text-zinc-900 placeholder:text-zinc-500'}`}
+                className={`bg-transparent border-none outline-none text-sm w-full h-full ${isTransparent ? 'text-white placeholder:text-white/60' : 'text-zinc-900 placeholder:text-zinc-500'}`}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />

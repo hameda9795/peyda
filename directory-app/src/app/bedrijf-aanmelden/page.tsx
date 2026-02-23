@@ -431,7 +431,7 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                 {/* Header Brand */}
                 <div className="relative z-10 p-8">
                     <Link href="/" className="inline-block group mb-8">
-                        <img src="/logo.png" alt="Peyda" className="w-[180px] h-auto object-contain group-hover:scale-105 transition-all duration-300" />
+                        <span className="logo-text text-4xl">peyda.nl</span>
                     </Link>
 
                     <div className="mb-12 space-y-4">
@@ -529,8 +529,7 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
                 {/* Mobile Header (Only visible on small screens) */}
                 <div className="lg:hidden p-4 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-30">
                     <Link href="/" className="font-bold text-slate-900 flex items-center gap-2">
-                        <img src="/logo.png" alt="Peyda" className="h-8 w-auto" />
-                        <span className="text-sm">Peyda Directory</span>
+                        <span className="logo-text text-2xl">peyda.nl</span>
                     </Link>
                     <div className="text-xs font-medium text-slate-500 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
                         Stap {currentStep} van {STEPS.length}
