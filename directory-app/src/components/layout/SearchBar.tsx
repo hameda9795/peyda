@@ -1,26 +1,18 @@
 "use client";
 
 import { Search, MapPin } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
-// Hook that safely gets search params (returns null during SSR)
-function useSearchParamSafe() {
-    return useSyncExternalStore(
-        () => () => {}, // no-op subscribe
-        () => {
-            if (typeof window === 'undefined') return '';
-            const params = new URLSearchParams(window.location.search);
-            return params.get("q") || '';
-        },
-        () => '' // SSR snapshot
-    );
-}
-
-function SearchBarContent({ isTransparent }: { isTransparent?: boolean }) {
+export function SearchBar({ isTransparent }: { isTransparent?: boolean }) {
     const router = useRouter();
-    const initialQuery = useSearchParamSafe();
-    const [query, setQuery] = useState(initialQuery);
+    const searchParams = useSearchParams();
+    const [query, setQuery] = useState("");
+
+    useEffect(() => {
+        const q = searchParams.get("q");
+        if (q) setQuery(q);
+    }, [searchParams]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,8 +35,4 @@ function SearchBarContent({ isTransparent }: { isTransparent?: boolean }) {
             <MapPin className={`h-4 w-4 shrink-0 ${isTransparent ? 'text-white/50' : 'text-zinc-400'}`} />
         </form>
     );
-}
-
-export function SearchBar({ isTransparent }: { isTransparent?: boolean }) {
-    return <SearchBarContent isTransparent={isTransparent} />;
 }

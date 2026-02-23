@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { Search, Bell, Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
 import { MegaMenu } from "./MegaMenu";
-import { SearchBar } from "./SearchBar";
 import LoginModal from "@/components/LoginModal";
 import { BusinessRegistrationPrompt } from "@/components/BusinessRegistrationPrompt";
 import { getCurrentUser } from "@/app/actions";
@@ -309,11 +308,6 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
 
                     {/* Right Section */}
                     <div className="flex items-center gap-2 lg:gap-3">
-                        {/* Search Bar - Desktop */}
-                        <div className="hidden lg:block">
-                            <SearchBar isTransparent={isTransparent} />
-                        </div>
-
                         {/* Mobile Search Button */}
                         <Link
                             href="/search"
