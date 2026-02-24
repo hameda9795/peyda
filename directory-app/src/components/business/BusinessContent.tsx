@@ -171,6 +171,7 @@ export function BusinessContent({ business }: BusinessContentProps) {
             </section>
 
             {/* Gallery Section */}
+            {business.images.gallery && business.images.gallery.length > 0 && (
             <section>
                 <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">Galerij</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
@@ -198,6 +199,7 @@ export function BusinessContent({ business }: BusinessContentProps) {
                     })}
                 </div>
             </section>
+            )}
 
             {/* FAQ Accordion */}
             {business.faq && business.faq.length > 0 && (

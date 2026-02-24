@@ -21,6 +21,7 @@ const securityHeaders = [
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://placehold.co https://via.placeholder.com https://i.pravatar.cc",
       "connect-src 'self' https://*.supabase.co",
+      "frame-src https://maps.google.com https://www.google.com https://*.google.com",
       "frame-ancestors 'self'",
     ].join('; '),
   },
