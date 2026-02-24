@@ -285,7 +285,7 @@ export function Navbar({ categories = [] }: { categories?: any[] }) {
 
                         {/* Logo - Always visible */}
                         <Link href="/" className="lg:static absolute left-1/2 lg:translate-x-0 -translate-x-1/2 flex items-center gap-2 group">
-                            <span className={`logo-text text-2xl lg:text-3xl tracking-tight transition-transform duration-500 group-hover:scale-105 ${isTransparent ? 'logo-text-transparent' : ''}`}>peyda.nl</span>
+                            <span className={`logo-text text-xl sm:text-2xl lg:text-3xl tracking-tight transition-transform duration-500 group-hover:scale-105 ${isTransparent ? 'logo-text-transparent' : ''}`}>peyda.nl</span>
                             <div className="hidden lg:flex px-2 py-0.5 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 border border-emerald-200/50 dark:border-emerald-800/50 text-xs font-semibold text-emerald-700 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0 duration-500">Live</div>
                         </Link>
 

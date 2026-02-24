@@ -80,7 +80,7 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
             <div className="container mx-auto px-4 relative z-10">
                 <div className="atlas-hero-grid">
                     <div className="atlas-hero-left">
-                        <h1 className="text-[1.85rem] sm:text-4xl md:text-5xl lg:text-[3.75rem] font-bold leading-[1.2] sm:leading-[1.1] mb-5 text-white display-font tracking-tight">
+                        <h1 className="text-[1.45rem] sm:text-4xl md:text-5xl lg:text-[3.75rem] font-bold leading-[1.25] sm:leading-[1.1] mb-5 text-white display-font tracking-tight">
                             Vind lokale bedrijven die passen bij jouw buurt
                             <span className="text-white/70 block sm:inline"> en ontdek het beste aanbod.</span>
                         </h1>
@@ -117,6 +117,44 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
                             <span className="atlas-trust-pill">Lokale SEO</span>
                             <span className="atlas-trust-pill">Echte reviews</span>
                             <span className="atlas-trust-pill">Direct contact</span>
+                        </div>
+
+                        {/* Mobile-only CTA — جایگزین owner-card در موبایل */}
+                        <div className="mt-5 md:hidden">
+                            <div className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-sm">
+                                <p className="text-white/80 text-sm font-medium mb-3">
+                                    🏪 Ondernemer? Zet je bedrijf op de kaart.
+                                </p>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={openRegisterModal}
+                                        className="flex-1 py-3 rounded-xl bg-[#E07A3F] text-[#111827] font-bold text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-orange-600/30 active:scale-95 transition-transform"
+                                    >
+                                        Bedrijf aanmelden
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                    <Link
+                                        href="/over-ons"
+                                        className="px-4 py-3 rounded-xl border border-white/30 text-white/80 text-sm font-medium flex items-center justify-center active:scale-95 transition-transform"
+                                    >
+                                        Meer info
+                                    </Link>
+                                </div>
+                                <div className="mt-3 grid grid-cols-3 gap-2">
+                                    <div className="bg-white/10 rounded-lg p-2 text-center">
+                                        <strong className="block text-white text-sm font-bold">5 stappen</strong>
+                                        <span className="text-white/60 text-xs">Aanmelden</span>
+                                    </div>
+                                    <div className="bg-white/10 rounded-lg p-2 text-center">
+                                        <strong className="block text-white text-sm font-bold">24/7</strong>
+                                        <span className="text-white/60 text-xs">Zichtbaar</span>
+                                    </div>
+                                    <div className="bg-white/10 rounded-lg p-2 text-center">
+                                        <strong className="block text-white text-sm font-bold">NL</strong>
+                                        <span className="text-white/60 text-xs">Landelijk</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

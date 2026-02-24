@@ -65,7 +65,7 @@ export function CategoryHero({ title, description, image, breadcrumbs }: Categor
                         ))}
                     </nav>
 
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight">
                         {title}
                     </h1>
 

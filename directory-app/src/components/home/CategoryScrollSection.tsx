@@ -224,7 +224,7 @@ function CategoryCard({
             href={href}
             className="group flex-shrink-0"
         >
-            <div className="relative w-[160px] aspect-[4/5] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="relative w-[145px] sm:w-[160px] aspect-[4/5] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 {/* Background Image or Premium Placeholder */}
                 {coverImage && isSafeImage(coverImage) ? (
                     <Image

@@ -212,11 +212,7 @@
     overflow: hidden;
 }
 
-@media (max-width: 768px) {
-    .atlas-hero {
-        padding-top: 11rem;
-    }
-}
+/* atlas-hero mobile padding is handled in the main responsive block below */
 
 .atlas-hero::before {
     content: '';
@@ -421,6 +417,13 @@
     max-width: 36rem;
     margin-bottom: 2rem;
     line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+    .atlas-subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
 }
 
 .atlas-trust-row {
@@ -1831,29 +1834,31 @@
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
+    /* نقشه هلند در موبایل کاملاً مخفی می‌شود – محتوا ارجحیت دارد */
     .atlas-map-wrap {
-        left: -14%;
-        top: -6%;
-        width: 70%;
-        height: 72%;
-        opacity: 0.5;
+        display: none;
     }
 
     .atlas-hero {
-        padding: 6rem 0 3.5rem;
+        padding: 6.5rem 0 2.5rem; /* navbar=5rem + 1.5rem breathing room */
     }
 
     .atlas-hero-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
 
-    .atlas-hero-left,
-    .atlas-hero-right {
+    .atlas-hero-left {
         grid-column: span 12 / span 12;
     }
 
+    /* در موبایل: کارت صاحب کسب‌وکار مخفی می‌شود؛ CTA فشرده جایگزین آن است */
+    .atlas-hero-right {
+        display: none;
+    }
+
     .owner-card {
-        padding: 1.5rem;
+        padding: 1.25rem;
     }
 
     .owner-metrics {
@@ -1929,6 +1934,59 @@
 
     .step-connector {
         display: none;
+    }
+}
+
+/* ===== Extra Small Screens (≤ 393px — iPhone 14 Pro, Galaxy S series) ===== */
+@media (max-width: 393px) {
+    .atlas-hero {
+        padding: 6rem 0 2rem; /* navbar=5rem + 1rem breathing room */
+    }
+
+    .atlas-subtitle {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .atlas-trust-row {
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+    }
+
+    .atlas-trust-pill {
+        font-size: 0.72rem;
+        padding: 0.25rem 0.55rem;
+    }
+
+    .owner-title {
+        font-size: 1.25rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .category-rail__card {
+        width: calc(50vw - 20px);
+        min-width: 140px;
+    }
+
+    .business-card {
+        width: calc(80vw);
+        max-width: 280px;
+    }
+
+    .newsletter-section .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .passport-title {
+        font-size: 1.15rem;
+    }
+
+    .passport-copy h2 {
+        font-size: 1.5rem;
     }
 }
 
