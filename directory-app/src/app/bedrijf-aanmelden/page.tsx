@@ -27,6 +27,7 @@ import { StepAdditional } from '@/components/register/StepAdditional';
 import { BusinessPreview } from '@/components/register/BusinessPreview';
 import { HelpModal } from '@/components/register/HelpModal';
 import { BusinessFormData } from '@/lib/types/business-form';
+import { validateStep as validateStepUtil } from '@/lib/validation/business-form-validation';
 import { createBusiness } from '@/lib/actions/business';
 import { getUserEmail } from '@/app/actions';
 import { supabase } from '@/lib/supabase';
@@ -134,96 +135,12 @@ export default function BusinessRegistrationPage({ searchParams }: { searchParam
     };
 
     const validateStep = (step: number) => {
-        let isValid = true;
-        let errorMessage = "";
-
-        switch (step) {
-            case 1:
-                if (!formData.name) {
-                    isValid = false;
-                    errorMessage = "Bedrijfsnaam is verplicht.";
-                } else if (!formData.category) {
-                    isValid = false;
-                    errorMessage = "Selecteer een categorie.";
-                } else if (!formData.subcategories || formData.subcategories.length === 0) {
-                    isValid = false;
-                    errorMessage = "Selecteer minimaal één subcategorie.";
-                } else if (!formData.shortDescription) {
-                    isValid = false;
-                    errorMessage = "Korte omschrijving is verplicht.";
-                }
-                break;
-            case 2:
-                if (!formData.street) {
-                    isValid = false;
-                    errorMessage = "Straat en huisnummer zijn verplicht.";
-                } else if (!formData.postalCode) {
-                    isValid = false;
-                    errorMessage = "Postcode is verplicht.";
-                } else if (!formData.city) {
-                    isValid = false;
-                    errorMessage = "Stad is verplicht.";
-                } else if (!formData.province) {
-                    isValid = false;
-                    errorMessage = "Provincie is verplicht.";
-                } else if (!formData.phone) {
-                    isValid = false;
-                    errorMessage = "Telefoonnummer is verplicht.";
-                } else if (!formData.email) {
-                    isValid = false;
-                    errorMessage = "E-mailadres is verplicht.";
-                } else if (!formData.website) {
-                    isValid = false;
-                    errorMessage = "Website is verplicht.";
-                } else {
-                    // Simple URL validation
-                    try {
-                        new URL(formData.website.startsWith('http') ? formData.website : `https://${formData.website}`);
-                    } catch (_) {
-                        isValid = false;
-                        errorMessage = "Voer een geldige website URL in.";
-                    }
-                }
-                break;
-            case 3:
-                const validServices = formData.services.filter(s => s.name.trim().length > 0);
-                if (validServices.length < 3) {
-                    isValid = false;
-                    errorMessage = "Voeg minimaal 3 diensten of producten toe.";
-                }
-                break;
-            case 4:
-                // Check if cover image is provided
-                if (!formData.coverImage) {
-                    isValid = false;
-                    errorMessage = "Een omslagfoto is verplicht.";
-                }
-                break;
-            case 5:
-                const answeredFaqs = (formData.faq || []).filter(
-                    item => item.question?.trim() && item.answer?.trim()
-                );
-                if (answeredFaqs.length < 5) {
-                    isValid = false;
-                    errorMessage = "Beantwoord minimaal 5 SEO-vragen.";
-                } else if (!formData.kvkNumber) {
-                    isValid = false;
-                    errorMessage = "KVK-nummer is verplicht.";
-                } else if (formData.ctaType === 'booking' && !formData.bookingUrl) {
-                    isValid = false;
-                    errorMessage = "Vul een reserveringslink in wanneer u 'Reserveren' als actieknop kiest.";
-                }
-                break;
-            default:
-                break;
-        }
-
+        const { isValid, error: errorMessage } = validateStepUtil(step, formData);
         if (!isValid) {
             setError(errorMessage);
         } else {
             setError(null);
         }
-
         return isValid;
     };
 

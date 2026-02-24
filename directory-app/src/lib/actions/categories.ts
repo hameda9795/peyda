@@ -4,6 +4,7 @@ import { db as prisma } from "@/lib/db";
 import { revalidatePath, unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCategoryImage } from "@/lib/category-images";
+import { getSubcategoryImage } from "@/lib/subcategory-images";
 
 // Cache categories for 5 minutes
 const getCachedCategories = unstable_cache(
@@ -35,8 +36,6 @@ const getCachedCategories = unstable_cache(
       seenNames.add(normalizedName);
       return true;
     });
-
-    const { getSubcategoryImage } = require("@/lib/subcategory-images");
 
     return uniqueCategories.map((cat: any) => ({
       ...cat,
@@ -91,8 +90,6 @@ async function getCategoriesInternal() {
             seenNames.add(normalizedName);
             return true;
         });
-
-        const { getSubcategoryImage } = require("@/lib/subcategory-images");
 
         return uniqueCategories.map((cat: any) => ({
             ...cat,
@@ -316,7 +313,6 @@ export async function getCategoryBySlug(slug: string) {
 
         if (!category) return null;
 
-        const { getSubcategoryImage } = require("@/lib/subcategory-images");
         return {
             ...category,
             image: category.image || getCategoryImage(category.slug),
@@ -446,7 +442,6 @@ export async function getSubcategoryBySlug(categorySlug: string, subcategorySlug
 
         if (!subcategory) return null;
 
-        const { getSubcategoryImage } = require("@/lib/subcategory-images");
         return {
             ...subcategory,
             image: subcategory.image || getSubcategoryImage(subcategory.category.slug, subcategory.name)
