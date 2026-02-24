@@ -2,6 +2,7 @@ import { getBusinessBySlug } from "@/lib/actions/business";
 import { BusinessHero } from "@/components/business/BusinessHero";
 import { BusinessInfoSidebar } from "@/components/business/BusinessInfoSidebar";
 import { BusinessContent } from "@/components/business/BusinessContent";
+import { MobileBusinessBar } from "@/components/business/MobileBusinessBar";
 import { Metadata } from "next";
 import Script from "next/script";
 import { notFound } from "next/navigation";
@@ -117,7 +118,7 @@ export default async function CatchAllPage({ params }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
+        <div className="min-h-screen bg-slate-50 pb-20 lg:pb-0">
             <Script
                 id="business-jsonld"
                 type="application/ld+json"
@@ -127,25 +128,25 @@ export default async function CatchAllPage({ params }: Props) {
             {/* Breadcrumb */}
             <div className="bg-white border-b border-slate-100">
                 <div className="container mx-auto px-4 py-3">
-                    <nav className="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
-                        <Link href="/" className="hover:text-slate-900">Home</Link>
-                        <span>/</span>
-                        <Link href={`/provincies/${province}`} className="hover:text-slate-900 capitalize">
+                    <nav className="flex items-center gap-1.5 text-sm text-slate-500 overflow-x-auto whitespace-nowrap pb-0.5 scrollbar-hide">
+                        <Link href="/" className="hover:text-slate-900 shrink-0">Home</Link>
+                        <span className="shrink-0">/</span>
+                        <Link href={`/provincies/${province}`} className="hover:text-slate-900 capitalize shrink-0">
                             {decodeURIComponent(province)}
                         </Link>
-                        <span>/</span>
-                        <Link href={`/steden/${city}`} className="hover:text-slate-900 capitalize">
+                        <span className="shrink-0">/</span>
+                        <Link href={`/steden/${city}`} className="hover:text-slate-900 capitalize shrink-0">
                             {decodeURIComponent(city).replace(/-/g, ' ')}
                         </Link>
-                        <span>/</span>
-                        <Link href={`/wijken/${city}/${neighborhood}`} className="hover:text-slate-900 capitalize">
+                        <span className="shrink-0">/</span>
+                        <Link href={`/wijken/${city}/${neighborhood}`} className="hover:text-slate-900 capitalize shrink-0">
                             {decodeURIComponent(neighborhood).replace(/-/g, ' ')}
                         </Link>
-                        <span>/</span>
-                        <Link href={`/categorieen/${category}`} className="hover:text-slate-900 capitalize">
+                        <span className="shrink-0">/</span>
+                        <Link href={`/categorieen/${category}`} className="hover:text-slate-900 capitalize shrink-0">
                             {decodeURIComponent(category).replace(/-/g, ' ')}
                         </Link>
-                        <span>/</span>
+                        <span className="shrink-0">/</span>
                         <span className="text-slate-900 font-medium">{business.name}</span>
                     </nav>
                 </div>
@@ -153,11 +154,11 @@ export default async function CatchAllPage({ params }: Props) {
 
             <BusinessHero business={business} />
 
-            <div className="container mx-auto px-4 -mt-8 relative z-20">
+            <div className="container mx-auto px-4 mt-0 md:-mt-8 relative z-20">
                 <div className="flex flex-col lg:flex-row gap-8">
 
                     {/* Main Content Column */}
-                    <main className="flex-1 bg-white rounded-xl shadow-xl p-6 md:p-10 border border-slate-100 min-h-[500px]">
+                    <main className="flex-1 bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-10 border border-slate-100 min-h-[500px]">
                         <BusinessContent business={business} />
                     </main>
 
@@ -184,6 +185,9 @@ export default async function CatchAllPage({ params }: Props) {
                     <Link href={`/steden/${city}`} className="hover:text-blue-600">{business.address.city}</Link>
                 </div>
             </div>
+
+            {/* Mobile Sticky Action Bar */}
+            <MobileBusinessBar business={business} />
         </div>
     );
 }

@@ -15,7 +15,7 @@ export function BusinessContent({ business }: BusinessContentProps) {
         <div className="space-y-12">
             {/* Short Description, trust signals & highlights */}
             <section>
-                <p className="text-xl md:text-2xl text-slate-800 leading-relaxed mb-8 font-medium">
+                <p className="text-base sm:text-xl md:text-2xl text-slate-800 leading-relaxed mb-6 sm:mb-8 font-medium">
                     {business.shortDescription}
                 </p>
 
