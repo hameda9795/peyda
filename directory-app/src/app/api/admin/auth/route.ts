@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const ADMIN_EMAIL = 'hamed9795';
-const ADMIN_PASSWORD = '102067438Gerd.com';
 const COOKIE_NAME = 'admin_session';
-const COOKIE_VALUE = 'admin_authenticated_secret_token_2026';
 
 export async function POST(request: NextRequest) {
     try {
         const { email, password } = await request.json();
 
-        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+        const sessionValue = process.env.ADMIN_SESSION_VALUE;
+
+        if (!adminEmail || !adminPassword || !sessionValue) {
+            console.error('[admin/auth] Missing ADMIN_EMAIL, ADMIN_PASSWORD or ADMIN_SESSION_VALUE env vars');
+            return NextResponse.json(
+                { success: false, message: 'Serverconfiguratiefout' },
+                { status: 500 }
+            );
+        }
+
+        if (email === adminEmail && password === adminPassword) {
             const cookieStore = await cookies();
-            cookieStore.set(COOKIE_NAME, COOKIE_VALUE, {
+            cookieStore.set(COOKIE_NAME, sessionValue, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',

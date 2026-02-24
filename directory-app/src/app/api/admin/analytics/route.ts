@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
+    const authError = await requireAdminAuth();
+    if (authError) return authError;
+
     try {
         const searchParams = request.nextUrl.searchParams;
         const period = searchParams.get('period') || '12'; // months

@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { db as prisma } from "@/lib/db";
 
 export async function GET() {
+    // Only accessible in development environment
+    if (process.env.NODE_ENV !== 'development') {
+        return NextResponse.json(
+            { error: 'Not Found' },
+            { status: 404 }
+        );
+    }
+
     try {
         const categories = await prisma.category.findMany({
             include: {

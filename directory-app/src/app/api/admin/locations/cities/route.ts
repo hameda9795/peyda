@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function GET() {
+    const authError = await requireAdminAuth();
+    if (authError) return authError;
+
     try {
         const cities = await db.city.findMany({
             orderBy: { name: 'asc' },

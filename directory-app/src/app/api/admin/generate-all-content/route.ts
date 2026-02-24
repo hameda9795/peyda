@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateBatchContent } from '@/lib/ai-content-generator';
 import { db as prisma } from '@/lib/db';
 import { CATEGORY_KEYWORDS } from '@/lib/category-keywords';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
+  const authError = await requireAdminAuth();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { city = 'Utrecht', limit, saveToDb = true } = body;

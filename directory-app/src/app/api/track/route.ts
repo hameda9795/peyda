@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+// Simple rate limit: max 30 track events per IP per 60 seconds
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 30;
+
 export async function POST(request: NextRequest) {
     try {
         const { businessId, type, visitorId } = await request.json();
@@ -29,6 +33,22 @@ export async function POST(request: NextRequest) {
         const ipAddress = forwardedFor ? forwardedFor.split(',')[0] : realIp || undefined;
         const userAgent = request.headers.get('user-agent') || undefined;
         const referrer = request.headers.get('referer') || undefined;
+
+        // Rate limiting: count recent requests from this IP
+        if (ipAddress) {
+            const recentCount = await db.businessInteraction.count({
+                where: {
+                    ipAddress,
+                    createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MS) },
+                },
+            });
+            if (recentCount >= RATE_LIMIT_MAX) {
+                return NextResponse.json(
+                    { error: 'Too many requests' },
+                    { status: 429 }
+                );
+            }
+        }
 
         // Use provided visitorId or create a fallback identifier
         const uniqueVisitorId = visitorId || `${ipAddress}-${userAgent?.slice(0, 50)}`;

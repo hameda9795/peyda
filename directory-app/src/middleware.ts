@@ -15,7 +15,8 @@ const authRoutes = [
 ]
 
 const ADMIN_COOKIE = 'admin_session';
-const ADMIN_COOKIE_VALUE = 'admin_authenticated_secret_token_2026';
+// Value is read from env at request time so it is never in source code
+const ADMIN_COOKIE_VALUE = process.env.ADMIN_SESSION_VALUE ?? '';
 
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
