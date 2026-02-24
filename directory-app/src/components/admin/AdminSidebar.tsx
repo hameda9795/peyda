@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Layers, Building2, BarChart3, Users, MapPin } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Layers, Building2, BarChart3, Users, MapPin, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarItem {
@@ -22,6 +22,13 @@ const sidebarItems: SidebarItem[] = [
 
 export function AdminSidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+
+    async function handleLogout() {
+        await fetch('/api/admin/auth', { method: 'DELETE' });
+        router.push('/admin/login');
+        router.refresh();
+    }
 
     return (
         <div className="flex h-screen w-64 flex-col border-r border-zinc-200 bg-white shadow-sm" suppressHydrationWarning>
@@ -62,15 +69,22 @@ export function AdminSidebar() {
                 </ul>
             </nav>
             <div className="mt-auto border-t border-zinc-100 p-6 bg-zinc-50/50" suppressHydrationWarning>
-                <div className="flex items-center gap-4" suppressHydrationWarning>
+                <div className="flex items-center gap-4 mb-4" suppressHydrationWarning>
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold" suppressHydrationWarning>
                         A
                     </div>
                     <div className="flex-1 min-w-0" suppressHydrationWarning>
-                        <p className="text-sm font-semibold text-zinc-900 truncate">Admin User</p>
-                        <p className="text-xs text-zinc-500 truncate">admin@directory.nl</p>
+                        <p className="text-sm font-semibold text-zinc-900 truncate">hamed9795</p>
+                        <p className="text-xs text-zinc-500 truncate">Systeembeheerder</p>
                     </div>
                 </div>
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                    <LogOut className="h-4 w-4" />
+                    Uitloggen
+                </button>
             </div>
         </div>
     );

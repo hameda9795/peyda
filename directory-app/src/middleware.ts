@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Routes that require authentication
+// Routes that require authentication (user dashboard)
 const protectedRoutes = [
   '/dashboard',
   '/dashboard/profile',
@@ -14,29 +14,52 @@ const authRoutes = [
   '/bedrijf-aanmelden',
 ]
 
+const ADMIN_COOKIE = 'admin_session';
+const ADMIN_COOKIE_VALUE = 'admin_authenticated_secret_token_2026';
+
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
-  // Check for session cookie
+  // ── Admin auth ──────────────────────────────────────────────────
+  if (pathname.startsWith('/admin')) {
+    const adminSession = request.cookies.get(ADMIN_COOKIE);
+    const isAuthenticated = adminSession?.value === ADMIN_COOKIE_VALUE;
+
+    // Allow login page and API route through without auth
+    if (pathname === '/admin/login' || pathname.startsWith('/api/admin/auth')) {
+      // If already logged in, redirect to admin dashboard
+      if (isAuthenticated && pathname === '/admin/login') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+      const response = NextResponse.next();
+      response.headers.set('x-pathname', pathname);
+      return response;
+    }
+
+    // Protect all other /admin/* routes
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+
+    // Pass pathname header for layout use
+    const response = NextResponse.next();
+    response.headers.set('x-pathname', pathname);
+    return response;
+  }
+
+  // ── User dashboard auth ─────────────────────────────────────────
   const sessionToken = request.cookies.get('session_token')
 
-  // If no session and trying to access protected route, redirect to login
   if (!sessionToken && protectedRoutes.some(route => pathname.startsWith(route))) {
     const loginUrl = new URL('/?login=true', request.url)
     return NextResponse.redirect(loginUrl)
   }
 
-  // If has session and trying to access auth routes (like registration)
   if (sessionToken && pathname === '/bedrijf-aanmelden') {
-    // Check if there's a message parameter (like 'no-business')
     const message = searchParams.get('message')
-    
-    // Allow access if message=no-business (user needs to register)
     if (message === 'no-business') {
       return NextResponse.next()
     }
-    
-    // Otherwise redirect to dashboard (user already has business)
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
@@ -45,6 +68,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/admin/:path*',
     '/dashboard/:path*',
     '/bedrijf-aanmelden',
   ],

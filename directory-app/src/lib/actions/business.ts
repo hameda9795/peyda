@@ -574,6 +574,190 @@ export async function createBusiness(data: FormData) {
     }
 }
 
+// ==================== ADMIN: CREATE BUSINESS (no per-email limit) ====================
+export async function createBusinessAsAdmin(data: FormData) {
+    try {
+        // Verify admin cookie server-side
+        const { cookies } = await import('next/headers');
+        const cookieStore = await cookies();
+        const adminSession = cookieStore.get('admin_session');
+        if (adminSession?.value !== 'admin_authenticated_secret_token_2026') {
+            return { success: false, error: 'Geen beheerderstoegang.' };
+        }
+
+        const name = data.get('name') as string;
+        const categoryId = data.get('category') as string;
+        const subcategoriesJson = data.get('subcategories');
+        const subcategoryIds = subcategoriesJson ? JSON.parse(subcategoriesJson as string) : [];
+
+        let subCategoryId = subcategoryIds.length > 0 ? subcategoryIds[0] : null;
+
+        if (!subCategoryId && categoryId) {
+            const category = await prisma.category.findUnique({
+                where: { id: categoryId },
+                include: { subcategories: true }
+            });
+            if (category && category.subcategories.length > 0) {
+                subCategoryId = category.subcategories[0].id;
+            }
+        }
+
+        if (!subCategoryId) {
+            throw new Error("Minimaal één subcategorie is verplicht.");
+        }
+
+        // Generate unique slug
+        let slug = name.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+        let uniqueSlug = slug;
+        let counter = 1;
+        while (await prisma.business.findUnique({ where: { slug: uniqueSlug } })) {
+            uniqueSlug = `${slug}-${counter}`;
+            counter++;
+        }
+        slug = uniqueSlug;
+
+        // Save images
+        const logo = await saveFile(data.get('logo') as File | string | null, 'logos');
+        const coverImage = await saveFile(data.get('coverImage') as File | string | null, 'covers');
+        const galleryFiles = data.getAll('gallery') as (File | string)[];
+        const galleryUrls = (await Promise.all(galleryFiles.map(f => saveFile(f, 'gallery')))).filter(Boolean) as string[];
+
+        let galleryAltTexts: string[] = [];
+        try {
+            const altTextsData = data.get('galleryAltTexts');
+            if (altTextsData) galleryAltTexts = JSON.parse(altTextsData as string);
+        } catch {}
+
+        const gallery = galleryUrls.map((url, index) => ({
+            url,
+            altText: galleryAltTexts[index] || ''
+        }));
+
+        const getStr = (key: string) => {
+            const val = data.get(key);
+            return val ? String(val) : null;
+        };
+
+        const cityName = getStr('city') || '';
+        const provinceFromForm = getStr('province');
+
+        let provinceName: string | null = null;
+        let provinceSlugValue: string | null = null;
+        let locationData = null;
+
+        if (provinceFromForm) {
+            provinceName = provinceFromForm;
+            provinceSlugValue = createSlug(provinceFromForm);
+            locationData = findProvinceByCity(cityName);
+        } else {
+            locationData = findProvinceByCity(cityName);
+            provinceName = locationData?.province.name || null;
+            provinceSlugValue = locationData?.province.slug || null;
+        }
+
+        // Use form email directly (no session restriction for admin)
+        const businessEmail = getStr('email');
+
+        const business = await prisma.business.create({
+            data: {
+                name,
+                slug,
+                description: getStr('shortDescription'),
+                shortDescription: getStr('shortDescription'),
+                longDescription: getStr('longDescription') || getStr('seoLocalText'),
+                street: getStr('street'),
+                postalCode: getStr('postalCode'),
+                city: cityName,
+                province: provinceName,
+                provinceSlug: provinceSlugValue,
+                neighborhood: getStr('neighborhood'),
+                phone: getStr('phone'),
+                email: businessEmail,
+                website: getStr('website'),
+                instagram: getStr('instagram'),
+                facebook: getStr('facebook'),
+                linkedin: getStr('linkedin'),
+                logo,
+                coverImage,
+                gallery,
+                videoUrl: getStr('videoUrl'),
+                kvkNumber: getStr('kvkNumber'),
+                foundedYear: data.get('foundedYear') ? parseInt(data.get('foundedYear') as string) : null,
+                serviceArea: getStr('serviceArea'),
+                bookingUrl: getStr('bookingUrl'),
+                ctaType: getStr('ctaType') || 'call',
+                services: data.get('services') ? JSON.parse(data.get('services') as string) : [],
+                openingHours: data.get('openingHours') ? JSON.parse(data.get('openingHours') as string) : [],
+                amenities: data.get('amenities') ? JSON.parse(data.get('amenities') as string) : [],
+                paymentMethods: data.get('paymentMethods') ? JSON.parse(data.get('paymentMethods') as string) : [],
+                languages: data.get('languages') ? JSON.parse(data.get('languages') as string) : [],
+                certifications: data.get('certifications') ? JSON.parse(data.get('certifications') as string) : [],
+                seoTitle: getStr('seoTitle'),
+                seoDescription: getStr('seoDescription'),
+                seoKeywords: data.get('seoKeywords') ? JSON.parse(data.get('seoKeywords') as string) : [],
+                seoLocalText: getStr('seoLocalText'),
+                highlights: data.get('highlights') ? JSON.parse(data.get('highlights') as string) : [],
+                faq: data.get('faq') ? JSON.parse(data.get('faq') as string) : [],
+                // Admin-registered businesses are immediately approved & published
+                status: 'approved',
+                isActive: true,
+                publishStatus: 'PUBLISHED',
+                seoStatus: 'COMPLETED',
+                lastSeoUpdate: new Date(),
+                subCategoryId,
+            } as any
+        });
+
+        const subCategoryDetails = await prisma.subCategory.findUnique({
+            where: { id: subCategoryId },
+            include: { category: true }
+        });
+
+        revalidatePath('/admin/businesses');
+        revalidatePath('/sitemap.xml');
+
+        const neighborhoodName = getStr('neighborhood') || '';
+        const provinceSlug = provinceSlugValue || 'nederland';
+        const citySlug = locationData?.city.slug || createSlug(cityName);
+        const neighborhoodSlug = createSlug(neighborhoodName);
+
+        const rawCategorySlug = subCategoryDetails?.category.slug || 'categorie';
+        const cleanCategorySlug = rawCategorySlug
+            .replace(/^\/?utrecht\//, '')
+            .replace(/^\/?nederland\//, '')
+            .replace(/^\/?/, '')
+            .replace(/\//g, '-');
+
+        const rawSubCategorySlug = subCategoryDetails?.slug || 'subcategorie';
+        const cleanSubCategorySlug = rawSubCategorySlug
+            .replace(/^\/?utrecht\//, '')
+            .replace(/^\/?nederland\//, '')
+            .replace(new RegExp(`^/?${rawCategorySlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/?`), '')
+            .replace(new RegExp(`^/?${cleanCategorySlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/?`), '')
+            .replace(/^\/?/, '')
+            .replace(/\//g, '-');
+
+        return {
+            success: true,
+            slug: business.slug,
+            provinceSlug,
+            citySlug,
+            neighborhoodSlug,
+            categorySlug: cleanCategorySlug,
+            subCategorySlug: cleanSubCategorySlug
+        };
+
+    } catch (error: any) {
+        console.error("Failed to create business as admin:", error);
+        return {
+            success: false,
+            error: error.message || "Er is een fout opgetreden bij het opslaan."
+        };
+    }
+}
+
 export async function getBusinessBySlug(slug: string): Promise<Business | null> {
     // 1. Fetch business without reviews first to avoid potential invalid include error if schema is outdated
     const business = await prisma.business.findUnique({
