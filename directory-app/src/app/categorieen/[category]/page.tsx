@@ -52,8 +52,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const displayName = cleanCategoryName(categoryData.name);
 
     return {
-        title: categoryData.seoTitle || `${displayName} | Lokale Bedrijvengids`,
-        description: categoryData.seoDescription || `Vind lokale ${displayName.toLowerCase()} professionals. Bekijk subcategorieen en ontdek de beste bedrijven in jouw regio.`,
+        title: `Bedrijven \${displayName} | Lokale Bedrijvengids \${subcategories.length} Subcategorieen`,
+        description: `Vind lokale \${displayName.toLowerCase()} professionals. Bekijk \${subcategories.length} subcategorieën en \${businesses.length}+ bedrijven. Gratis bedrijf aanmelden in \${displayName.toLowerCase()}. Ontdek de beste diensten.`,
         openGraph: {
             title: `${displayName} | Bedrijfscategorie`,
             description: buildDescription(displayName),
@@ -175,7 +175,7 @@ export default async function CategoryPage({ params }: Props) {
                     <div className="seo-hero-grid">
                         <div>
                             <span className="seo-kicker">{icon} Categorie</span>
-                            <h1 className="seo-title">{displayName}</h1>
+                            <h1 className="seo-title">Bedrijven in {displayName} — Lokale Bedrijvengids</h1>
                             <p className="seo-subtitle">
                                 Vind lokale {displayName.toLowerCase()} professionals en bedrijven.
                                 Bekijk {subcategories.length} gespecialiseerde subcategorieen en ontdek

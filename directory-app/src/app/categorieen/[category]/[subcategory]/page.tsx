@@ -36,8 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const categoryDisplayName = cleanCategoryName(sub.category.name);
 
     return {
-        title: sub.seoTitle || `${sub.name} | ${categoryDisplayName} - Lokale Bedrijvengids`,
-        description: sub.seoDescription || `Vind ${sub.name.toLowerCase()} specialisten in jouw regio. Bekijk lokale bedrijven en dienstverleners.`,
+        title: `Bedrijven \${sub.name} | Lokale Bedrijvengids \${categoryDisplayName}`,
+        description: `Vind \${sub.name.toLowerCase()} specialisten. Bekijk \${businesses.length}+ bedrijven in \${categoryDisplayName.toLowerCase()}. Gratis bedrijf aanmelden. Ontdek de beste \${sub.name.toLowerCase()} diensten.`,
         openGraph: {
             title: `${sub.name} | ${categoryDisplayName}`,
             description: buildDescription(sub.name),
@@ -83,7 +83,7 @@ export default async function SubcategoryPage({ params }: Props) {
                     <div className="seo-hero-grid">
                         <div>
                             <span className="seo-kicker">{icon} Subcategorie</span>
-                            <h1 className="seo-title">{sub.name}</h1>
+                            <h1 className="seo-title">Bedrijven {sub.name} — Lokale Specialisten</h1>
                             <p className="seo-subtitle">
                                 Vind de beste {sub.name.toLowerCase()} specialisten en bedrijven in Nederland.
                                 Bekijk lokale professionals in jouw regio en vergelijk diensten, reviews en prijzen.

@@ -41,8 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const province = findProvinceByCityName(cityName);
 
     return {
-        title: cityKeywords.contentSections.intro.split('.')[0] + ' | Lokale Bedrijvengids',
-        description: `Ontdek lokale bedrijven en diensten in ${cityName}. ${cityKeywords.primaryKeywords.slice(0, 3).join(', ')}.`,
+        title: `Bedrijven ${cityName} | Lokale Bedrijvengids`,
+        description: `Vind lokale bedrijven in ${cityName}. Bekijk alle bedrijven en diensten. Gratis bedrijf aanmelden.`,
         openGraph: {
             title: `${cityName} | Stadspagina`,
             description: `Lokale bedrijven en diensten in ${cityName}`,
@@ -138,7 +138,7 @@ export default async function CityPage({ params }: Props) {
     const schemaScripts = JSON.stringify([
         generateWebPageSchema({
             name: `${cityName} | Lokale Bedrijvengids`,
-            description: `Ontdek lokale bedrijven en diensten in ${cityName}. ${cityKeywords.primaryKeywords.slice(0, 3).join(', ')}.`,
+            description: `Vind lokale bedrijven in ${cityName}. Bekijk alle bedrijven en diensten. Gratis bedrijf aanmelden.`,
             url: pageUrl
         }),
         generateBreadcrumbSchema(breadcrumbs),
@@ -183,7 +183,7 @@ export default async function CityPage({ params }: Props) {
                         <div className="seo-hero-grid">
                             <div>
                                 <span className="seo-kicker">{province?.icon || '🏙️'} Stad</span>
-                                <h1 className="seo-title">{cityName}</h1>
+                                <h1 className="seo-title">Bedrijven in {cityName} — Lokale Bedrijvengids</h1>
                                 <p className="seo-subtitle">
                                     Welkom bij de lokale bedrijvengids voor {cityName}
                                     {province ? ` in ${province.name}` : ''}.

@@ -30,8 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     return {
-        title: `${province.name} | Bedrijvengids per stad en wijk`,
-        description: `Vind lokale bedrijven in ${province.name}. Bekijk ${province.cities.length} steden waaronder ${province.capital}. Ontdek diensten per categorie en wijk.`,
+        title: `Bedrijven ${province.name} | Lokale Bedrijvengids ${province.cities.length} Steden`,
+        description: `Vind lokale bedrijven in ${province.name}. Bekijk alle bedrijven in ${province.cities.length} steden waaronder ${province.capital}. Gratis bedrijf aanmelden in ${province.name}. Ontdek lokale diensten.`,
         openGraph: {
             title: `${province.name} | Lokale Bedrijvengids`,
             description: buildDescription(province.name),
@@ -254,3 +254,6 @@ export default async function ProvincePage({ params }: Props) {
         </main>
     );
 }
+
+
+
