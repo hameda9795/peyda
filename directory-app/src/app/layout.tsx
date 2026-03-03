@@ -38,10 +38,10 @@ const globalSchemas = JSON.stringify([
 export const metadata: Metadata = {
     metadataBase: new URL(BASE_URL),
     title: {
-        default: "Peyda - De Bedrijvengids van Nederland",
+        default: "Bedrijvengids Nederland | Gratis Bedrijf Aanmelden | Peyda",
         template: "%s | Peyda",
     },
-    description: "De meest complete bedrijvengids voor heel Nederland. Vind lokale bedrijven, restaurants, kappers, loodgieters en meer in jouw stad of wijk met Peyda.",
+    description: "Ontdek lokale bedrijven in heel Nederland. Gratis je bedrijf aanmelden op dé moderne bedrijvengids. 12 provincies, 26 steden, duizenden ondernemers.",
     keywords: [
         "bedrijvengids",
         "lokale bedrijven",

@@ -81,13 +81,11 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
                 <div className="atlas-hero-grid">
                     <div className="atlas-hero-left">
                         <h1 className="text-[1.45rem] sm:text-4xl md:text-5xl lg:text-[3.75rem] font-bold leading-[1.25] sm:leading-[1.1] mb-5 text-white display-font tracking-tight">
-                            Vind lokale bedrijven die passen bij jouw buurt
-                            <span className="text-white/70 block sm:inline"> en ontdek het beste aanbod.</span>
+                            Dé Moderne Bedrijvengids voor Nederland\n                            \u003cspan className="text-white/70 block sm:inline"\u003e Vind Lokale Bedrijven in Jouw Buurt\u003c/span\u003e
                         </h1>
 
                         <p className="atlas-subtitle">
-                            Van restaurants tot aannemers: ontdek betrouwbare ondernemers, vergelijk
-                            opties en neem direct contact op via het lokale atlas van Nederland.
+                            Ontdek betrouwbare lokale bedrijven, van restaurants tot aannemers. Vergelijk\n                            ondernemers, lees reviews en neem direct contact op.\n                            Gratis bedrijf aanmelden!
                         </p>
 
                         <div className="search-container relative max-w-[650px] z-20">
@@ -212,3 +210,5 @@ export function WelcomeSection({ totalBusinesses = 0 }: WelcomeSectionProps) {
         </section>
     );
 }
+
+
