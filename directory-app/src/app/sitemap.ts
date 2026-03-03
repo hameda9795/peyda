@@ -4,6 +4,13 @@ import { NETHERLANDS_PROVINCES } from '@/lib/netherlands-data';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://peyda.nl';
 
+// Cache sitemap for 1 hour (3600 seconds)
+export const revalidate = 3600;
+
+// Max URLs per sitemap (Google limit is 50,000)
+const MAX_BUSINESS_URLS = 5000;
+const MAX_BESTE_URLS = 1000;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const now = new Date();
     const sitemap: MetadataRoute.Sitemap = [];
@@ -99,7 +106,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const businesses = await prisma.business.findMany({
             where: {
                 status: 'approved',
+                publishStatus: 'PUBLISHED',
             },
+            take: MAX_BUSINESS_URLS,
+            orderBy: { updatedAt: 'desc' },
             select: {
                 slug: true,
                 city: true,
@@ -221,7 +231,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             where: { status: 'approved' },
             _count: { id: true },
             orderBy: { _count: { id: 'desc' } },
-            take: 50, // Top 50 cities
+            take: 30, // Top 30 cities (reduced for performance)
         });
 
         // Create comparison pages for each city + category combination
@@ -256,3 +266,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return sitemap;
 }
+
+
+
+
+
